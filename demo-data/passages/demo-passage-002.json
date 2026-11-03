@@ -1,0 +1,21 @@
+{
+  "passageId": "demo-passage-002",
+  "title": "The Wind and the Sun",
+  "gradeBand": "2-3",
+  "lexile": 500,
+  "wordCount": 64,
+  "language": "en-US",
+  "text": "The wind and the sun argued about who was stronger. They saw a traveler walking down the road. The wind said it could make the traveler remove his coat. The wind blew hard and cold, but the man only held his coat tighter. Then the sun shone warm and bright. Soon the man took off his coat and smiled.",
+  "vocabulary": [
+    {"word": "argued", "definition": "disagreed and gave reasons"},
+    {"word": "traveler", "definition": "a person who is going on a journey"}
+  ],
+  "questions": [
+    {"id": "q1", "type": "literal", "prompt": "What did the wind and the sun argue about?"},
+    {"id": "q2", "type": "inference", "prompt": "Why did the man take off his coat at the end?"}
+  ],
+  "soundAlong": {
+    "enabled": true,
+    "audioAccess": "assignment"
+  }
+}

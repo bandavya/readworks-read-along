@@ -1,0 +1,30 @@
+{
+  "assignments": [
+    {
+      "assignmentId": "assignment-001",
+      "passageId": "demo-passage-001",
+      "soundAlongAccess": {
+        "default": false,
+        "student-001": true,
+        "student-002": false
+      }
+    },
+    {
+      "assignmentId": "assignment-002",
+      "passageId": "demo-passage-002",
+      "soundAlongAccess": {
+        "default": true,
+        "student-002": false
+      }
+    },
+    {
+      "assignmentId": "assignment-003",
+      "passageId": "demo-passage-003",
+      "soundAlongAccess": {
+        "default": false,
+        "student-001": true,
+        "student-002": true
+      }
+    }
+  ]
+}

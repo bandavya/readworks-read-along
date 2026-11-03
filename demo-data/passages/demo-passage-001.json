@@ -1,0 +1,21 @@
+{
+  "passageId": "demo-passage-001",
+  "title": "A Very Small Garden",
+  "gradeBand": "2-3",
+  "lexile": 430,
+  "wordCount": 52,
+  "language": "en-US",
+  "text": "The garden was small, but it was full of color. Red tomatoes grew near the fence. Yellow flowers turned to face the sun. A little green frog sat on a wet leaf and watched the bees. Every morning the garden woke up with a new surprise.",
+  "vocabulary": [
+    {"word": "color", "definition": "the quality seen when light is reflected"},
+    {"word": "surprise", "definition": "something unexpected that happens"}
+  ],
+  "questions": [
+    {"id": "q1", "type": "literal", "prompt": "What was in the garden?"},
+    {"id": "q2", "type": "inference", "prompt": "Why did the flowers face the sun?"}
+  ],
+  "soundAlong": {
+    "enabled": true,
+    "audioAccess": "assignment"
+  }
+}

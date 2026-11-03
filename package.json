@@ -1,0 +1,30 @@
+{
+  "name": "sound-along",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sound Along - AWS-compatible read-along vertical slice (hackathon)",
+  "bin": {
+    "sound-along": "bin/sound-along.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "synth": "cdk synth",
+    "deploy": "cdk deploy --all --require-approval never",
+    "destroy": "cdk destroy --all",
+    "seed": "node scripts/seed.js",
+    "generate": "node scripts/generate.js"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.0",
+    "aws-cdk": "2.1147.0",
+    "ts-node": "^10.9.2",
+    "typescript": "~5.6.0"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "2.167.0",
+    "constructs": "^10.4.0",
+    "@aws-sdk/client-s3": "^3.670.0",
+    "@aws-sdk/client-sfn": "^3.670.0"
+  }
+}

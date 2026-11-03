@@ -1,0 +1,21 @@
+{
+  "passageId": "demo-passage-003",
+  "title": "How Seeds Travel",
+  "gradeBand": "3-4",
+  "lexile": 620,
+  "wordCount": 71,
+  "language": "en-US",
+  "text": "Plants cannot walk, but their seeds can travel far. Some seeds have tiny wings and spin through the air like helicopters. Other seeds are light and fluffy, so the wind carries them across fields. A few seeds hook onto the fur of animals and ride to new places. When a seed finally lands in good soil, it can grow into a brand new plant.",
+  "vocabulary": [
+    {"word": "travel", "definition": "to move from one place to another"},
+    {"word": "soil", "definition": "the top layer of earth where plants grow"}
+  ],
+  "questions": [
+    {"id": "q1", "type": "literal", "prompt": "Name two ways seeds can travel."},
+    {"id": "q2", "type": "inference", "prompt": "Why is it helpful for seeds to travel far from the parent plant?"}
+  ],
+  "soundAlong": {
+    "enabled": true,
+    "audioAccess": "assignment"
+  }
+}

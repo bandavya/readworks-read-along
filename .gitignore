@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+
+# CDK build output
+cdk.out/
+*.d.ts
+dist/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Logs & OS
+*.log
+.DS_Store
+Thumbs.db
+
+# Env / secrets (never commit credentials)
+.env
+.env.*
+*.pem
+aws-credentials*
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Frontend media — large, ReadWorks-licensed; lives in S3, served via CloudFront.
+# Kept out of git to keep the repo lean and avoid committing licensed binaries.
+frontend/audio/
+frontend/data/
+frontend/img/
+frontend/look-art/
+# Keep the compiled app shell + code (frontend/assets, frontend/index.html) tracked.
