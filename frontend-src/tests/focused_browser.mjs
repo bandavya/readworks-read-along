@@ -7,9 +7,9 @@ import { join } from 'node:path'
 import { guard, finish } from './_kinds.mjs'
 
 const [base, shots] = process.argv.slice(2)
-if (!base) { console.error('Usage: node tests/focused_browser.mjs <base-url> [shot-folder]'); process.exit(2) }
+if (!base) { console.error('Usage: node tests/focused_browser.mjs <base-url> [shot-folder] [passage id]'); process.exit(2) }
 const site = base.replace(/\/$/, '')
-const HIKE = 'ea76e55b-92bd-4671-8881-753d020e50a8'
+const HIKE = process.argv[4] || 'ea76e55b-92bd-4671-8881-753d020e50a8'
 const SIZES = [[320, 568], [390, 844], [844, 390], [768, 1024], [1366, 768], [1920, 1080]]
 const edge = 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'
 const port = 19800 + Math.floor(Math.random() * 150)
@@ -79,6 +79,9 @@ try {
   await size(1366, 768)
   await go(`#/look/mix/p/${HIKE}`, '.mix-text .sa-w')
   await clickJs('.mix-play')
+  // Move past the spoken title, which lights words in the heading rather than the story.
+  for (let t = 0; t < 5000; t += 200) { if (await evaluate(`Number(document.querySelector('#mix-seek').max) > 1`)) break; await pause(200) }
+  await evaluate(`(() => { const s = document.querySelector('#mix-seek'); s.value = String(Number(s.max) * 0.4); s.dispatchEvent(new Event('input', { bubbles: true })) })()`)
   let lit = null
   for (let t = 0; t < 8000 && !lit; t += 200) { await pause(200); lit = await evaluate(`(() => { const e = document.querySelector('.mix-text .sa-now'); if (!e) return null; const s = getComputedStyle(e); return { bg: s.backgroundColor, line: s.textDecorationLine, ribbon: document.querySelectorAll('[class*=ribbon]:not(.mix-voice-off)').length } })()`) }
   guard('playing lights a word, highlight only', () => { if (!lit || lit.line !== 'none' || lit.bg === 'rgba(0, 0, 0, 0)') throw Error(JSON.stringify(lit)) })
@@ -92,6 +95,8 @@ try {
   await evaluate(`[...document.querySelectorAll('.mix-tools button')].find(b => b.textContent === 'Highlight the sentence')?.click()`)
   await pause(500)
   const sentence = await evaluate(`({ words: document.querySelectorAll('.mix-sentence').length, line: getComputedStyle(document.querySelector('.mix-text .sa-now') || document.body).textDecorationLine })`)
+  const midStory = await evaluate(`(() => { const e = document.querySelector('.mix-text .sa-now'); if (!e) return null; const r = e.getBoundingClientRect(), d = document.querySelector('.mix-dock').getBoundingClientRect(); return { top: r.top, bottom: r.bottom, dockTop: d.top } })()`)
+  guard('the lit word stays on screen, above the player', () => { if (!midStory || midStory.top < 0 || midStory.bottom > midStory.dockTop) throw Error(JSON.stringify(midStory)) })
   guard('sentence choice lights the sentence and underlines the word', () => { if (sentence.words < 2 || sentence.line !== 'underline') throw Error(JSON.stringify(sentence)) })
   await evaluate(`[...document.querySelectorAll('.mix-tools button')].find(b => b.textContent === 'Highlight the word')?.click()`)
   await clickJs('.mix-play'); await clickJs('.mix-tools-button')
