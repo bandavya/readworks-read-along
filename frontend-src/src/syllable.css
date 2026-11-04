@@ -1,0 +1,37 @@
+/* Syllable guide. Colors come from the surrounding page: the kid view's --kv-* variables when present,
+   else the teacher pages' variables. All sizes in em so it scales with the place it is put. */
+.sg {
+  --sg-btn: var(--kv-btn, var(--teal));
+  --sg-btn-ink: var(--kv-btn-ink, var(--on-teal));
+  --sg-ink: var(--kv-ink, var(--ink));
+  --sg-card: var(--kv-card, var(--panel));
+  --sg-line: var(--kv-line, var(--line));
+  --sg-lit: var(--kv-hl, #ffe14d);
+  --sg-lit-ink: var(--kv-hl-ink, #1b1b1b);
+  --sg-muted: var(--kv-muted, var(--muted));
+  display: grid; gap: 0.6em; font-size: 1rem; line-height: 1.2; color: var(--sg-ink);
+}
+.sg *, .sg *::before, .sg *::after { box-sizing: border-box; }
+.sg-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25em 0.2em; }
+.sg-dot { font-size: 1.6em; line-height: 1; color: var(--sg-muted); }
+.sg-tile {
+  min-width: 2em; min-height: 2em; padding: 0.2em 0.45em; border-radius: 0.5em; cursor: pointer;
+  border: 0.12em solid var(--sg-line); background: var(--sg-card); color: var(--sg-ink);
+  font: inherit; font-size: 1.5em; font-weight: 400; line-height: 1.1;
+}
+.sg-tile.stressed { font-weight: 800; text-decoration: underline; text-decoration-thickness: 0.12em; text-underline-offset: 0.18em; border-bottom: 0.2em solid var(--sg-btn); }
+.sg-tile.lit { background: var(--sg-lit); color: var(--sg-lit-ink); border-color: var(--sg-lit); }
+.sg-tile:active { transform: translateY(0.08em); }
+.sg-actions { display: flex; flex-wrap: wrap; gap: 0.6em; }
+.sg-act {
+  min-height: 3em; min-width: 3em; padding: 0 0.9em; display: inline-flex; align-items: center; justify-content: center; gap: 0.5em;
+  border: 0; border-radius: 1.5em; background: var(--sg-btn); color: var(--sg-btn-ink); font: inherit; font-weight: 700; cursor: pointer;
+}
+.sg-act svg { width: 1.6em; height: 1.6em; flex: none; }
+.sg-act.on { box-shadow: 0 0 0 0.2em var(--sg-lit); }
+.sg-act:active { transform: translateY(0.08em); }
+.sg-icons .sg-act { width: 3.6em; height: 3.6em; padding: 0; border-radius: 50%; }
+.sg-icons .sg-act svg { width: 2em; height: 2em; }
+.sg-icons .sg-tile { font-size: 1.7em; }
+.sg-note { margin: 0; font-size: 0.8em; color: var(--sg-muted); }
+.sg :focus-visible { outline: 3px solid var(--focus, #f59e0b); outline-offset: 2px; }

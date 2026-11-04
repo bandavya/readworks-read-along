@@ -1,0 +1,25 @@
+.teacher-page { max-width: 760px; }
+.teacher-page h1 { margin: 8px 0; }
+.teacher-form, .teacher-link { display: grid; gap: 16px; padding: 20px; margin: 20px 0; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
+.teacher-form label, .teacher-link label { display: grid; gap: 6px; font-weight: 700; }
+.teacher-form input:not([type="checkbox"]), .teacher-form select, .teacher-link input { width: 100%; min-height: 44px; padding: 8px; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; }
+.teacher-form .teacher-check { display: flex; align-items: center; gap: 10px; min-height: 44px; }
+.teacher-check input { width: 44px; height: 44px; margin: 0; flex: none; cursor: pointer; }
+.teacher-check:focus-within { outline: 3px solid var(--focus); outline-offset: 2px; }
+.teacher-form button, .teacher-actions button, .teacher-actions a { min-height: 44px; padding: 10px 16px; border-radius: 4px; border: 1px solid var(--teal); background: var(--teal); color: var(--on-teal); font-weight: 700; }
+.teacher-form button { justify-self: start; }
+.teacher-form button:disabled { opacity: .55; }
+.teacher-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.teacher-actions a { display: inline-flex; align-items: center; text-decoration: none; }
+.teacher-sample { margin: 24px 0; padding: 20px; border: 1px solid var(--line); border-radius: 8px; }
+.teacher-sample button { min-height: 44px; padding: 10px 16px; }
+.teacher-sample li { margin: 12px 0; }
+
+.teacher-page, .teacher-form, .teacher-link, .teacher-sample { min-width: 0; }
+.teacher-link input { min-width: 0; }
+.teacher-sample { overflow-x: auto; overflow-wrap: anywhere; }
+.teacher-sample table { width: 100%; display: block; overflow-x: auto; }
+@media (max-width: 560px) {
+  .teacher-form, .teacher-link, .teacher-sample { padding: 12px; margin: 12px 0; }
+  .teacher-actions > * { width: 100%; justify-content: center; }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "readworks-sound-along-prototype",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@vitejs/plugin-vue": "^6.0.10",
+    "vite": "^8.3.5",
+    "vue": "^3.5.44"
+  }
+}

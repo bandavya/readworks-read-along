@@ -1,0 +1,87 @@
+/* The held-takes panel (#/holds). A pencil pass built for clearing speed:
+   quiet, ordinary type; the sentence is the main thing; two answers at the bottom where a thumb is. Every control is at least
+   44 px. State is said in words, never by color alone. No animation, so reduced motion needs nothing more. */
+.hc { max-width: 640px; margin: 0 auto; padding: 8px 16px calc(96px + env(safe-area-inset-bottom)); color: var(--ink); font-size: 1rem; line-height: 1.5; }
+.hc h1 { font-size: 1.3rem; margin: 8px 0 12px; font-weight: 600; }
+.hc a { color: var(--teal); }
+.hc-msg { min-height: 1.4em; margin: 4px 0; color: var(--muted); font-size: 0.9rem; }
+.hc-muted { color: var(--muted); font-size: 0.9rem; }
+.hc-error { color: #a32a22; font-weight: 600; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme='light']) .hc-error { color: #f39a90; } }
+.hc-center { text-align: center; padding: 48px 0; }
+
+.hc-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.hc-title { margin: 2px 0 6px; font-weight: 600; }
+.hc-title .hc-muted { font-weight: 400; }
+.hc-auto { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 0.9rem; color: var(--muted); }
+.hc-auto input { width: 22px; height: 22px; }
+
+.hc-link, .hc-nav, .hc-chip, .hc-btn, .hc-ans, .hc-word, .hc-pw { font: inherit; cursor: pointer; }
+.hc-link { background: none; border: 0; color: var(--teal); text-decoration: underline; text-underline-offset: 3px; min-height: 44px; min-width: 44px; padding: 0 10px; display: inline-flex; align-items: center; }
+.hc-link.on, .hc-link[aria-pressed='true'] { font-weight: 600; text-decoration-thickness: 2px; }
+a.hc-link { text-decoration: underline; }
+
+.hc-prog { display: flex; align-items: center; gap: 4px; color: var(--muted); font-size: 0.9rem; }
+.hc-nav { background: none; border: 1px solid var(--line); border-radius: 6px; min-width: 44px; min-height: 44px; color: var(--ink); font-size: 1.3rem; }
+.hc-nav:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.hc-flag { margin-top: 4px; }
+.hc-sentence { font-family: var(--read); font-size: 1.3rem; line-height: 1.7; margin: 10px 0 6px; cursor: pointer; overflow-wrap: anywhere; }
+.hc-word {
+  display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; margin-block: -8px; padding: 0 6px; color: inherit;
+  font-family: inherit; font-size: inherit; background: var(--hl-bg); border: 0; border-bottom: 2px solid var(--teal); border-radius: 4px;
+}
+.hc-word.on { outline: 3px solid var(--teal); }
+.hc-heard { margin: 4px 0; color: var(--muted); }
+.hc-hint { margin: 2px 0; font-size: 0.85rem; color: var(--muted); }
+.hc-tools { display: flex; flex-wrap: wrap; gap: 0 2px; margin: 6px -10px 0; }
+.hc-note { width: 100%; margin-top: 4px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--page); color: var(--ink); font: inherit; }
+.hc-keys { margin: 2px 0 0; font-size: 0.8rem; color: var(--muted); }
+@media (hover: none) { .hc-keys { display: none; } }
+
+/* The two answers sit at the bottom of the screen, always in the same place, where a thumb rests. */
+.hc-bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; display: flex; gap: 10px; max-width: 640px; margin: 0 auto;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: var(--page); border-top: 1px solid var(--line);
+}
+.hc-ans { flex: 1; min-height: 56px; border: 2px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--ink); font-size: 1.05rem; font-weight: 600; }
+.hc-right { border-color: #2f855a; }
+.hc-wrong { border-color: #b45309; }
+.hc-right[aria-pressed='true'] { background: #2f855a; color: #fff; }
+.hc-wrong[aria-pressed='true'] { background: #b45309; color: #fff; }
+
+.hc-out { margin-top: 12px; }
+.hc-big { font-size: 1.25rem; margin: 8px 0; }
+.hc-line { margin: 6px 0; }
+.hc-btn { min-height: 48px; padding: 0 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--ink); font-weight: 600; margin: 4px 8px 4px 0; }
+.hc-primary { background: var(--teal); border-color: var(--teal); color: var(--on-teal); }
+.hc-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.hc-choices { margin-top: 10px; }
+.hc-confirm { margin: 8px 0; padding: 10px 12px; background: var(--soft); border-radius: 8px; }
+.hc-confirm p { margin: 0 0 6px; }
+.hc-confirm select { min-height: 44px; margin: 6px 0; display: block; max-width: 100%; }
+.hc-sub { margin: 8px -10px 0; }
+
+.hc-more { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 4px; color: var(--muted); }
+.hc-more summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; font-size: 0.9rem; }
+.hc-more ul { margin: 4px 0; padding-left: 20px; font-size: 0.9rem; }
+.hc-full { width: 100%; margin: 6px 0 10px; }
+.hc-para { line-height: 1.8; font-size: 1rem; color: var(--ink); }
+.hc-pw { background: var(--hl-bg); border: 0; border-bottom: 2px solid var(--teal); border-radius: 3px; color: inherit; padding: 0 4px; min-height: 44px; min-width: 44px; margin-block: -10px; }
+
+.hc-login form { display: grid; gap: 12px; max-width: 24rem; }
+.hc-login label { display: flex; flex-direction: column; gap: 4px; font-size: 0.9rem; color: var(--muted); }
+.hc input[type='text'], .hc input[type='password'] { min-height: 44px; padding: 0 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--page); color: var(--ink); font: inherit; }
+
+.hc-filters { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.hc-chip { min-height: 44px; padding: 0 14px; border: 1px solid var(--line); border-radius: 22px; background: var(--panel); color: var(--ink); }
+.hc-chip[aria-pressed='true'] { background: var(--teal); border-color: var(--teal); color: var(--on-teal); }
+.hc-rows { list-style: none; margin: 8px 0; padding: 0; }
+.hc-row { display: flex; flex-direction: column; justify-content: center; min-height: 56px; padding: 6px 4px; border-bottom: 1px solid var(--line); text-decoration: none; color: var(--ink); }
+.hc-row-title { font-weight: 600; }
+
+@media (prefers-reduced-motion: reduce) { .hc, .hc * { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
+
+.hc-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.hc-notok { list-style: none; margin: 0 0 6px; padding: 0; }
+.hc-notok li { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }

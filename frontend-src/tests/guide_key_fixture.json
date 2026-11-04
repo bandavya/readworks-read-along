@@ -1,0 +1,12 @@
+[
+  {"input": "Read", "key": "read"},
+  {"input": "can't", "key": "can't"},
+  {"input": "can’t", "key": "can't"},
+  {"input": "A-B!", "key": "ab"},
+  {"input": "naïve", "key": "naïve"},
+  {"input": "Straße", "key": "straße"},
+  {"input": "İ", "key": "i̇"},
+  {"input": "東京_2", "key": "東京_2"},
+  {"input": "a²", "key": "a²"},
+  {"input": "", "key": ""}
+]

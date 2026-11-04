@@ -8,6 +8,8 @@
   },
   "scripts": {
     "build": "tsc",
+    "build:frontend": "node scripts/build-frontend.js",
+    "test:frontend": "node scripts/test-frontend.js",
     "watch": "tsc -w",
     "synth": "cdk synth",
     "deploy": "cdk deploy --all --require-approval never",

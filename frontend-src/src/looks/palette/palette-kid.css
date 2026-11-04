@@ -1,0 +1,206 @@
+/* Palette kid route: ReadWorks' own teal, paper, annotation yellow, and clear student controls. */
+.palette-kid .kv {
+  --kv-bg:#f5f8f8; --kv-ink:#344048; --kv-muted:#576b78;
+  --kv-card:#fff; --kv-soft:#d7f5ff; --kv-line:#dcdee0;
+  --kv-btn:#007693; --kv-btn-ink:#fff; --kv-play:#007693;
+  --kv-play-ink:#fff; --kv-glow:transparent;
+  --kv-hl:var(--palette-kid-highlight,#f9f2a4); --kv-hl-ink:#344048;
+  --kv-held:#d7f5ff; --kv-orange:#d7f5ff;
+  --kv-gold:#f9f2a4; --kv-gold-ink:#344048;
+  font-family:Roboto,Arial,sans-serif;
+}
+.palette-kid .kv :focus-visible,
+body.palette-kid-active .kv-panel :focus-visible { outline:3px solid #f9f2a4; outline-offset:3px; box-shadow:0 0 0 6px #344048; }
+.palette-kid .kv-start {
+  position:relative; justify-content:center; gap:0;
+  padding:clamp(5rem,11vh,7.6rem) 1.5rem 2.4rem;
+  background:linear-gradient(95deg,#1c3b49,#007693);
+  color:#fff;
+}
+.palette-kid .kv-start::before {
+  content:'ReadWorks'; position:absolute; top:1.25rem; left:clamp(1.5rem,5vw,4.5rem);
+  font:700 1.45rem/1.2 Merriweather,Georgia,serif; letter-spacing:-.055em;
+}
+.palette-kid .kv-start::after {
+  content:'Sound Along'; position:absolute; top:1.65rem; right:clamp(5.3rem,8vw,7rem);
+  font:500 .9rem/1 Roboto,Arial,sans-serif;
+}
+.palette-kid .kv-start-title {
+  width:min(100%,44rem); margin:0 auto 1.7rem;
+  color:#fff; text-align:center;
+  font:700 clamp(2rem,4vw,3.4rem)/1.16 Roboto,Arial,sans-serif;
+  letter-spacing:-.035em;
+}
+.palette-kid .kv-tap-hint { display:none; }
+.palette-kid .kv-choices { max-width:54rem; max-height:25rem; gap:1.3rem; }
+.palette-kid .kv-choice {
+  background:#fff; color:#0c5f76; border:3px solid #fff;
+  border-radius:1.7rem; box-shadow:none; gap:1.4rem;
+  min-height:10rem; padding:1.5rem;
+}
+.palette-kid .kv-choice:hover { background:#d7f5ff; border-color:#d7f5ff; }
+.palette-kid .kv-choice:active { transform:scale(.98); box-shadow:none; }
+.palette-kid .kv-self { background:#f9f2a4; border-color:#f9f2a4; color:#344048; }
+.palette-kid .kv-self:hover { background:#fff8ca; border-color:#fff8ca; }
+.palette-kid .kv-choice-icon { width:min(35%,7rem); max-height:40%; }
+.palette-kid .kv-choice-label { font:700 clamp(1.3rem,2vw,1.7rem)/1.2 Roboto,Arial,sans-serif; }
+.palette-kid .kv-read { background:var(--kv-card); }
+.palette-kid .kv-rail {
+  justify-content:flex-start; gap:.65rem; min-height:7.3rem;
+  padding:.45rem 5.8rem 1.35rem 1.5rem;
+  background:#007693; color:#fff;
+}
+.palette-kid .kv-rail > .kv-btn,
+.palette-kid .kv-rail > .rk-open,
+.palette-kid .kv-rail > .kv-play { position:relative; }
+.palette-kid .kv-rail > .kv-btn::after,
+.palette-kid .kv-rail > .rk-open::after,
+.palette-kid .kv-rail > .kv-play::after {
+  position:absolute; top:calc(100% + .14rem); left:50%; transform:translateX(-50%);
+  color:#fff; font:700 1rem/1.1 Roboto,Arial,sans-serif; white-space:nowrap;
+}
+.palette-kid .kv-home::after { content:'Home'; }
+.palette-kid .kv-choose::after { content:'Words'; }
+.palette-kid .kv-mean::after { content:'Meaning'; }
+.palette-kid .kv-again::after,.palette-kid .kv-replay::after { content:'Again'; }
+.palette-kid .kv-rail > .rk-open::after { content:'Practice'; }
+.palette-kid .kv-play.playing::after { content:'Pause'; }
+.palette-kid .kv-play:not(.playing):not(.kv-replay)::after { content:'Play'; }
+.palette-kid .kv-btn,.palette-kid .kv-play {
+  box-shadow:none; border-radius:999px; border:2px solid transparent;
+  background:#fff; color:#0c5f76;
+}
+.palette-kid .kv-btn { width:3.8rem; height:3.8rem; }
+.palette-kid .kv-play { width:5.2rem; height:5.2rem; background:#f9f2a4; color:#344048; }
+.palette-kid .kv-btn:active,.palette-kid .kv-play:active,.palette-kid .kv-play.pressed { transform:scale(.96); box-shadow:none; }
+.palette-kid .kv-play.pulse { animation:none; box-shadow:0 0 0 .2rem #d7f5ff; }
+.palette-kid .kv-gear {
+  top:.55rem; right:1rem; width:4.2rem; height:4.2rem;
+  color:#fff; border-radius:5px;
+}
+.palette-kid .kv-gear:hover { background:rgba(255,255,255,.15); }
+.palette-kid .kv-gear::after {
+  content:'Grown-ups'; position:absolute; top:calc(100% - .18rem);
+  color:#fff; font:700 1rem/1 Roboto,Arial,sans-serif; white-space:nowrap;
+}
+.palette-kid .kv-dotswrap { height:2.3rem; background:#fff; }
+.palette-kid .kv-dot { background:#dcdee0; }
+.palette-kid .kv-dot.on { background:#007693; }
+.palette-kid .kv-stage { background:#f5f8f8; padding:.7rem clamp(.5rem,4vw,3rem) 1.2rem; }
+.palette-kid .kv-page { background:#fff; border:1px solid #dcdee0; border-radius:5px; padding:0 1rem; }
+.palette-kid .kv-text {
+  max-width:22em; padding:.6rem .4rem 1.4rem;
+  font-family:Andika,'Trebuchet MS',sans-serif;
+  line-height:1.83; color:#344048;
+}
+.palette-kid .kv-text .sa-w { border-radius:3px; }
+.palette-kid .kv-text .sa-w.sa-now,
+.palette-kid .kv-text .sa-w.sa-now.kv-held {
+  background:var(--palette-kid-highlight,#f9f2a4); color:#344048;
+  box-shadow:0 0 0 .08em var(--palette-kid-highlight,#f9f2a4);
+}
+.palette-kid .kv-text [data-vocab-sense-id] { text-decoration-color:#007693; }
+.palette-kid .kv-arrow {
+  width:4.4rem; height:4.4rem; margin:0 .65rem;
+  border-radius:999px; box-shadow:none; background:#007693;
+}
+.palette-kid .kv-arrow:active { box-shadow:none; transform:scale(.96); }
+.palette-kid .kv-arrow.finish { background:#f9f2a4; color:#344048; }
+.palette-kid .kv-fig {
+  height:calc(var(--img-s,1) * clamp(4.5rem,12vh,7.5rem));
+  border:1px solid #dcdee0; border-radius:5px; background:#d7f5ff;
+}
+.palette-kid .kv-fig img { border-radius:0; }
+.palette-kid .kv-bubble {
+  max-width:min(34rem,calc(100vw - 1rem)); border:2px solid #007693;
+  border-radius:5px; background:#d7f5ff; box-shadow:none;
+}
+.palette-kid .kv-bubble::after { background:#d7f5ff; border-color:#007693; }
+.palette-kid .kv-bubble-say { border-radius:5px; box-shadow:none; }
+.palette-kid .kv .kv-wordsbtn { box-shadow:none; background:#f9f2a4; color:#344048; }
+.palette-kid .kv-words {
+  align-items:stretch; padding:1.6rem max(1.5rem,calc((100vw - 58rem)/2)) 3rem;
+  background:#f5f8f8;
+}
+.palette-kid .kv-star-row { display:none; }
+.palette-kid .kv-words::before {
+  content:'Words to know'; font:700 clamp(2rem,4vw,3.3rem)/1.1 Roboto,Arial,sans-serif;
+  color:#0c5f76; margin:0 0 1.2rem;
+}
+.palette-kid .kv-cards { display:flex; flex-direction:column; max-width:58rem; gap:.75rem; }
+.palette-kid .kv-wcard-main {
+  min-height:7.5rem; flex-direction:row; justify-content:flex-start; gap:1.4rem;
+  padding:1rem 1.3rem; border:1px solid #dcdee0; border-radius:5px;
+  background:#fff; box-shadow:none;
+}
+.palette-kid .kv-wcard.on .kv-wcard-main { background:#d7f5ff; border-color:#007693; }
+.palette-kid .kv-wcard-word { flex:1; text-align:left; font:700 clamp(1.6rem,3vw,2.5rem)/1.2 Roboto,Arial,sans-serif; }
+.palette-kid .kv-wcard-pic { display:none; }
+.palette-kid .kv-wcard-say { width:4.5rem; height:4.5rem; flex:none; background:#007693; }
+.palette-kid .kv-wcard-guided { flex-wrap:wrap; }
+.palette-kid .kv-wcard-hear { flex:1; text-align:left; }
+.palette-kid .kv-wcard-guided .sg { flex-basis:100%; justify-items:start; }
+.palette-kid .kv-wcard-guided .sg-row,.palette-kid .kv-wcard-guided .sg-actions { justify-content:flex-start; }
+.palette-kid .kv-problem { border-radius:5px; border-color:#d1002a; }
+.palette-kid-note {
+  position:fixed; z-index:61; bottom:.2rem; left:50%; transform:translateX(-50%);
+  padding:0 .4rem; background:#f5f8f8; color:#576b78;
+  font:400 11px/1.2 Roboto,Arial,sans-serif; white-space:nowrap; pointer-events:none;
+}
+body.palette-kid-active .kv-panel { border:2px solid #007693; border-radius:5px; box-shadow:none; font-family:Roboto,Arial,sans-serif; }
+body.palette-kid-active .kv-panel-btn,
+body.palette-kid-active .kv-seg,
+body.palette-kid-active .kv-option { border-radius:5px; }
+body.palette-kid-active .kv-panel-note,
+body.palette-kid-active .kv-row-h { color:#576b78; }
+@media (max-width:700px) {
+  .palette-kid .kv-start { padding:4rem 1rem 2rem; }
+  .palette-kid .kv-start::before { top:1rem; left:1rem; font-size:1.1rem; }
+  .palette-kid .kv-start::after { display:none; }
+  .palette-kid .kv-start-title { font-size:clamp(1.65rem,7vw,2.35rem); margin-bottom:1.1rem; }
+  .palette-kid .kv-choices { flex-direction:column; gap:.85rem; max-height:none; }
+  .palette-kid .kv-choice { min-height:0; flex-direction:row; justify-content:flex-start; padding:1rem 1.3rem; gap:1.2rem; }
+  .palette-kid .kv-choice-icon { width:3.4rem; height:3.4rem; }
+  .palette-kid .kv-rail { gap:.3rem; min-height:6.9rem; padding:.35rem 4.15rem 1.25rem .4rem; }
+  .palette-kid .kv-rail > .kv-btn::after,.palette-kid .kv-rail > .rk-open::after,.palette-kid .kv-rail > .kv-play::after { font-size:1rem; }
+  .palette-kid .kv-btn { width:3.15rem; height:3.15rem; }
+  .palette-kid .kv-play { width:4.4rem; height:4.4rem; }
+  .palette-kid .kv-gear { top:.65rem; right:.2rem; width:3.5rem; height:3.5rem; }
+  .palette-kid .kv-gear::after { font-size:1rem; right:0; }
+  .palette-kid .kv-stage { padding:.35rem .15rem .6rem; }
+  .palette-kid .kv-arrow { width:3.15rem; height:3.7rem; margin:0 .15rem; }
+  .palette-kid .kv-page { padding:0 .2rem; }
+  .palette-kid .kv-text { max-width:100%; padding:.45rem .2rem 1rem; }
+  .palette-kid .kv-words { padding:1rem 1rem 3rem; }
+  .palette-kid .kv-wcard-main { min-height:6.5rem; gap:.7rem; padding:.8rem; }
+}
+@media (prefers-color-scheme:dark) {
+  .palette-kid .kv {
+    --kv-bg:#142329; --kv-ink:#e3edf0; --kv-muted:#b9cdd3;
+    --kv-card:#1c2c32; --kv-soft:#294750; --kv-line:#46646d;
+    --kv-btn:#65c2d7; --kv-btn-ink:#102b36; --kv-play:#65c2d7;
+    --kv-play-ink:#102b36; --kv-held:#315a66;
+  }
+  .palette-kid .kv-start { background:linear-gradient(95deg,#102b36,#005671); }
+  .palette-kid .kv-read,.palette-kid .kv-dotswrap,.palette-kid .kv-page,.palette-kid .kv-wcard-main { background:#1c2c32; }
+  .palette-kid .kv-rail { background:#005671; }
+  .palette-kid .kv-btn { background:#d7f5ff; color:#1c3b49; }
+  .palette-kid .kv-stage,.palette-kid .kv-words { background:#142329; }
+  .palette-kid .kv-page,.palette-kid .kv-wcard-main,.palette-kid .kv-fig { border-color:#46646d; }
+  .palette-kid .kv-text { color:#e3edf0; }
+  .palette-kid .kv-arrow,.palette-kid .kv-wcard-say { background:#65c2d7; color:#102b36; }
+  .palette-kid .kv-bubble { background:#294750; border-color:#65c2d7; }
+  .palette-kid .kv-bubble::after { background:#294750; border-color:#65c2d7; }
+  .palette-kid .kv-words::before { color:#a7dce7; }
+  .palette-kid .kv-wcard.on .kv-wcard-main { background:#294750; border-color:#65c2d7; }
+  .palette-kid-note { background:#142329; color:#b9cdd3; }
+  body.palette-kid-active .kv-panel { border-color:#65c2d7; }
+  body.palette-kid-active .kv-panel-note,body.palette-kid-active .kv-row-h { color:#b9cdd3; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .palette-kid .kv *, .palette-kid .kv *::before, .palette-kid .kv *::after { animation:none!important; transition:none!important; }
+}
+
+/* The shared kid view owns this setting; the palette control is in its grown-ups panel. */
+.palette-kid .kv-auto-setting { display:none; }
+body.palette-kid-active .palette-auto-words { font:700 1rem/1.25 Roboto,Arial,sans-serif; }

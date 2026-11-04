@@ -1,0 +1,64 @@
+/* Review markers and the grown-up review screen. Uses the page's own colors. */
+
+/* Adult marker: one calm line. */
+.rv-note {
+  display: flex; align-items: baseline; gap: 0.45em; margin: 0 0 6px; font-size: 0.8em; line-height: 1.4;
+  color: var(--sg-muted, var(--muted));
+}
+.rv-note::before { content: ''; flex: none; width: 0.6em; height: 0.6em; border-radius: 50%; border: 2px dashed currentColor; transform: translateY(0.05em); }
+.rv-note.rv-fix::before, .rv-note.rv-checked::before { border-style: solid; }
+.rv-note a { color: var(--teal); text-decoration: underline; text-underline-offset: 2px; white-space: nowrap; }
+
+/* Kid marker: a tiny pencil in a dashed ring. Quiet, no color alarm, not a button. */
+.rv-kid {
+  display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; flex: none;
+  width: 1.15rem; height: 1.15rem; margin-left: 0.5rem; border-radius: 50%; border: 2px dashed currentColor;
+  color: inherit; opacity: 0.75;
+}
+.rv-kid svg { width: 62%; height: 62%; }
+
+/* The review screen */
+.rv { max-width: 860px; margin: 0 auto; padding: 16px 16px 80px; }
+.rv h1 { font-family: var(--read); font-size: 1.6rem; margin: 6px 0 4px; }
+.rv-lede { color: var(--muted); margin: 0 0 14px; max-width: 62ch; line-height: 1.5; }
+.rv-back { display: inline-flex; align-items: center; min-height: 44px; margin-top: 4px; color: var(--teal); }
+.rv-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 12px 0; padding: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
+.rv-bar label { display: flex; flex-direction: column; font-size: 0.85rem; color: var(--muted); gap: 2px; }
+.rv-bar input[type='text'] { min-height: 44px; padding: 0 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--page); color: var(--ink); width: 14rem; }
+.rv-tally { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 0; padding: 0; list-style: none; font-size: 0.95rem; }
+.rv-tally b { font-size: 1.1rem; }
+.rv-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 12px; }
+.rv-btn {
+  min-height: 44px; min-width: 44px; padding: 0 14px; border-radius: 6px; border: 1px solid var(--line);
+  background: var(--panel); color: var(--ink); font-weight: 600; cursor: pointer;
+}
+.rv-btn:hover { background: var(--soft); }
+.rv-btn[aria-pressed='true'], .rv-btn.on { background: var(--teal); border-color: var(--teal); color: var(--on-teal); }
+.rv-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.rv-item { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; }
+.rv-item.s-approved, .rv-item.s-checked { border-left: 6px solid #2f855a; }
+.rv-item.s-fix { border-left: 6px solid #b45309; }
+.rv-item.s-draft { border-left: 6px dashed var(--line); }
+.rv-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 12px; }
+.rv-word { font-family: var(--read); font-weight: 700; font-size: 1.3rem; margin: 0; }
+.rv-kind { font-size: 0.8rem; color: var(--muted); text-transform: none; }
+.rv-state { margin-left: auto; font-size: 0.85rem; font-weight: 600; }
+.rv-text { font-size: 1.05rem; line-height: 1.5; margin: 6px 0; }
+.rv-ctx { font-size: 0.9rem; color: var(--muted); margin: 0 0 6px; }
+.rv-ctx mark { background: var(--hl-bg); color: var(--ink); font-weight: 700; padding: 0 2px; border-radius: 3px; }
+.rv-play { display: inline-flex; align-items: center; gap: 8px; }
+.rv-play svg { width: 22px; height: 22px; }
+.rv-play.on { box-shadow: 0 0 0 3px var(--hl-bg); }
+.rv-noclip { font-size: 0.85rem; color: var(--muted); margin: 0 0 6px; }
+.rv-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; margin-top: 8px; }
+.rv-note-in { flex: 1 1 14rem; min-height: 44px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--page); color: var(--ink); font: inherit; resize: vertical; }
+.rv-changed { font-size: 0.85rem; color: var(--banner-ink); background: var(--banner-bg); padding: 4px 8px; border-radius: 4px; margin: 6px 0 0; }
+.rv-export { margin-top: 18px; }
+.rv-export textarea { width: 100%; min-height: 9rem; font-family: ui-monospace, Consolas, monospace; font-size: 0.8rem; background: var(--page); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 8px; }
+.rv-status { min-height: 1.4em; color: var(--muted); margin: 6px 0; }
+.rv .sg { margin: 6px 0; }
+@media (max-width: 520px) { .rv-state { margin-left: 0; width: 100%; } }
+.sg-check { margin-left: 0.4em; color: var(--teal); text-decoration: underline; text-underline-offset: 2px; white-space: nowrap; }
+.rv-vocab-link a { color: var(--teal); }
+/* In-text links get a 44 px tap area without making the line taller. */
+.rv-note a, .sg-check, .rv-vocab-link a { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; min-width: 44px; padding: 0 0.4em; margin-block: -14px; }

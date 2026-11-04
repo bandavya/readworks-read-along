@@ -1,0 +1,9 @@
+.take-compare { max-width: 960px; margin: 0 auto; padding: 24px; color: #17212d; line-height: 1.55; }
+.take-compare header, .take-compare section { margin: 24px 0; }
+.take-compare .eyebrow { font-size: .85rem; }
+.take-compare .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.take-compare button, .take-compare select { min-height: 44px; min-width: 44px; padding: 8px 14px; font: inherit; }
+.take-compare .compare-reader { font-size: 1.4rem; line-height: 1.85; }
+.take-compare .compare-reader .sa-w { cursor: pointer; border-radius: 4px; }
+.take-compare .compare-reader .sa-w:focus-visible { outline: 3px solid #174da1; }
+.take-compare .compare-reader .sa-now { background: #ffe680; }

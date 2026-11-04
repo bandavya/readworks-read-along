@@ -1,0 +1,148 @@
+/* Reading helper (grades 3-5): ReadWorks-like, restrained. Teal rule, slate ink, Merriweather text, a yellow word
+   highlight, system-sans controls. Controls are 44 px and up (not the K-2 sizes). Colors come from styles.css tokens. */
+
+.fx-page {
+  --fx-fs: 22px;
+  --fx-hl: #ffe27a;
+  --fx-hl-ink: #1f2a30;
+  background: var(--panel);
+  min-height: 100vh;
+}
+@media (prefers-color-scheme: dark) {
+  .fx-page { --fx-hl: #6b5500; --fx-hl-ink: #fff6d6; }
+}
+
+/* the top-bar switch back to the full page */
+.fx-helper {
+  margin-left: auto; min-height: 44px; display: inline-flex; align-items: center; gap: 10px;
+  background: none; border: 0; color: #fff; font-weight: 700; font-size: 15px; padding: 0 4px;
+}
+.fx-helper-knob { width: 44px; height: 26px; border-radius: 13px; background: rgba(255,255,255,.95); position: relative; flex: none; }
+.fx-helper-knob::after { content: ''; position: absolute; top: 3px; left: 21px; width: 20px; height: 20px; border-radius: 50%; background: #007693; }
+@media (prefers-color-scheme: dark) { .fx-helper-knob::after { background: #0b4a5c; } }
+.fx-helper:focus-visible { outline-color: #fff; }
+
+/* ---------- the audio rail ---------- */
+.fx-railwrap {
+  position: sticky; top: 0; z-index: 10; background: var(--panel); border-bottom: 1px solid var(--line);
+  display: flex; flex-wrap: wrap; align-items: center; gap: 4px 20px;
+  padding: 6px max(16px, calc((100% - 920px) / 2));
+}
+.fx-rail-top { flex: 1 1 320px; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.fx-rail-opts { flex: 0 1 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 20px; }
+.fx-rail-quiet { flex-basis: 100%; gap: 6px 20px; }
+.fx-row { display: flex; align-items: center; gap: 10px 16px; flex-wrap: wrap; }
+.fx-row-main { flex: 1 1 100%; flex-wrap: nowrap; min-width: 0; }
+.fx-settings, .fx-error, .fx-quiet { flex-basis: 100%; }
+.fx-play {
+  flex: none; width: 48px; height: 48px; border-radius: 50%; border: 0; background: var(--teal); color: var(--on-teal);
+  display: grid; place-items: center;
+}
+.fx-play:hover { background: var(--teal-dark); }
+.fx-time { flex: none; font-variant-numeric: tabular-nums; font-size: 14px; color: var(--muted); white-space: nowrap; }
+.fx-scrub { flex: 1 1 auto; min-width: 0; height: 44px; accent-color: var(--teal); }
+.fx-field { display: inline-flex; align-items: center; gap: 8px; }
+.fx-lab { font-size: 14px; font-weight: 700; color: var(--muted); }
+.fx-select {
+  min-height: 44px; min-width: 120px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px;
+  background: var(--panel); color: var(--ink); font-size: 15px; font-weight: 700;
+}
+.fx-sizes { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.fx-size {
+  min-width: 44px; min-height: 44px; background: var(--panel); border: 0; color: var(--ink); font-family: var(--read);
+  font-weight: 700; display: inline-grid; place-items: center; padding: 0 8px;
+}
+.fx-size + .fx-size { border-left: 1px solid var(--line); }
+.fx-size.on { background: var(--teal); color: var(--on-teal); }
+.fx-more {
+  min-height: 44px; padding: 6px 14px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel);
+  color: var(--ink); font-weight: 700; font-size: 15px;
+}
+.fx-settings { padding: 2px 0 4px; }
+.fx-reading-settings { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 8px; }
+.fx-reading-settings .fx-btn[aria-pressed="true"] { background: var(--teal); color: var(--on-teal); }
+.fx-seg { display: inline-flex; border: 1px solid var(--teal); border-radius: 6px; overflow: hidden; }
+.fx-seg button { min-height: 44px; padding: 6px 16px; background: var(--panel); border: 0; color: var(--teal); font-weight: 700; font-size: 15px; }
+.fx-seg button + button { border-left: 1px solid var(--teal); }
+.fx-seg button.on { background: var(--teal); color: var(--on-teal); }
+.fx-error { margin: 0; color: #b42318; font-size: 14px; }
+@media (prefers-color-scheme: dark) { .fx-error { color: #ff9b8f; } }
+.fx-quiet { margin: 0; color: var(--muted); font-size: 15px; }
+
+.fx-done {
+  flex-basis: 100%; margin: 0; padding: 8px 0 4px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px;
+  border-top: 1px solid var(--line); background: var(--panel);
+}
+.fx-done-t { font-weight: 700; margin-right: 4px; }
+.fx-btn {
+  min-height: 44px; padding: 6px 18px; border-radius: 4px; border: 1px solid var(--teal); background: var(--panel);
+  color: var(--teal); font-weight: 700; font-size: 15px;
+}
+.fx-btn:hover { background: var(--soft); }
+.fx-meaning { margin: 0 0.25em; vertical-align: middle; }
+
+/* ---------- the article ---------- */
+.fx-article { max-width: 760px; margin: 0 auto; padding: 18px 16px 72px; }
+.fx-hint { margin: 0 0 18px; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.fx-keyhint { display: block; margin-top: 2px; }
+.sa-text.fx-text {
+  font-size: var(--fx-fs);
+  line-height: 1.7;
+  max-width: 33em; /* about 55-65 characters per line in Merriweather */
+}
+.fx-text h1.sa-title {
+  font-size: 1.5em; line-height: 1.3; margin: 0 0 0.45em; padding-bottom: 0.3em; border-bottom: 3px solid var(--teal);
+}
+.fx-text .sa-byline { font-family: var(--ui); font-size: 0.7em; color: var(--muted); }
+.fx-text .sa-w { padding-block: 0.08em; }
+.fx-text .sa-w.sa-now { background: var(--fx-hl); color: var(--fx-hl-ink); box-shadow: none; }
+.fx-text [data-vocab-sense-id] { text-decoration-thickness: 1px; }
+.fx-text figcaption { font-size: 14px; }
+.fx-credit { margin-left: 0; max-width: 33em; }
+
+/* ---------- vocabulary, under the article ---------- */
+.fx-vocab { margin-top: 28px; border-top: 1px solid var(--line); padding-top: 8px; }
+.fx-vocab summary { cursor: pointer; font-size: 20px; font-weight: 700; min-height: 44px; display: flex; align-items: center; }
+.fx-vocab-list { margin: 12px 0 0; display: grid; gap: 16px; }
+.fx-vocab-list dt { font-weight: 700; font-size: 18px; margin-bottom: -8px; }
+.fx-vocab-list dd { margin: 0; display: grid; gap: 6px; max-width: 60ch; }
+.fx-vocab-list em { color: var(--muted); }
+.fx-say {
+  min-height: 44px; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px 0 12px; border-radius: 22px; border: 0;
+  background: var(--teal); color: var(--on-teal); font-size: 17px; font-weight: 700;
+}
+.fx-say.on { box-shadow: 0 0 0 4px var(--hl-bg); }
+
+/* ---------- narrow screens: settings on their own row, nothing scrolls sideways ---------- */
+@media (max-width: 600px) {
+  /* only the play row stays pinned on a phone; speed, size and settings scroll away with the page */
+  .fx-railwrap { display: contents; }
+  .fx-rail-top { position: sticky; top: 0; z-index: 10; background: var(--panel); border-bottom: 1px solid var(--line); padding: 6px 12px; }
+  .fx-rail-opts { padding: 6px 12px; border-bottom: 1px solid var(--line); gap: 4px 12px; }
+  .fx-rail-quiet { position: static; }
+  .fx-done { position: sticky; top: 61px; z-index: 9; padding: 8px 12px; border-bottom: 1px solid var(--line); }
+  .fx-row-set { gap: 8px 12px; }
+  .fx-article { padding: 14px 14px 64px; }
+  .fx-time { font-size: 13px; }
+  .fx-select { min-width: 0; }
+  .topbar-in { gap: 10px; }
+  .topbar-in .back { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fx-page *, .fx-page *::before, .fx-page *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+.fx-font-andika .fx-text { font-family: Andika, 'Trebuchet MS', Verdana, system-ui, sans-serif; }
+.fx-font-sans .fx-text { font-family: 'Trebuchet MS', Verdana, system-ui, sans-serif; }
+.fx-spaced .fx-text { line-height: 2; letter-spacing: 0.06em; word-spacing: 0.14em; }
+.fx-calm { background: #f4f3e9; }
+.fx-calm .fx-article { background: #f4f3e9; }
+@media (prefers-color-scheme: dark) {
+  .fx-calm, .fx-calm .fx-article { background: #202625; }
+}
+
+.fx-sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }

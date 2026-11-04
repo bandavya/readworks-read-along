@@ -1,0 +1,28 @@
+.listen-page { max-width: 42rem; margin: 2rem auto; padding: 1.5rem; color: #172a3a; }
+.listen-page h1 { font-size: clamp(2rem, 5vw, 2.75rem); }
+.listen-page p { line-height: 1.5; }
+.listen-note { padding: 1rem; border-left: 4px solid #286d83; background: #eaf5f8; }
+.listen-error { padding: .75rem; background: #fff0e8; }
+.listen-step { font-weight: 700; }
+.listen-page button { min-height: 44px; margin: .4rem .6rem .4rem 0; padding: .6rem 1rem; cursor: pointer; }
+.listen-page button:disabled { cursor: not-allowed; opacity: .55; }
+.listen-primary { font-size: 1.2rem; font-weight: 700; }
+.listen-page fieldset { margin: 1.2rem 0; border: 1px solid #8599a4; padding: 1rem; }
+.listen-page legend { font-weight: 700; }
+.listen-ratings { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .7rem; }
+.listen-ratings label { display: inline-flex; align-items: center; justify-content: center; gap: .35rem; min-width: 44px; min-height: 44px; padding: .2rem .5rem; border: 1px solid #718b98; border-radius: .4rem; cursor: pointer; }
+.listen-ratings input { width: 44px; height: 44px; margin: 0; flex: none; cursor: pointer; }
+.listen-ratings label:focus-within { outline: 3px solid #175f74; outline-offset: 2px; }
+.listen-scale { margin-bottom: 0; }
+.listen-floor { margin: 1.2rem 0; padding: .8rem 1rem; background: #f2f6f7; border-radius: .4rem; }
+.listen-floor summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; font-weight: 700; }
+.listen-table-wrap { overflow-x: auto; }
+.listen-page table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+.listen-page caption { text-align: left; font-weight: 700; margin-bottom: .5rem; }
+.listen-page th, .listen-page td { padding: .6rem; text-align: left; border-bottom: 1px solid #a3b6bf; white-space: nowrap; }
+.listen-page thead { background: #eaf5f8; }
+.listen-small { font-size: .9rem; }
+.listen-word-report { margin: 1rem 0; padding: .75rem 1rem; border: 1px solid #8599a4; border-radius: .4rem; }
+.listen-words { display: flex; flex-wrap: wrap; gap: .35rem; }
+.listen-words button { margin: 0; min-height: 44px; }
+.listen-words button[aria-pressed="true"] { background: #175f74; color: #fff; }

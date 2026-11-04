@@ -1,0 +1,99 @@
+/* Sentence rehearsal: "Listen -> your turn -> listen again". Teacher bar = .rh-*, kid controls = .rk-*.
+   No microphone, no score: the sentence just stays lit while the child reads it out loud. */
+
+/* ---------- the lit sentence (teacher page) ---------- */
+:root {
+  --rh-bg: #fdf0c4;
+  --rh-line: #b45309;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --rh-bg: #4a3d12;
+    --rh-line: #fbbf24;
+  }
+}
+.sa-text .sa-w.sa-rehearse {
+  background: var(--rh-bg);
+  box-shadow: inset 0 -0.16em 0 var(--rh-line);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+/* while the narrator reads it, the word being spoken keeps its usual (blue) highlight on top of the band */
+.sa-text .sa-w.sa-rehearse.sa-now {
+  background: var(--hl-bg);
+  box-shadow: inset 0 -0.16em 0 var(--hl-line);
+}
+
+/* ---------- teacher bar (in the dock, under the player) ---------- */
+.rh { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.rh-open, .rh-b {
+  min-height: 44px; padding: 6px 16px; border-radius: 6px; border: 1px solid var(--teal); background: var(--panel);
+  color: var(--teal); font-weight: 700; font-size: 15px; display: inline-flex; align-items: center; gap: 8px;
+}
+.rh-open:hover, .rh-b:hover { background: var(--soft); }
+.rh-b.primary { background: var(--teal); color: var(--on-teal); }
+.rh-b.primary:hover { background: var(--teal-dark); }
+.rh-b.quiet { border-color: var(--line); color: var(--ink); font-weight: 400; }
+.rh svg { flex: none; }
+.rh-hint { color: var(--muted); font-size: 14px; }
+.rh-panel {
+  flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 8px 12px;
+  border: 2px solid var(--rh-line); border-radius: 8px; background: var(--rh-bg); color: var(--ink);
+}
+.rh-panel:focus { outline: none; }
+.rh-panel:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.rh-cue { display: inline-flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 700; margin-right: auto; }
+.rh-cue small { font-size: 14px; font-weight: 400; color: var(--muted); }
+.rh-turn .rh-cue { animation: rh-glow 1.8s ease-in-out infinite; }
+@keyframes rh-glow { 50% { opacity: 0.55; } }
+.rh-panel .rh-b { background: var(--panel); }
+.rh-panel .rh-b.primary { background: var(--teal); }
+.rh-sr { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; padding: 0; }
+@media (prefers-reduced-motion: reduce) { .rh-turn .rh-cue { animation: none; } }
+
+/* ---------- kid view ---------- */
+.kv-read { position: relative; }
+.kv-text .sa-w.sa-rehearse {
+  background: var(--rk-band); box-shadow: 0 0.12em 0 var(--kv-play);
+  -webkit-box-decoration-break: clone; box-decoration-break: clone;
+}
+.kv-text .sa-w.sa-rehearse.sa-now { background: var(--kv-hl); color: var(--kv-hl-ink); box-shadow: 0 0 0 0.08em var(--kv-hl); }
+.kv { --rk-band: #d6f4de; }
+@media (prefers-color-scheme: dark) { .kv { --rk-band: #1f4a30; } }
+
+.rk-open { position: relative; }
+.rk-over {
+  position: absolute; z-index: 30; top: 0; left: 0; right: 0; height: 6.3rem; padding: 0.6rem 4.25rem 0.2rem;
+  display: flex; align-items: center; justify-content: center; gap: 1.25rem;
+  background: var(--kv-bg);
+}
+.rk-over:focus { outline: none; }
+.rk-cue {
+  display: flex; align-items: center; gap: 0.8rem; min-width: 0; padding: 0 1.3rem 0 0.9rem; height: 4.6rem;
+  border-radius: 2.3rem; background: var(--kv-card); border: 0.2rem solid var(--kv-line); color: var(--kv-ink);
+  font-size: 1.7rem; font-weight: 700; line-height: 1;
+}
+.rk-cue svg { width: 2.6rem; height: 2.6rem; flex: none; }
+.rk-listen .rk-cue svg, .rk-again .rk-cue svg { color: var(--kv-btn); }
+.rk-turn .rk-cue { border-color: var(--kv-play); background: var(--rk-band); animation: rk-glow 1.6s ease-in-out infinite; }
+.rk-turn .rk-cue svg { color: var(--kv-play); }
+@keyframes rk-glow {
+  0%, 100% { box-shadow: 0 0 0 0 var(--kv-glow); }
+  50% { box-shadow: 0 0 0 0.9rem rgba(18, 161, 80, 0); }
+}
+.rk-b {
+  flex: none; width: 5.5rem; height: 5.5rem; border: 0; border-radius: 50%; display: grid; place-items: center; padding: 0;
+  background: var(--kv-btn); color: var(--kv-btn-ink); box-shadow: 0 0.3rem 0 var(--kv-shadow);
+}
+.rk-b svg { width: 60%; height: 60%; }
+.rk-b.go { background: var(--kv-play); color: var(--kv-play-ink); }
+.rk-b.small { width: 4rem; height: 4rem; }
+.rk-b:active { transform: translateY(0.25rem) scale(0.94); box-shadow: 0 0.05rem 0 var(--kv-shadow); filter: brightness(0.9); }
+.rk-b-label { display: block; margin-top: 0.2rem; font-size: 0.8rem; text-align: center; color: var(--kv-muted); font-weight: 700; }
+.rk-col { display: flex; flex-direction: column; align-items: center; }
+@media (prefers-reduced-motion: reduce) { .rk-turn .rk-cue { animation: none; } }
+@media (max-width: 560px) {
+  .rk-over { gap: 0.6rem; padding-left: 3.4rem; padding-right: 3.4rem; }
+  .rk-cue { font-size: 1.25rem; padding-right: 0.8rem; }
+  .rk-cue svg { width: 2rem; height: 2rem; }
+}

@@ -1,0 +1,12 @@
+{
+  "groups": [
+    {
+      "title": "On this site",
+      "items": [
+        { "name": "Library", "href": "#/", "question": "Which reading experience fits this passage?" },
+        { "name": "Themes", "href": "#/looks", "question": "Which look and feel suits readers?" },
+        { "name": "Teacher links", "href": "#/teacher/", "question": "Can a teacher share a reading link? Mock classes only." }
+      ]
+    }
+  ]
+}

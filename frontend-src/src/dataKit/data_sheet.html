@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sound Along Data</title>
+<style>
+:root{--bg:#fbfaf7;--card:#fff;--ink:#1f2328;--soft:#59616b;--line:#dcdad3;--band:#f1efe9;--a:#1f5f8b;--a-bg:#e6f0f7;--b:#2c7a55;--b-bg:#e5f3ec;--c:#8a5a12;--c-bg:#f7eedd;--no:#a33a2c;--no-bg:#f9e7e4;--focus:#b4470f}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16181b;--card:#1f2226;--ink:#e9e7e2;--soft:#a6adb6;--line:#363a40;--band:#25282d;--a:#8cc4ea;--a-bg:#1c3040;--b:#86d3ad;--b-bg:#1b3329;--c:#e4bd7c;--c-bg:#3a2e1b;--no:#f0a297;--no-bg:#40231f;--focus:#ffb37e}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:1080px;margin:0 auto;padding:24px 16px 72px}
+h1{font-size:1.9rem;line-height:1.2;margin:0 0 6px}
+h2{font-size:1.35rem;margin:42px 0 6px;padding-top:12px;border-top:1px solid var(--line)}
+h3{font-size:1rem;margin:0 0 4px}
+p{margin:6px 0 10px;max-width:74ch}
+.mark{color:var(--soft);font-size:.9rem}
+a{color:var(--a)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:16px 0}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.stat b{display:block;font-size:2.1rem;line-height:1.1}
+.stat span{font-size:.92rem;color:var(--soft)}
+.flow{display:grid;grid-template-columns:1fr 34px 1fr 34px 1fr;gap:4px;margin-top:12px;align-items:stretch}
+.box{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:.9rem}
+.box b{display:block;margin-bottom:2px}
+.box ul{margin:4px 0 0;padding-left:18px}
+.s{border-top:4px solid var(--b)}.v{border-top:4px solid var(--c)}.t{border-top:4px solid var(--a)}
+.arrow{display:flex;align-items:center;justify-content:center;color:var(--soft);font-size:1.3rem}
+.stay{margin-top:8px;background:var(--band);border-radius:10px;padding:8px 12px;font-size:.9rem;max-width:33%}
+.scroll{overflow-x:auto;margin-top:8px;border-radius:8px}
+table{border-collapse:collapse;width:100%;background:var(--card);font-size:.88rem}
+th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+th{background:var(--band);font-weight:650}
+.mid td,.mid th{text-align:center}.mid td:first-child,.mid th:first-child{text-align:left}
+.yes{font-weight:650;color:var(--a)}.no{color:var(--soft)}
+.chip{display:inline-block;border-radius:6px;background:var(--a-bg);color:var(--a);padding:0 6px;font-size:.78rem;font-weight:600;margin:1px 3px 1px 0}
+pre{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto;font-size:.85rem;margin:8px 0}
+.bars{display:grid;grid-template-columns:minmax(120px,300px) 1fr;gap:6px 10px;align-items:center;margin-top:10px;font-size:.9rem}
+.track{display:flex;align-items:center;gap:6px}
+.bar{height:20px;border-radius:0 4px 4px 0;min-width:2px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px;margin-top:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:.94rem}
+.card ul{margin:4px 0;padding-left:20px}
+.warn{background:var(--no-bg);border-radius:10px;padding:10px 14px;margin:10px 0;max-width:80ch}
+.mock{border:2px dashed var(--line);border-radius:10px;padding:10px 12px;background:var(--card)}
+.mocklabel{font-size:.78rem;font-weight:700;color:var(--no)}
+@media (max-width:760px){.flow{grid-template-columns:1fr}.arrow{transform:rotate(90deg);height:24px}.bars{grid-template-columns:1fr}.stay{max-width:none}}
+</style>
+</head>
+<body>
+<main>
+<h1>What Sound Along gathers, from where, and what it's for</h1>
+<p class="mark"><b>Prototype, tested only with made-up students.</b> Checked Nov 4, 2026. This describes our code and the checks we ran. No person has reviewed it for privacy or security, and it isn't legal advice. ReadWorks' own counsel decides what the law requires.</p>
+
+<div class="stats">
+  <div class="stat"><b id="kept"></b><span>kinds of count kept on a student's device</span></div>
+  <div class="stat"><b id="sent"></b><span>of those reach the teacher, as a yes or a level, with no counts</span></div>
+  <div class="stat"><b>0</b><span>words, minutes, times of day or scores in a report to the teacher (the feedback form is separate; see below)</span></div>
+  <div class="stat"><b>14</b><span>days until records on our test server are set to expire</span></div>
+</div>
+
+<h2>The path, from a student's device to the teacher's</h2>
+<div class="flow">
+  <div class="box s"><b>Student's device</b>The teacher sends one link to the class. The student picks their name and reads.
+    <ul><li>The screen says what the teacher will see</li><li>Picking "I'm not on this list" sends nothing</li><li>Only the assigned passage reports</li></ul></div>
+  <div class="arrow" aria-hidden="true">→</div>
+  <div class="box v"><b>Server</b>Keeps one small record per student per assignment.
+    <ul><li>Refuses any field not on its list, so a word can't be stored</li><li>Set to expire after 14 days</li><li>Tested on a local copy so far, not yet on AWS; on ReadWorks' systems in real use</li></ul></div>
+  <div class="arrow" aria-hidden="true">→</div>
+  <div class="box t"><b>Teacher's computer</b>A private class link opens the dashboard, whenever the teacher chooses.
+    <ul><li>No alerts, no live feed: it loads when opened</li><li>Alphabetical, never ranked</li><li>Reads the class only with that link's secret key</li></ul></div>
+</div>
+<div class="stay"><b>Stays on the student's device:</b> running counts, speed, voice, saved words.</div>
+<p class="warn"><b>The biggest limit today: nothing checks who a student is.</b> Without real sign-in, anyone with the class link can see every name on the list and report as any of them, so a dashboard row could be wrong or falsified. Your policy also says a student's name is visible only to their own teacher, and this list isn't. It's for demos with made-up students. Real use needs ReadWorks' sign-in.</p>
+
+<h3 style="margin-top:18px">Exactly what a student's device sends</h3>
+<p>This is a real message from our test with a made-up student, the fullest one that session sent. The "student key" is a random code standing for one student. The name isn't in the message: the server holds names separately, on the teacher's list. The "playback" number is the audio level: 1 is Partway, 2 Significant part, 3 Nearly all. The server refuses a message with any other field.</p>
+<pre>{ "assignmentId": "01a1a6916e60-20cf2dc36da46cb3",
+  "studentKey": "6ee1e201b262d95a",
+  "progress": { "opened": 1, "playback": 2, "word_tap": 1 } }</pre>
+
+<h2>What the teacher sees</h2>
+<div class="mock">
+  <div class="mocklabel">MOCK. Every student here is made up.</div>
+  <div class="scroll"><table class="mid" style="min-width:640px">
+    <thead><tr><th>Student</th><th>Opened</th><th>Audio played</th><th>Tapped a word</th><th>Replayed</th><th>Used word help</th><th>Audio wouldn't play</th></tr></thead>
+    <tbody>
+      <tr><td>Ada</td><td>Yes</td><td>Nearly all</td><td></td><td></td><td>Yes</td><td></td></tr>
+      <tr><td>Ben</td><td>Yes</td><td>Partway</td><td>Yes</td><td>Yes</td><td>Yes</td><td></td></tr>
+      <tr><td>Cam</td><td>Yes</td><td></td><td></td><td></td><td></td><td>Yes</td></tr>
+      <tr><td>Dee · not opened here</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    </tbody>
+  </table></div>
+</div>
+<div class="cards">
+  <div class="card"><h3>What it can help a teacher do</h3><ul><li>See who hasn't opened it, and check in kindly</li><li>Spot audio that won't play, and fix it rather than blame a child</li><li>Notice who's using the tools</li></ul></div>
+  <div class="card"><h3>What it can't tell a teacher</h3><ul><li>Whether a student read or understood</li><li>Why a student used a tool: curiosity and difficulty look the same</li><li>Reading on paper, or with sound off</li><li>A reading level</li></ul></div>
+  <div class="card"><h3>Left out on purpose</h3><ul><li>Which word was tapped</li><li>How many times</li><li>Minutes, or time of day</li><li>Any score, flag or ranking</li></ul><p class="mark">Research on a children's reading tutor found raw help counts mislead, which is why we send a yes rather than a count.</p></div>
+</div>
+
+<h2>Everything a child can enter</h2>
+<div class="scroll"><table style="min-width:640px">
+  <thead><tr><th>What a child does</th><th>What's kept</th><th>Who receives it</th></tr></thead>
+  <tbody>
+    <tr><td>Picks their name from the list</td><td>A random key and the name, in that browser tab, until it closes</td><td>The server links later reports to the key. Anyone with the link sees the names on the list</td></tr>
+    <tr><td>Reads, plays, taps, asks for a meaning</td><td>The counts below</td><td>A coarse version goes to the teacher, for the assigned passage</td></tr>
+    <tr><td><b>Types in the Feedback form</b></td><td>A face, an optional free-text note, the screen, the passage and the time</td><td>Our team, on the test server for about 14 days, or on the device, or a shared store when the prototype is viewed as a Claude page. <b>A child can type up to 2,000 characters of anything here.</b> It warns against private details, but nothing stops them. Builds with no server also offer a name-or-age box, kept on the device. <b>This should be off for real students</b></td></tr>
+    <tr><td>Stars a word</td><td>The word, with no name or passage</td><td>Nobody. It stays in that browser, and the next person on a shared device can see it</td></tr>
+    <tr><td>Changes speed, voice or text size</td><td>The setting</td><td>Nobody. It stays in that browser</td></tr>
+    <tr><td>Bookmarks a passage, in experimental looks only</td><td>The passage</td><td>Nobody. It stays in that browser, though it can hint at interests on a shared device</td></tr>
+  </tbody>
+</table></div>
+
+<h2>Each kind of count</h2>
+<div class="scroll"><table style="min-width:800px">
+  <thead><tr><th style="width:17%">Count</th><th>Where it comes from</th><th>What it helps with</th><th>What it can't tell you</th><th style="width:11%">Reaches the teacher</th></tr></thead>
+  <tbody id="rows"></tbody>
+</table></div>
+<p class="mark">This table is generated from the same list the code runs on, and an automated check fails if they differ. These measure use of the tools, not reading or learning. The reading helper and experimental looks don't record these counts today. Turning a count off on a device also stops it reaching the teacher from that device.</p>
+
+<h2>Who can see what today</h2>
+<div class="scroll"><table class="mid" style="min-width:720px">
+  <thead><tr><th></th><th>The student</th><th>Others with the class link</th><th>Teacher with the class progress link</th><th>Our team (AWS access)</th><th>ReadWorks</th><th>Family</th></tr></thead>
+  <tbody>
+    <tr><td>Names on the list, and each student's key</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td></tr>
+    <tr><td>Progress on the dashboard</td><td class="no">Not yet shown</td><td class="no">No</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td></tr>
+    <tr><td>Running counts on the device</td><td class="yes">Anyone on that browser</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="no">No</td></tr>
+  </tbody>
+</table></div>
+<p class="mark">This is what the code is built to do. Anyone can still forward a link or share a screenshot or CSV. A teacher could project the dashboard, so it shouldn't be. A student can't yet see their own row, which we think should change.</p>
+
+<h2>Safeguards, and how far each one goes</h2>
+<div class="scroll"><table style="min-width:680px">
+  <thead><tr><th>Safeguard</th><th>Enforced by</th><th>What it doesn't stop</th></tr></thead>
+  <tbody>
+    <tr><td>Only listed fields can be stored</td><td>The server refuses anything else; tested with a word as a value, and with an extra field</td><td>A future developer widening the list. Anyone can still send false values in the allowed fields</td></tr>
+    <tr><td>Only the teacher's link reads a class</td><td>A secret key checked by the server; tested with a student's key</td><td>A forwarded link. The key lasts as long as the record</td></tr>
+    <tr><td>Only the assigned passage reports</td><td>The reporter in the student's browser checks the passage; tested. The server doesn't check this</td><td>A changed browser, or a future version that turns on library reporting</td></tr>
+    <tr><td>One student's numbers don't include another's</td><td>Reports count only events after the name is picked, not device totals; tested</td><td><b>Anyone with the link reporting as someone else,</b> by mistake or on purpose. Nothing checks who they are until real sign-in</td></tr>
+    <tr><td>Records expire</td><td>A 14-day setting on the test server. Deletion can lag by a few days</td><td>Real use needs a retention period chosen by ReadWorks and the schools</td></tr>
+    <tr><td>Honest labels</td><td>Wording on the dashboard</td><td>A teacher still reading "partway" as "didn't try". This needs testing with teachers</td></tr>
+  </tbody>
+</table></div>
+
+<h2>What we checked</h2>
+<h3>One student's reading session in a real browser, sound muted: requests by destination</h3>
+<div class="bars" role="img" aria-label="Bar chart of requests in one test session: 189 to the site hosting the reader, 6 to the progress server, 1 to Google Fonts. The same numbers are in the labels.">
+  <div>The reader's own files</div><div class="track"><div class="bar" style="width:75%;background:var(--a)" title="189 requests for code, text and audio"></div><b>189</b></div>
+  <div>The progress server</div><div class="track"><div class="bar" style="width:2.4%;background:var(--b)" title="1 to read the list of names, 5 to report progress"></div><b>6</b></div>
+  <div>Google Fonts</div><div class="track"><div class="bar" style="width:0.4%;background:var(--c)" title="1 request; 4 when fonts weren't already saved"></div><b>1</b></div>
+</div>
+<p class="mark">File counts come from a development server, which sends many small files. Of the 6, one read the name list and 5 sent progress. Google Fonts was 4 in an earlier run, before the browser saved them. Cookies set: none.</p>
+<ul>
+  <li><b>Automated checks:</b> on the kit, including that its data files hold no network calls and that a normal report holds only the three fields shown; and on the server, including refused fields and the teacher's key. All pass. They don't cover the falsified-row limit above, which an outside review reproduced.</li>
+  <li><b>End to end, on this computer:</b> a teacher made a class, a student in another browser tab picked a name and read, and the teacher's dashboard showed that student's row and the others as not opened. This used a local copy of the server code, not AWS, and a real class on real devices hasn't been tried.</li>
+  <li><b>A search of the reader's code:</b> found no microphone, camera, location, cookies or analytics tools. That's a search, not a guarantee about every future build.</li>
+  <li><b>Outside AI reviews:</b> another company's model audited this page against the code twice, and each time we fixed or disclosed what it found. It also plugged the kit into a clean copy of the app. No person has done any of this.</li>
+</ul>
+
+<h2>Other data this prototype touches</h2>
+<div class="scroll"><table style="min-width:760px">
+  <thead><tr><th style="width:20%">What</th><th>Holds</th><th>Where it lives</th><th>Worth knowing</th></tr></thead>
+  <tbody>
+    <tr><td><b>Google Fonts</b></td><td>The device's IP address, as with any web request</td><td>Google</td><td><b>Should come out before real use.</b> Fonts can be packaged with the app</td></tr>
+    <tr><td>Teacher's class</td><td>Class name (free text), passage, sound, voice, view, names on the list</td><td>The test server, about 14 days. The link holds settings, but not names</td><td>Made-up names only for now</td></tr>
+    <tr><td>Word-help review</td><td>An adult reviewer's name and approvals</td><td>The browser, or the test server when sent</td><td>The screen has no sign-in, so a child who found it could reach it</td></tr>
+    <tr><td>Narration holds panel</td><td>A signed token and reviewer name, for one tab session</td><td>That browser tab</td><td>Staff, behind a passcode; only in builds that enable it</td></tr>
+    <tr><td>Voice rating test</td><td>A random session ID and ratings</td><td>The browser</td><td>Adult listening test</td></tr>
+    <tr><td>Hosting</td><td>Ordinary web requests for pages, text and audio</td><td>The host. Function logs are kept one week on the test account</td><td>We found no access logging in our code, and we didn't review what those logs contain</td></tr>
+  </tbody>
+</table></div>
+
+<h2>Before any real student uses this</h2>
+<p class="warn"><b>This hasn't been cleared for real students, and it shouldn't run with them on our test account.</b> A class dashboard holds records about named children, which is a bigger step than counts on a device.</p>
+<div class="cards">
+  <div class="card"><h3>For ReadWorks to decide</h3><ul><li>Your <a href="https://www.readworks.org/privacy">policy</a> says you don't collect "behavioral data", and store use activity "anonymously". A named dashboard doesn't fit that wording as it stands</li><li>Who operates it, under which school agreements</li><li>How long records stay</li><li>Whether teachers should see library reading (we've kept it out)</li></ul></div>
+  <div class="card"><h3>Questions for counsel</h3><ul><li>Whether these records count as education records under FERPA, in a school's hands</li><li>How your position on COPPA and FERPA applies to a teacher dashboard</li><li>Which state student-privacy laws and contracts apply. We found no nonprofit exclusion in the New York, California or Illinois text we read, but that's not a legal opinion</li><li>How parents can see or delete a child's record</li></ul></div>
+  <div class="card"><h3>What we'd need to build</h3><ul><li>Your real student sign-in, in place of picking a name</li><li>Your server, in place of ours</li><li>Feedback form off for students, and Google Fonts out</li><li>A view for each student of their own row</li><li>A security review by a person</li><li>Testing with real teachers on how they read "partway"</li></ul></div>
+</div>
+</main>
+<script id="options" type="application/json">[{"id":"opened","label":"Times opened","teacher":"yes","teacherLabel":"Opened","hook":"record('opened', passageId) once a passage has loaded","from":"A passage finishes loading.","helps":"Shows which passages get used on this device.","cannotTell":"Who opened it. A teacher trying a passage counts too."},{"id":"play_started","label":"Times play was pressed","hook":"record('play_started', passageId) on the narration audio's play event, skipping one-word snippets","from":"Narration starts or resumes.","helps":"Shows whether the audio is being used at all.","cannotTell":"Listening. Each resume after a pause counts again."},{"id":"reached_end","label":"Times audio reached the end","hook":"record('reached_end', passageId) when narration ends, skipping one-word snippets","from":"Narration plays through its last moment.","helps":"Shows whether readers stay with a passage.","cannotTell":"That anyone was listening, or that the whole passage played. A jump near the end can reach it."},{"id":"playback","label":"How much audio played","teacher":"level","teacherLabel":"Audio played","levels":["None recorded","Partway","Significant part","Nearly all"],"start":[0,0.5,0.95],"hook":"trackPlayback(audioElement, passageId) once, when the narration audio element is created","from":"The browser's own record of which stretches of audio played, in one visit.","helps":"A coarse sign of whether audio is getting used through a passage.","cannotTell":"What a child heard or read. A muted device or an empty seat still counts. Reading with sound off shows nothing."},{"id":"word_tap","label":"Word taps","teacher":"yes","teacherLabel":"Tapped a word","hook":"record('word_tap', passageId) when a tap or key press starts playback from a word","from":"A reader taps a word to hear from there.","helps":"Shows whether tap-to-replay gets used.","cannotTell":"Which word, or whether the reader was stuck. It may be curiosity or jumping around."},{"id":"replay","label":"Replays","teacher":"yes","teacherLabel":"Replayed","hook":"record('replay', passageId) when a reader replays a sentence or restarts the story","from":"A reader replays a sentence or starts the story again.","helps":"Shows whether rereading tools get used.","cannotTell":"Why they replayed, or which sentence. Interest and difficulty look the same."},{"id":"word_card_opened","label":"Word cards a reader opened","teacher":"yes","teacherLabel":"Used word help","hook":"record('word_card_opened', passageId) when a reader opens a word's meaning; never for automatic cards","from":"A reader asks for the meaning of a word.","helps":"Shows whether word help gets used.","cannotTell":"Which word, or that the reader did not know it."},{"id":"audio_trouble","label":"Times audio wouldn't play","teacher":"yes","teacherLabel":"Audio wouldn't play","hook":"Comes with trackPlayback; no separate hook","from":"The browser reports that the narration failed, for example when a school network blocks it.","helps":"Separates a technical problem from a reader who chose not to listen.","cannotTell":"Why it failed. Muted sound or missing headphones do not show up."}]</script>
+<script>
+const OPTIONS = JSON.parse(document.getElementById('options').textContent)
+document.getElementById('kept').textContent = OPTIONS.length
+document.getElementById('sent').textContent = OPTIONS.filter((o) => o.teacher).length
+const rows = document.getElementById('rows')
+const cell = (text) => { const td = document.createElement('td'); td.textContent = text; return td }
+for (const o of OPTIONS) {
+  const tr = document.createElement('tr')
+  const name = document.createElement('td')
+  const b = document.createElement('b'); b.textContent = o.label; name.append(b)
+  if (o.levels) {
+    const levels = document.createElement('div')
+    o.levels.forEach((level) => { const s = document.createElement('span'); s.className = 'chip'; s.textContent = level; levels.append(s) })
+    name.append(levels)
+  }
+  tr.append(name, cell(o.from), cell(o.helps), cell(o.cannotTell), cell(o.teacher === 'level' ? 'The level' : o.teacher === 'yes' ? 'Yes or blank' : 'No'))
+  rows.append(tr)
+}
+</script>
+</body>
+</html>
