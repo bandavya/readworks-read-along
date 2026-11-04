@@ -1,6 +1,6 @@
 # Reader passage record
 
-*What JSON does the reader load for one passage?*
+*What information does the reader load for one passage?*
 
 The data · Status: built and tested locally
 
@@ -22,7 +22,7 @@ The record is built from the writing in [The passage file](the-passage-file.md).
 
 ## Where it stands
 
-The conversion code writes this shape and local tests exercise it. The team reports five Ruth passages generated on the event AWS account, with reader records and audio loading through the site delivery network. In muted headless browser checks, audio loaded and the clock ran, but highlight tolerance was not measured and a live word tap was not verified. The live library listed 14 passages on Nov. 4, 2026: 13 labeled “Generated voice (Ruth),” seven of those also with a human voice, and one Spanish passage with only a human voice. No human listening review, real-device check, or use by a child, teacher, or ReadWorks person was confirmed.
+The conversion code writes this shape and local tests exercise it. The team reports five Ruth passages generated on the event AWS account, with reader records and audio loading through the site delivery network. In muted headless browser checks, audio loaded and the clock ran, but highlight tolerance was not measured. A separate muted scripted run tapped a word on the live site; nobody listened. The live library listed 14 passages on Nov. 4, 2026: 13 labeled “Generated voice (Ruth),” seven of those also with a human voice, and one Spanish passage with only a human voice. No human listening review, real-device check, or use by a child, teacher, or ReadWorks person was confirmed.
 
 ---
 
@@ -49,7 +49,7 @@ The conversion code writes this shape and local tests exercise it. The team repo
 | `voices[]` | Bridge, retaining compatible existing voices | Reader offers recordings; each entry has `id`, `label`, `voiceId`, `audio`, `lead`, `t`, `source`, `review`, `text_hash`. |
 | `vocab`, `credit` | Bridge from source vocabulary; bridge sets `credit` empty | Word help and article credit display. |
 
-The bridge validates all timing and markup before its first reader write, then copies audio, writes the record, and updates `data/index.json`. On the deployed Ruth setup, it then tries to write `audio/syl/*.mp3` and `data/syllables/<id>.json` for Words to know before the final job update. A guide failure records `syllableAudioError` without failing publication; a failed word can leave an empty guide. A timeout before the final update could mark an already listed passage failed. Guide clip paths omit the voice and have a one-year cache, so regeneration in another voice can serve old clips. An existing voice survives only when word mapping and timing length still fit. For the long ReadWorks-shaped source, `vocab.support.senses` becomes reader `vocab`; the entire source record is not copied. The code sets a generated voice's `source` label to Polly speech marks even on the Ruth path, where timing actually comes from speech recognition; the code's label is misleading. Run `python -m unittest discover -s tests -p '*reader_bridge*'` to check the bridge where available.
+The bridge validates all timing and markup before its first reader write, then copies audio, writes the record, and updates `data/index.json`. On the deployed Ruth setup, it then tries to write `audio/syl/*.mp3` and `data/syllables/<id>.json` for Words to know before the final job update. A guide failure records `syllableAudioError` without failing publication; a failed word can leave an empty guide. A timeout before the final update could mark an already listed passage failed. Guide clip paths omit the voice and have a one-year cache, so regeneration in another voice can serve old clips. An existing voice survives only when word mapping and timing length still fit. For the long ReadWorks-shaped source, `vocab.support.senses` becomes reader `vocab`; the entire source record is not copied. The bridge writes a generated voice's `source` as Polly speech marks, and on the Ruth path `lambdas/generative_voice/handler.py` replaces it with `Polly generative, timed by Amazon Transcribe`; the label reads correctly. Run `python -m unittest discover -s tests -p '*reader_bridge*'` to check the bridge where available.
 
 ---
 

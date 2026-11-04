@@ -4,9 +4,11 @@
 
 First-pass spec, written with AI and checked against the code at commit 33e2648. Not yet reviewed by a person.
 
-ReadWorks gives teachers free reading passages, and all 6,893 have audio. About 64% of them use a computer voice that ReadWorks describes as unnatural, and a student who loses their place can't see which word is being said or easily go back to it. Sound Along is a read-along built for that problem: a natural voice, each word lit as it is spoken, and a tap on any word to hear the passage from there.
+ReadWorks' brief says it gives teachers 6,893 free reading passages, all with audio. About 64% of them use a computer voice that ReadWorks describes as unnatural, and a student who loses their place can't see which word is being said or easily go back to it. Sound Along is a read-along built for that problem: a natural voice, each word lit as it is spoken, and a tap on any word to hear the passage from there.
 
 A cloud workflow takes a passage's text and makes the audio and a time for each word. The reader in the browser uses those times to light the words. Around that sit help with hard words, a larger view for younger readers, a way to record volunteers, and made-up demos of what a teacher could see.
+
+**Go straight to:** [see the reader](focused-mode.md) · [what's proven](what-is-proven-and-what-is-not.md) · [deploy and test](deploy-and-smoke-test.md)
 
 **The essential link is a word number shared by the page, its timing row, and the sound.**
 
@@ -16,7 +18,7 @@ A cloud workflow takes a passage's text and makes the audio and a time for each 
 
 ## Where it stands
 
-This spec describes one version of the code: commit `33e2648` of the team repository. The reader and its checks ran on local copies of the site, with the browser muted. Nothing on this branch has been seen running on the event's AWS account yet, and no child, teacher or ReadWorks staff member has tried this version. [What is proven and what is not](what-is-proven-and-what-is-not.md) goes through it part by part.
+This spec describes one version of the code: commit `33e2648` of the team repository. The team reports it is deployed on the event's AWS account with the Ruth voice. The live site lists 14 passages, and its reader passed 42 of 42 browser checks with the sound off. Nobody has judged the audio by ear, and no child, teacher or ReadWorks staff member has tried this version. [What is proven and what is not](what-is-proven-and-what-is-not.md) goes through it part by part.
 
 ## Where to start
 
@@ -55,7 +57,7 @@ Every page starts with the idea in plain words, then a picture where one helps. 
 
 - [Word meanings](word-meanings.md): How does a reader get help with a word in the passage? (built and tested locally)
 - [Words to know](words-to-know.md): Where can a reader see a passage's vocabulary in one place? (built and tested locally)
-- [Syllable guides and slow](syllable-guides-and-slow.md): How can a reader hear a word in parts or more slowly? (built and tested locally)
+- [Hear words in parts or slowly](syllable-guides-and-slow.md): How can a reader hear a word in parts or more slowly? (built and tested locally)
 - [Reviewing word help](reviewing-word-help.md): How does a person check generated meanings, guides, and clips before trusting them? (built and tested locally)
 - [Usage counts](usage-counts.md): What reading activity does this prototype count, and where does it go? (built and tested locally)
 - [Teacher dashboard](teacher-dashboard.md): What can a teacher see about one class assignment? (built and tested locally)
@@ -80,7 +82,7 @@ Every page starts with the idea in plain words, then a picture where one helps. 
 
 - [Data flow](data-flow.md): Where does one passage and its audio go before a student taps a word? (built and tested locally)
 - [The passage file](the-passage-file.md): What does a passage source file contain, and who uses it? (built and tested locally)
-- [Reader passage record](reader-passage-record.md): What JSON does the reader load for one passage? (built and tested locally)
+- [Reader passage record](reader-passage-record.md): What information does the reader load for one passage? (built and tested locally)
 - [Word numbers and timing rows](word-numbers-and-timing-rows.md): How does a written word point to its moment in audio? (built and tested locally)
 - [Library index](library-index.md): What list tells the website which stories are available? (built and tested locally)
 - [Manifest and job record](manifest-and-job-record.md): Where do generation results and review state live? (built and tested locally)

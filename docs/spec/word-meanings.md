@@ -8,7 +8,7 @@ A reader who meets an unfamiliar word should not have to leave the story to lear
 
 In the focused reader (the default view), pressing and holding a marked word for half a second opens the card. So does pressing ? or Shift+Enter on the word. Holding an unmarked word does nothing, and the card has no spoken meaning. A click adds Spanish text where the passage has it.
 
-The classic reader and the younger readers view work more simply. Holding any narrated word can open a short meaning and read it aloud, or replay the word from the story if no meaning exists.
+The classic reader and its older younger-reader route work more simply. The default Younger readers link opens the focused article with larger text, so it behaves like the focused reader. Holding any narrated word can open a short meaning and read it aloud, or replay the word from the story if no meaning exists.
 
 ReadWorks wrote some definitions. The rest, plus the spoken definitions and syllable clips, are computer-generated. The classic and younger views mark unchecked help as draft; the focused reader shows no label. The team reports that on the live Ruth deployment, newly generated guides use the passage voice; the default Joanna deployment and shipped guides still use older clips.
 
@@ -26,7 +26,7 @@ The word-help path depends on the reader view:
 
 ## Where it stands
 
-The card and the press-and-hold path are built in the local readers. On Nov. 4 the build team's focused reader run passed 41 of 41 browser checks across three passages and six screen sizes in Edge with sound muted. The classic reader passed 162 of 162 muted checks. Muted runs cannot confirm how the clips sound. No child, teacher, or ReadWorks person has tried this version, no classroom-device trial or human listening check could be confirmed. The team reports the focused reader and guide audio deployed on the event AWS account, but tap-a-word on the live build was not verified.
+The card and the press-and-hold path are built in the local readers. On Nov. 4 the build team's focused reader run passed 41 of 41 browser checks across three passages and six screen sizes in Edge with sound muted. The classic reader passed 162 of 162 muted checks. Muted runs cannot confirm how the clips sound. No child, teacher, or ReadWorks person has tried this version, no classroom-device trial or human listening check could be confirmed. The team reports the focused reader and guide audio deployed on the event AWS account, and a muted scripted run opened word help on the live site. Nobody listened.
 
 ---
 

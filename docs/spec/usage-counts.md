@@ -4,7 +4,7 @@
 
 Word help and the classroom · Status: built and tested locally
 
-Teachers and ReadWorks may want to know whether the reading tools get used, without grading a child. Sound Along can count a small set of actions on the browser that opened a passage: opening it, starting or reaching the end of audio, tapping or replaying, opening word help, how much audio played, and an audio error. Only the classic and younger readers count all of these; a separate Reading helper page counts word help openings. The focused reader, the default first view, counts nothing.
+Teachers and ReadWorks may want to know whether the reading tools get used, without grading a child. Sound Along can count a small set of actions on the browser that opened a passage: opening it, starting or reaching the end of audio, tapping or replaying, opening word help, how much audio played, and an audio error. Only the classic reader and its older younger-reader route count all of these, and the default Younger readers link counts nothing; a separate Reading helper page counts word help openings. The focused reader, the default first view, counts nothing.
 
 These counts stay on the device. The Assign a passage page shows totals per passage, lets someone turn each count off, and can export or delete them. A total has no student identity, and a teacher opening a passage adds to the same total.
 

@@ -36,4 +36,4 @@ The review page has no real sign-in. Test its behavior with `cd frontend-src; no
 
 ---
 
-Previous: [Syllable guides and slow](syllable-guides-and-slow.md) · [Spec home](README.md) · Next: [Usage counts](usage-counts.md)
+Previous: [Hear words in parts or slowly](syllable-guides-and-slow.md) · [Spec home](README.md) · Next: [Usage counts](usage-counts.md)

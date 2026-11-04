@@ -22,7 +22,7 @@ The library list follows the passage files; optional guide audio comes afterward
 
 ## Where it stands
 
-The bridge is on by default. The team reports that five Ruth passages reached the reader through the event AWS deployment, that passage audio and guide audio load through CloudFront, and that a repeated passage avoided regeneration. The live library lists 14 passages: 13 with a Ruth generated voice, including seven that also have a human voice, plus one Spanish passage with only a human voice. The team reports muted browser playback and highlighting without a measured tolerance; tap-a-word was not verified. No person has judged the sound by ear or tried it on a target device with sound.
+The bridge is on by default. The team reports that five Ruth passages reached the reader through the event AWS deployment, that passage audio and guide audio load through CloudFront, and that a repeated passage avoided regeneration. The live library lists 14 passages: 13 with a Ruth generated voice, including seven that also have a human voice, plus one Spanish passage with only a human voice. The team reports muted browser playback and highlighting without a measured tolerance. A separate muted scripted run tapped a word on the live site; nobody listened. No person has judged the sound by ear or tried it on a target device with sound.
 
 ---
 

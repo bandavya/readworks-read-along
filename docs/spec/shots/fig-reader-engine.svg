@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 444" role="img" aria-label="The recording's clock drives the highlight. At one tick the engine looks in the timing list for the latest word whose start has passed, and that word number lights up on the page and stays in view above the player. Dragging the player, changing the pace or switching the voice all act on the clock. A pace change leaves the times alone, and a voice switch brings that voice's own list and resumes at the same word. A tap on a word jumps the clock to that word."><style>
 svg{--bg:#fbfbf8;--sf:#eef1f2;--ink:#1d2730;--mu:#566370;--line:#a8b3ba;--li:#17557f;--am:#94651f;--rev:#fff4de;--lit:#ffe58a;--litink:#1d2730}
-@media (prefers-color-scheme:dark){svg{--bg:#171d22;--sf:#28323a;--ink:#e6ebee;--mu:#a3b0ba;--line:#55636d;--li:#8cc6ec;--am:#d5b16e;--rev:#3e3526;--lit:#ffe58a;--litink:#1d2730}}
+@media (prefers-color-scheme:dark){svg{--bg:#171d22;--sf:#28323a;--ink:#e6ebee;--mu:#a3b0ba;--line:#55636d;--li:#8cc6ec;--am:#d5b16e;--rev:#3e3526;--lit:#7a6517;--litink:#ffffff}}
 text{font:13px "Segoe UI",system-ui,-apple-system,Arial,sans-serif;fill:var(--ink)}
 .b{font-weight:650}.lg{font-size:15px;font-weight:650}.s{font-size:12px}.xs{font-size:11.5px}.mu{fill:var(--mu)}.li{fill:var(--li)}.am{fill:var(--am)}
 .era{font:italic 14px Georgia,"Times New Roman",serif;fill:var(--mu)}.print{font:19px Georgia,"Times New Roman",serif}.mono{font:11.5px ui-monospace,Consolas,monospace;fill:var(--mu)}
