@@ -14,6 +14,8 @@ export interface QualityGateProps {
   audioBucket: s3.IBucket;
   jobTable: dynamodb.ITable;
   onPass: sfn.IChainable;
+  /** The transcription job is already running or done (generative voice), so skip starting another. */
+  reuseTranscription?: boolean;
 }
 
 export class QualityGate extends Construct {
@@ -71,6 +73,6 @@ export class QualityGate extends Construct {
       .when(sfn.Condition.booleanEquals('$.qualityGatePassed', true), props.onPass)
       .otherwise(held);
     wait.next(check).next(result);
-    this.entry = start.next(wait);
+    this.entry = props.reuseTranscription ? wait : start.next(wait);
   }
 }

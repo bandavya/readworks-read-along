@@ -30,7 +30,14 @@ export class SoundAlongStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: SoundAlongStackProps) {
     super(scope, id, props);
 
-    const { envName, voiceId, engine, language } = props;
+    const { envName, language } = props;
+    // Generative voices cannot return speech marks, so this mode takes word times from Amazon Transcribe.
+    const generativeVoice = this.node.tryGetContext('generativeVoice') === 'true';
+    if (generativeVoice && language !== 'en-US') {
+      throw new Error(`generativeVoice uses the English voice Ruth, but the configured language is ${language}.`);
+    }
+    const voiceId = generativeVoice ? 'Ruth' : props.voiceId;
+    const engine = generativeVoice ? 'generative' : props.engine;
     const removalPolicy =
       envName === 'sandbox' || envName === 'local'
         ? cdk.RemovalPolicy.DESTROY
@@ -123,11 +130,19 @@ export class SoundAlongStack extends cdk.Stack {
     const gatedWorkerCode = qualityGateEnabled
       ? lambda.Code.fromAsset(path.join(__dirname, '..', 'lambdas', 'quality_gate'), { exclude: ['**/__pycache__/**', '**/*.pyc'] }) : undefined;
 
+    // The generative-voice functions load the worker, gate and bridge code beside them, so ship all of lambdas/.
+    const generativeCode = generativeVoice
+      ? lambda.Code.fromAsset(path.join(__dirname, '..', 'lambdas'), {
+        exclude: ['api', 'passage_service', 'trigger', '**/__pycache__/**', '**/*.pyc'],
+      }) : undefined;
+    const generativeHandlers = ['submit_polly', 'check_polly'];
+
     const makeWorker = (name: string, handler: string): lambda.Function =>
       new lambda.Function(this, name, {
         runtime: lambda.Runtime.PYTHON_3_12,
-        handler: `handler.${handler}`,
-        code: gatedWorkerCode && ['check_existing_manifest', 'write_manifest'].includes(handler) ? gatedWorkerCode : workerCode,
+        handler: generativeCode && generativeHandlers.includes(handler) ? `generative_voice.handler.${handler}` : `handler.${handler}`,
+        code: generativeCode && generativeHandlers.includes(handler) ? generativeCode
+          : gatedWorkerCode && ['check_existing_manifest', 'write_manifest'].includes(handler) ? gatedWorkerCode : workerCode,
         timeout: cdk.Duration.minutes(5),
         memorySize: 256,
         environment: commonLambdaEnv,
@@ -148,8 +163,8 @@ export class SoundAlongStack extends cdk.Stack {
     const readerBridgeEnabled = String(this.node.tryGetContext('readerBridge')) !== 'false';
     const readerBridgeFn = readerBridgeEnabled ? new lambda.Function(this, 'ReaderBridgeFn', {
       runtime: lambda.Runtime.PYTHON_3_12,
-      handler: 'handler.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, '..', 'lambdas', 'reader_bridge'), { exclude: ['**/__pycache__/**', '**/*.pyc'] }),
+      handler: generativeCode ? 'generative_voice.handler.bridge' : 'handler.handler',
+      code: generativeCode ?? lambda.Code.fromAsset(path.join(__dirname, '..', 'lambdas', 'reader_bridge'), { exclude: ['**/__pycache__/**', '**/*.pyc'] }),
       timeout: cdk.Duration.minutes(5),
       memorySize: 256,
       environment: { ...commonLambdaEnv, FRONTEND_BUCKET: frontendBucket.bucketName },
@@ -207,6 +222,31 @@ export class SoundAlongStack extends cdk.Stack {
     });
     submitPollyFn.addToRolePolicy(pollyPolicy);
     checkPollyFn.addToRolePolicy(pollyPolicy);
+
+    // Generative voice: Transcribe times the finished MP3 because Polly returns no speech marks for it.
+    let startTranscriptionFn: lambda.Function | undefined;
+    let checkTranscriptionFn: lambda.Function | undefined;
+    if (generativeCode) {
+      const makeTranscribeFn = (name: string, handler: string) => new lambda.Function(this, name, {
+        runtime: lambda.Runtime.PYTHON_3_12,
+        handler: `generative_voice.handler.${handler}`,
+        code: generativeCode,
+        timeout: cdk.Duration.minutes(2),
+        memorySize: 256,
+        environment: commonLambdaEnv,
+        logRetention: logs.RetentionDays.ONE_WEEK,
+      });
+      startTranscriptionFn = makeTranscribeFn('StartTranscriptionFn', 'start_transcription');
+      checkTranscriptionFn = makeTranscribeFn('CheckTranscriptionFn', 'check_transcription');
+      const jobArn = this.formatArn({ service: 'transcribe', resource: 'transcription-job', resourceName: 'sound-along-qg-*' });
+      startTranscriptionFn.addToRolePolicy(new iam.PolicyStatement({ actions: ['transcribe:StartTranscriptionJob'], resources: [jobArn] }));
+      checkTranscriptionFn.addToRolePolicy(new iam.PolicyStatement({ actions: ['transcribe:GetTranscriptionJob'], resources: [jobArn] }));
+      startTranscriptionFn.addToRolePolicy(new iam.PolicyStatement({ actions: ['s3:GetObject'], resources: [audioBucket.arnForObjects('polly/*')] }));
+      startTranscriptionFn.addToRolePolicy(new iam.PolicyStatement({ actions: ['s3:PutObject'], resources: [audioBucket.arnForObjects('transcribe/*')] }));
+      checkTranscriptionFn.addToRolePolicy(new iam.PolicyStatement({ actions: ['s3:GetObject'], resources: [audioBucket.arnForObjects('transcribe/*')] }));
+      checkTranscriptionFn.addToRolePolicy(new iam.PolicyStatement({ actions: ['s3:PutObject'], resources: [audioBucket.arnForObjects('polly/*')] }));
+      jobTable.grantReadWriteData(checkTranscriptionFn);
+    }
 
     emitMetricsFn.addToRolePolicy(
       new iam.PolicyStatement({
@@ -299,23 +339,44 @@ export class SoundAlongStack extends cdk.Stack {
     } else {
       afterPublish = published.next(emitMetrics).next(succeedDone);
     }
+    // With generative voice the gate reads the transcription already made for word times, so it skips its own start.
     const afterValidation = qualityGateEnabled
-      ? new QualityGate(this, 'QualityGate', { contentBucket, audioBucket, jobTable, onPass: afterPublish }).entry
+      ? new QualityGate(this, 'QualityGate', { contentBucket, audioBucket, jobTable, onPass: afterPublish, reuseTranscription: generativeVoice }).entry
       : afterPublish;
 
     // Poll loop: WaitForCompletion -> CheckPollyStatus -> Choice
-    const pollChoice = new sfn.Choice(this, 'IsPollyDone')
-      .when(
-        sfn.Condition.stringEquals('$.pollyStatus', 'completed'),
-        validate.next(
-          new sfn.Choice(this, 'IsValid')
-            .when(
-              sfn.Condition.booleanEquals('$.valid', true),
-              afterValidation,
-            )
-            .otherwise(failState),
-        ),
-      )
+    const pollChoice = new sfn.Choice(this, 'IsPollyDone');
+    const validated = validate.next(
+      new sfn.Choice(this, 'IsValid')
+        .when(
+          sfn.Condition.booleanEquals('$.valid', true),
+          afterValidation,
+        )
+        .otherwise(failState),
+    );
+    let afterAudio: sfn.IChainable = validated;
+    if (startTranscriptionFn && checkTranscriptionFn) {
+      const startTranscription = new tasks.LambdaInvoke(this, 'StartTranscribeWordTimes', {
+        lambdaFunction: startTranscriptionFn,
+        outputPath: '$.Payload',
+      });
+      const waitForTranscription = new sfn.Wait(this, 'WaitForWordTimes', {
+        time: sfn.WaitTime.duration(cdk.Duration.seconds(10)),
+      });
+      const checkTranscription = new tasks.LambdaInvoke(this, 'CheckWordTimes', {
+        lambdaFunction: checkTranscriptionFn,
+        outputPath: '$.Payload',
+      });
+      waitForTranscription.next(checkTranscription).next(
+        new sfn.Choice(this, 'AreWordTimesReady')
+          .when(sfn.Condition.stringEquals('$.transcribeStatus', 'running'), waitForTranscription)
+          .when(sfn.Condition.stringEquals('$.transcribeStatus', 'failed'), failState)
+          .otherwise(validated),
+      );
+      afterAudio = startTranscription.next(waitForTranscription);
+    }
+    pollChoice
+      .when(sfn.Condition.stringEquals('$.pollyStatus', 'completed'), afterAudio)
       .when(sfn.Condition.stringEquals('$.pollyStatus', 'failed'), failState)
       .otherwise(waitForPolly);
 
@@ -338,7 +399,7 @@ export class SoundAlongStack extends cdk.Stack {
 
     const stateMachine = new sfn.StateMachine(this, 'GenerationStateMachine', {
       definitionBody: sfn.DefinitionBody.fromChainable(definition),
-      timeout: cdk.Duration.minutes(qualityGateEnabled ? 30 : 15),
+      timeout: cdk.Duration.minutes(qualityGateEnabled || generativeVoice ? 30 : 15),
       tracingEnabled: true,
       logs: {
         destination: new logs.LogGroup(this, 'SfnLogs', {
