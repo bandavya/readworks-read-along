@@ -13,15 +13,12 @@
 @media(prefers-reduced-motion:reduce){.mix-library-spine{transition:none}}
 
 
-/* Fewer choices: search and grade up front; everything else under More. */
-.mix-library-layout{display:grid;grid-template-columns:minmax(0,1fr)}
-.mix-library-filters{position:static;display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 16px;width:auto}
-.mix-library-filters>label{flex:0 1 240px;margin:0}
-.mix-library-more{flex:0 0 100%}
+/* Fewer choices: search and grade up front; everything else under More.
+   Filters sit in a left sidebar (the base two-column grid); each control stacks vertically. */
+.mix-library-filters{position:sticky;top:18px;display:block;width:auto}
+.mix-library-filters>label{display:block;margin:0 0 14px}
 .mix-library-more summary{min-height:44px;display:inline-flex;align-items:center;cursor:pointer;font-weight:700}
-.mix-library-more>div{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 16px;padding-top:6px}
-.mix-library-more label{flex:0 1 200px;margin:0}
-.mix-library-filters{background:none;border:0;padding:0}
-.mix-library-more{flex:1 1 auto}
+.mix-library-more>div{display:block;padding-top:6px}
+.mix-library-more label{display:block;margin:0 0 14px}
 
 .mix-library-top{display:flex;align-items:center;justify-content:space-between;gap:12px}.mix-library-top .mix-all-features{min-height:44px;padding:6px 12px;border:1px solid #9ac8d1;border-radius:5px;background:none;color:#fff;font:inherit;font-weight:700;cursor:pointer}
