@@ -12,15 +12,9 @@ The build works in a scratch folder first and checks that the expected main page
 
 **The build produces the shell, and passage data and audio are separate inputs to what a person sees and hears.**
 
-The chart shows that the built site and the passage media meet only at the end, which is why either can change alone.
+The build swaps in the reader shell while passage files remain separate:
 
-```mermaid
-flowchart LR
- A["Vue source"] -->|"build"| B["Staged site"]
- B -->|"index and assets"| C["Static frontend"]
- D["Passage data and media"] -->|"kept in place"| C
- C -->|"upload"| E["Hosted site"]
-```
+![Vue source becomes a checked staged shell, then the built frontend; passage data and media remain in place for browser fetches, with a separate optional upload.](shots/fig-building-the-reader.svg)
 
 ## How it connects
 
@@ -28,7 +22,7 @@ To see where the source and output sit, use [Repo map](repo-map.md). The file la
 
 ## Where it stands
 
-The checked-in built site contains a main page, supporting files, and an experiment settings file. The build team's muted Edge checks reported 41 of 41 focused reader checks on each of The Big Hike and two long passages at six screen sizes, and 162 of 162 classic reader checks. Those checks were not rerun, and no fresh build was made because the base checkout is read-only. No event AWS deployment or real-device listening test has been observed. ReadWorks reviewed an earlier themed demo before focused mode existed.
+The checked-in built site contains a main page, supporting files, and an experiment settings file; it includes the focused reader image-caption fix from `frontend-src/src/looks/mix/mix.css`. The build team's muted Edge checks reported 41 of 41 focused reader checks on each of The Big Hike and two long passages at six screen sizes, and 162 of 162 classic reader checks. Those checks were not rerun, and no fresh build was made because the base checkout is read-only. The team's final build doc reports that the CDK stack and rebuilt reader are deployed on the event AWS account, including the focused reader caption fix. The live library lists 14 passages, including two long passages of 1,435 and 2,046 words with Ruth as their only voice; another passage lists 46 words to know. No real-device listening test has been observed.
 
 ---
 
@@ -38,7 +32,7 @@ The checked-in built site contains a main page, supporting files, and an experim
 
 For local development, `cd frontend-src` and `npm run dev`; the site uses files under `frontend-src/public/` when present. `frontend-src/src/router.js` maps library, passage, focused, kid, teacher, review, and optional holds views. `frontend-src/src/api.js` fetches local `data/index.json` and `data/<uuid>.json` by default; configured managed publication changes that route. `VITE_PUBLIC_SAMPLE=1` makes a public sample build and disables the holds panel. `VITE_HOLDS_API` enables the holds route only outside that sample.
 
-Run `npm run test:frontend` for the offline UI harnesses after installing packages and any needed ignored fixtures. Browser commands are listed in [Tests and how to run them](tests-and-how-to-run-them.md). The root `scripts/publish-frontend.js` uploads the static `frontend/` tree to a named frontend bucket, preserves live library rows when uploading the index, and sets "always revalidate" (`no-cache`) for `index.html` and `data/`, a one-year cache for hashed `assets/`, and a five-minute cache for other files. A successful local build by itself does not verify that upload or the hosted reader.
+Run `npm run test:frontend` for the offline UI harnesses after installing packages and any needed ignored fixtures. Browser commands are listed in [Tests and how to run them](tests-and-how-to-run-them.md). The root `scripts/publish-frontend.js` uploads the static `frontend/` tree to a named frontend bucket, preserves live library rows when uploading the index, and sets "always revalidate" (`no-cache`) for `index.html` and `data/`, a one-year cache for hashed `assets/`, and a five-minute cache for other files. The team's final build doc reports that the rebuilt shell was deployed and its caption fix checked in a muted headless browser. A local build by itself does not verify an upload or the hosted reader.
 
 ---
 

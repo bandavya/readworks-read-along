@@ -6,19 +6,15 @@ The data · Status: built and tested locally
 
 Before anyone opens a story, the library needs a quick list of what's available. The library index is that list: one short row per story, with its title, grade, length and available voices. Choosing a row loads the story's larger reader record.
 
-A row is added or replaced only after the audio is copied and the story record is written, so a child never sees a library entry whose story is missing. Updating the website also touches the list. It combines the rows bundled with the site and the rows already online, and an online row wins over a bundled one, so a site update keeps stories generated since.
+A row is added or replaced only after the audio is copied and the story record is written. Later deletion or a failed regeneration does not remove that row, so a stale entry is possible. Updating the website also touches the list. It combines the rows bundled with the site and the rows already online, and an online row wins over a bundled one, so a site update keeps stories generated since.
 
-The index is a small public catalog for the reader. Assignments, reviews and generation jobs are kept elsewhere.
+The index is a small public catalog for the reader. The site is public to anyone with its address and has no sign-in. Assignments, reviews and generation jobs are kept elsewhere.
 
-**The index announces which stories are ready; the reader record holds each story's content.**
+**The index lists published stories; a stale row can remain after later deletion or failed regeneration.**
 
-```mermaid
-flowchart LR
-  A["Publishing step"] -->|"summary row"| B["Library list"]
-  C["Website publisher"] -->|"merge online rows"| B
-  B -->|"story list"| D["Library"]
-  D -->|"selected ID"| E["Full passage record"]
-```
+The library index is a small catalog row for each published story:
+
+![A demo library index row shows the fields the browser lists, when the publishing step writes it, and how a website update merges rows.](shots/fig-library-index.svg)
 
 ## How it connects
 
@@ -26,7 +22,7 @@ Choosing a row opens the story described in [Reader passage record](reader-passa
 
 ## Where it stands
 
-The index writer and the website merge are built, with a local test for the merge. Library checks were part of the 41 of 41 muted Edge browser checks at six screen sizes, and the classic reader passed 162 of 162. These are local browser results, not an event AWS deployment, real-device test or listening test. This checkout has no seed index file to inspect.
+The index writer and website merge have local tests. The live library listed 14 passages on Nov. 4, 2026: 13 labeled “Generated voice (Ruth),” seven of those also with “Human voice (ReadWorks recording),” and one Spanish passage with only a human voice. A Very Small Garden listed 46 words. The team reports that the reader bridge and library index ran on the event AWS account and that live index entries resolved to reader data and audio. Browser checks ran muted; no real-device check, human listening review, or use by a child, teacher, or ReadWorks person was confirmed. This checkout has no seed index file.
 
 ---
 
@@ -36,7 +32,7 @@ The index writer and the website merge are built, with a local test for the merg
 
 ```json
 {"uuid":"demo-passage-001","title":"A Very Small Garden",
- "grade":"2","lexile":430,"lang":"EN","words":52,
+ "grade":"2","lexile":430,"lang":"EN","words":46,
  "voices":["generated"]}
 ```
 
@@ -50,7 +46,7 @@ This is the code's output shape using fields from `demo-data/passages/demo-passa
 | `words` | Bridge recounts text tokens | Library length display. |
 | `voices` | Bridge from full record's voice IDs | Library and reader know which recordings exist. |
 
-The bridge reads the existing list, replaces the matching `uuid` or appends a row, writes, waits briefly, and reads back. It retries up to six times to reduce concurrent write loss, but this is still a read/modify/write list without a transactional lock. `scripts/publish-frontend.js` walks `frontend/`. On `data/index.json` it reads the live website index, starts a map with local rows, then inserts live rows by `uuid`, making live rows win; it rejects non-list data and propagates read errors other than a missing key. It uploads all other local files directly. If this checkout has no local index, the merge branch does not run during publication. `frontend-src/src/api.js` also has a separately configured managed mode expecting `document` paths; that is a different index contract.
+The bridge reads the existing list, replaces the matching `uuid` or appends a row, writes, waits briefly, and reads back. It retries up to six times to reduce concurrent write loss, but this is still a read/modify/write list without a transactional lock. It does not remove a row when its reader file is deleted. `scripts/publish-frontend.js` walks `frontend/`. On `data/index.json` it reads the live website index, starts a map with local rows, then inserts live rows by `uuid`, making live rows win; it rejects non-list data and propagates read errors other than a missing key. It uploads all other local files directly. If this checkout has no local index, the merge branch does not run during publication. `frontend-src/src/api.js` also has a separately configured managed mode expecting `document` paths; that is a different index contract.
 
 Run `node tests/test_publish_frontend.cjs` for the merge and `python -m unittest discover -s tests -p 'test_reader_bridge.py'` for index publication.
 

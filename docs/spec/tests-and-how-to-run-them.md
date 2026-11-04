@@ -12,19 +12,23 @@ Tests also come in two kinds. Guard rules can fail the run. Behavior reports des
 
 **Check what a result needed and what it counted before treating a pass as evidence.**
 
+The reported muted browser runs have different suite sizes and one missed check:
+
+![Four scaled bars show reported focused reader 41/41 per passage, classic reader 162/162, and teacher demo 173/173 and 172/173 on two machines.](shots/fig-tests-and-how-to-run-them.svg)
+
 ## How it connects
 
 To find the code behind these checks, see [Repo map](repo-map.md). The frontend build is in [Building the reader](building-the-reader.md), and [What is proven and what is not](what-is-proven-and-what-is-not.md) pulls the wider evidence together.
 
 ## Where it stands
 
-Local runs: the recorder passed 156 guards; the holds lab passed 15 and skipped two private checks; the quality gate passed 12 tests; the passage service passed eight; generative voice passed 15 with one skip. The frontend aggregate ran some harnesses but failed overall because the Vue package isn't installed, and harnesses needing private fixtures skipped. The audio check's 11-test run had one temp-file permission error in the sandbox. The reader bridge had one failure because the root AWS SDK packages are absent. The build team's Nov. 4 muted Edge runs reported 41/41 focused checks on each of three passages at six sizes, 162/162 classic checks, and teacher demo 173/173 on one machine and 172/173 on another; those were not rerun. None of this proves operation on the event AWS account, use on a real device, or a person's listening judgment.
+Against the live site on Nov. 4, `frontend-src/tests/focused_browser.mjs` passed 42 of 42 guard rules, muted. That test has no tap-a-word guard; a separate scripted run covered it. Local runs: the recorder passed 156 guards; the holds lab passed 15 and skipped two private checks; the quality gate passed 12 tests; the passage service passed eight; generative voice passed 15 with one skip. The frontend aggregate ran some harnesses but failed overall because the Vue package isn't installed, and harnesses needing private fixtures skipped. The audio check's 11-test run had one temp-file permission error in the sandbox. The reader bridge had one failure because the root AWS SDK packages are absent. The build team's Nov. 4 muted Edge runs reported 41/41 focused checks on each of three passages at six sizes, 162/162 classic checks, and teacher demo 173/173 on one machine and 172/173 on another; those were not rerun. The team's final build doc reports that deployment, passage upload, generation, and timing ran on the event AWS account. In a muted headless browser, audio loaded and the clock ran; highlight tolerance was not measured. Tap a word, keyboard use, and comparing two voices were not verified. No real-device use or person's listening judgment is established.
 
 ---
 
 ## Technical details
 
-Run commands from the repository root unless a row says to use `frontend-src/`. `npm run test:frontend` runs the listed Node harnesses, but a full run needs the frontend packages (`npm ci` in `frontend-src/`) and several ignored ReadWorks fixtures; the commands below let you isolate one check. Use Python 3, Node, and installed dependencies where named. `python -I` keeps Python imports isolated. The following are all executable test files under `tests/` and the tool trees:
+Run commands from the repository root unless a row says to use `frontend-src/`. `npm run test:frontend` runs the listed Node harnesses, but a full run needs the frontend packages (`npm ci` in `frontend-src/`) and several ignored ReadWorks fixtures; the commands below let you isolate one check. Use Python 3, Node, and installed dependencies where named. `python -I` keeps Python imports isolated. The following are the executable test files under `tests/` and the tool trees; the new `lambdas/syllable_audio/` has no separate test entry point in this checkout:
 
 | Check | Command from root | Needs |
 |---|---|---|

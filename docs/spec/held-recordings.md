@@ -22,7 +22,7 @@ To compare possible hold rules without changing anything, use [Holds lab](holds-
 
 ## Where it stands
 
-The panel's front-end helpers passed 76 guard rules in a local test harness. The holds screen is hidden unless a server address is configured, and it is off in the public sample build. This checkout contains the panel and its client contract, but no matching server for it was found in the cloud code, so an end-to-end hold decision could not be confirmed. It has not run on the event AWS account, a real device, or in a person's listening session.
+The panel's front-end helpers passed 76 guard rules in a local test harness. The holds screen is hidden unless a server address is configured, and it is off in the public sample build. This checkout contains the panel and its client contract, but no matching server for it was found in the cloud code, so an end-to-end hold decision could not be confirmed. This panel has not run on the event AWS account, a real device, or in a person's listening session. The team reports that the separate generated-audio pipeline has run on the event account. Its build doc lists the voice quality gate as deployed, though its deploy command doesn't turn that on.
 
 ---
 

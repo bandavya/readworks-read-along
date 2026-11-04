@@ -4,19 +4,15 @@
 
 The data · Status: built and tested locally
 
-After Sound Along makes a recording, two records show what happened. The manifest is a receipt for one passage's recording: the text and voice settings used, where the audio and word-timing files are kept, and a status. The job row is the working record that changes while work runs, and notes when a result is held or fails. Both carry the passage ID and a fingerprint of the text plus voice settings, so an old recording is never mistaken for a changed passage.
+After Sound Along makes a recording, two records show what happened. The manifest is a receipt for one passage's recording: the text and voice settings used, where the audio and word-timing files are kept, and a status. The job row is the working record that changes while work runs, and notes when a result is held or fails. Both carry the passage ID and a fingerprint of normalized text, voice, engine, and language, so changed settings change the lookup.
 
 A recording that generated successfully is not a recording a person approved. In the checked path the manifest says the voice was generated and needs a human check. The publishing step can still make a reader copy after the automated checks. A held result records its reasons and does not move on. The status a submitter sees (queued, running, held, failed or published) is read from these records.
 
 **The manifest names the media; the job row tracks the work and its outcome.**
 
-```mermaid
-flowchart LR
-  A["Source and voice settings"] -->|"fingerprint"| B["Job row"]
-  C["Audio checks"] -->|"result"| B
-  C -->|"media receipt"| D["Manifest"]
-  D -->|"media locations"| E["Reader publishing"]
-```
+A manifest and a job row hold overlapping fields for one generated take:
+
+![A table shows which fields the manifest file and the job row each hold for the demo passage, who writes and reads them, and what the human review state means.](shots/fig-manifest-and-job-record.svg)
 
 ## How it connects
 
@@ -24,7 +20,7 @@ The fingerprint is taken from the text in [The passage file](the-passage-file.md
 
 ## Where it stands
 
-Both record writers and the status lookup are built and tested locally with stand-in services. The cloud setup builds locally, but this branch hasn't run on the event AWS account. An earlier voice test ran in a separate account and an earlier pipeline. No real-device check or person's listening review of this branch was confirmed.
+Both record writers and status lookup have local tests with stand-in services. The team reports that the Ruth pipeline ran on the event AWS account with the voice check on and generated five passages; a repeated passage avoided regeneration. Its checked results have `status=generated` and `reviewStatus=needs human check`, which does not mean a person approved them. The default Joanna deployment has the check off and writes `approved` and `unreviewed`. The team reports no real-device check, human listening review, or use by a child, teacher, or ReadWorks person.
 
 ---
 
@@ -53,7 +49,7 @@ An abbreviated checked manifest shape is `{"passageId":"demo-passage-001","textH
 | `reviewKey`, `holdReasons` | Quality gate | On a hold: the `review/<id>.json` object in the content bucket and the reasons. |
 | `readerPublishedAt`, `readerFailureReason` | Reader bridge | Distinguishes a media result from reader publication. |
 
-The API intake separately writes `api-jobs/<id>.json` with `id`, `text_sha256`, `pipeline_hash`, `voice`, `submitted_at`, and `words` (the list of passage words, not a count). It uses this marker for idempotency and status; it is not the DynamoDB job row. Run `python -m unittest discover -s tests -p 'test_quality_gate.py'` and `python -m unittest discover -s tests -p 'test_passage_service.py'` for local behavior.
+When enabled, the signed intake writes `api-jobs/<id>.json` with `id`, `text_sha256`, `pipeline_hash`, `voice`, `submitted_at`, and `words` (the list of passage words, not a count), as well as `passages/<id>.json` to start the workflow. The live Ruth setup leaves this intake off; the legacy `/generate` route can start paid runs without a credential. The job row gets `readerPublishedAt` only after the bridge has written the index and attempted guide audio. A guide failure records `syllableAudioError` and continues; a timeout before that final update could mark a live passage failed. There is no human approval gate before generated audio reaches the reader. Run `python -m unittest discover -s tests -p 'test_quality_gate.py'` and `python -m unittest discover -s tests -p 'test_passage_service.py'` for local behavior.
 
 ---
 

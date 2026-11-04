@@ -10,15 +10,9 @@ The word choice is the default and gives one colored marker. Underline leaves th
 
 **The reader can change how much visual guidance they see without changing the narration.**
 
-The diagram shows one current word feeding three possible looks. The screenshot shows the underline choice.
+The same spoken word can appear in three ways:
 
-```mermaid
-flowchart LR
-  A["Recording clock"] -->|"current word"| B["Reader"]
-  B -->|"word choice"| C["Word highlighted"]
-  B -->|"underline choice"| D["Word underlined"]
-  B -->|"sentence choice"| E["Sentence tinted, word underlined"]
-```
+![Three rows show the same made-up sentence with the current word highlighted, underlined, or underlined within a tinted sentence.](shots/fig-follow-along-choices.svg)
 
 ![Current word underlined without a highlight](shots/follow-underline.png)
 
@@ -28,7 +22,7 @@ flowchart LR
 
 ## Where it stands
 
-The build team's Nov. 4 focused run passed 41 of 41 checks on The Big Hike and two long passages across six sizes, in muted Edge. That supports the visual behavior. It does not show that a child finds any cue easier to follow, or that the cues track the heard words. The choices have not run on the event AWS account or a real device, and no child, teacher, or ReadWorks reviewer has tried them.
+The build team's Nov. 4 focused run passed 41 of 41 checks on The Big Hike and two long passages across six sizes, in muted Edge. That supports the visual behavior. It does not show that a child finds any cue easier to follow, or that the cues track the heard words. The team reports the reader with these choices is deployed on the event AWS account with Ruth. Its live headless check saw highlighting follow timing data, but measured no tolerance and ran muted. The choices have not been tried on a real device, and no child, teacher, or ReadWorks reviewer has tried them.
 
 ---
 

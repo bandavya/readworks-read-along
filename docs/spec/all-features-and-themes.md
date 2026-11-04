@@ -16,13 +16,17 @@ The screenshot shows the collapsed Demo controls strip at the top and the Back t
 
 ![All features mode: the collapsed Demo controls strip at the top and the Back to focused mode button, which here overlaps the player](shots/all-features.png)
 
+Opening Demo controls reveals the comparison choices behind All features:
+
+![An opened Demo controls strip lists seven themes and three screen types; below it, the reader's extra visual and sound controls appear.](shots/fig-all-features-and-themes.svg)
+
 ## How it connects
 
 [Focused mode](focused-mode.md) explains the starting view. [The passage reader](the-passage-reader.md) covers the reader both views share, and [Younger readers view](younger-readers-view.md) shows how one link changes with the switch.
 
 ## Where it stands
 
-The build team's Nov. 4 focused run passed 41 of 41 checks, including switching to All features and back. The classic reader run passed 162 of 162. Both ran muted. The current switch and themes have not run on the event AWS account or a real device, and no child or teacher has tried them. ReadWorks reviewed only the earlier themed demo.
+The build team's Nov. 4 focused run passed 41 of 41 checks, including switching to All features and back. The classic reader run passed 162 of 162. Both ran muted. The team reports the site with the switch and themes is deployed on the event AWS account with Ruth, but did not verify every theme there. Neither has been tried on a real device, and no child or teacher has tried them. ReadWorks reviewed only the earlier themed demo.
 
 ---
 

@@ -14,14 +14,9 @@ The routes filter differently. The signed service removes fields the reader shou
 
 **A passage's text and ID start the run, and a directly uploaded file should hold only what may become public.**
 
-Both routes end at the same audio workflow:
+Both intake routes write the same passage file:
 
-```mermaid
-flowchart LR
-  A["Passage file"] -->|upload| B["Arrival notice"]
-  B -->|ID and file location| C["Audio workflow"]
-  D["Signed submission service"] -->|cleaned passage file| A
-```
+![A direct upload or optional signed submission writes the same passage JSON file; its arrival starts the audio workflow, whose fingerprint decides whether finished audio is reused.](shots/fig-passage-intake.svg)
 
 ## How it connects
 
@@ -29,7 +24,7 @@ flowchart LR
 
 ## Where it stands
 
-The intake and workflow are built and locally testable. The stack builds and its cloud template generates locally, but no run on the event AWS account was confirmed. No child, teacher, or ReadWorks content teammate has tried this intake on a real deployment. No target-device trial with sound and a reader was confirmed.
+The team reports that the stack ran on the event AWS account in `us-west-2`: passage upload, generation, and a repeated passage that avoided regeneration were verified. The live library lists 14 passages, including two long passages with Ruth as their only voice. Direct S3 access returned 403 in an earlier check. No child, teacher, or ReadWorks person has tried this intake, and no target-device trial with sound was confirmed.
 
 ---
 

@@ -2,7 +2,7 @@
 
 *A read-along for ReadWorks: how it works, what is built, and what is still open.*
 
-First-pass spec, written with AI and checked against the code at commit 8516b89. Not yet reviewed by a person.
+First-pass spec, written with AI and checked against the code at commit 33e2648. Not yet reviewed by a person.
 
 ReadWorks gives teachers free reading passages, and all 6,893 have audio. About 64% of them use a computer voice that ReadWorks describes as unnatural, and a student who loses their place can't see which word is being said or easily go back to it. Sound Along is a read-along built for that problem: a natural voice, each word lit as it is spoken, and a tap on any word to hear the passage from there.
 
@@ -10,31 +10,23 @@ A cloud workflow takes a passage's text and makes the audio and a time for each 
 
 **The essential link is a word number shared by the page, its timing row, and the sound.**
 
-```mermaid
-flowchart LR
-  P["Passage text"] --> N["Make narration"]
-  N --> T["Word times"]
-  P --> C["Check and publish"]
-  T --> C
-  C -->|"reader file and audio"| R["Student reader"]
-  R -->|"tap a word"| A["Replay from that word"]
-```
+![A word number ties the page, the timing row and the sound together](shots/fig-sound-along-in-one-picture.svg)
 
 ![The focused reader playing a story, with the current word highlighted](shots/reader-highlight.png)
 
 ## Where it stands
 
-This spec describes one version of the code: commit `8516b89` of the team repository. The reader and its checks ran on local copies of the site, with the browser muted. Nothing on this branch has been seen running on the event's AWS account yet, and no child, teacher or ReadWorks staff member has tried this version. [What is proven and what is not](what-is-proven-and-what-is-not.md) goes through it part by part.
+This spec describes one version of the code: commit `33e2648` of the team repository. The reader and its checks ran on local copies of the site, with the browser muted. Nothing on this branch has been seen running on the event's AWS account yet, and no child, teacher or ReadWorks staff member has tried this version. [What is proven and what is not](what-is-proven-and-what-is-not.md) goes through it part by part.
 
 ## Where to start
 
 - **ReadWorks content and program staff:** [What ReadWorks asked for](what-readworks-asked-for.md), then [ReadWorks' feedback and our answers](readworks-feedback-and-our-answers.md) and [Open questions for ReadWorks](open-questions-for-readworks.md).
-- **Engineers taking this over:** [Repo map](repo-map.md), [AWS stack and settings](aws-stack-and-settings.md), then [Deploy and smoke test](deploy-and-smoke-test.md).
+- **Engineers taking this over:** [Repo map](repo-map.md), [Data flow](data-flow.md), [AWS stack and settings](aws-stack-and-settings.md), then [Deploy and smoke test](deploy-and-smoke-test.md).
 - **Anyone with five minutes:** [Sound Along in one picture](sound-along-in-one-picture.md), then [Focused mode](focused-mode.md).
 
 Every page starts with the idea in plain words, then a picture where one helps. The technical details are at the bottom.
 
-## All 50 pages
+## All 51 pages
 
 ## The product at a glance
 
@@ -86,6 +78,7 @@ Every page starts with the idea in plain words, then a picture where one helps. 
 
 ## The data
 
+- [Data flow](data-flow.md): Where does one passage and its audio go before a student taps a word? (built and tested locally)
 - [The passage file](the-passage-file.md): What does a passage source file contain, and who uses it? (built and tested locally)
 - [Reader passage record](reader-passage-record.md): What JSON does the reader load for one passage? (built and tested locally)
 - [Word numbers and timing rows](word-numbers-and-timing-rows.md): How does a written word point to its moment in audio? (built and tested locally)
@@ -99,7 +92,7 @@ Every page starts with the idea in plain words, then a picture where one helps. 
 - [Human recordings](human-recordings.md): How does an approved volunteer reading become a reader voice? (built and tested locally)
 - [Holds lab](holds-lab.md): How can the team compare policies for uncertain audio without changing publication? (built and tested locally)
 - [Held recordings](held-recordings.md): What would a reviewer see when a take is held for uncertain words? (built, off by default)
-- [Names and pronunciation](names-and-pronunciation.md): Can the system tell whether a name such as Tamara is pronounced correctly? (design only, not built)
+- [Names and pronunciation](names-and-pronunciation.md): Can the system tell whether a person's name is pronounced correctly? (design only, not built)
 - [Tests and how to run them](tests-and-how-to-run-them.md): Which checks exist, how do I run each, and what does each need? (built and tested locally)
 - [Repo map](repo-map.md): Where is each part of Sound Along in this repository? (built and tested locally)
 - [Building the reader](building-the-reader.md): How does the editable reader source become the static website? (built and tested locally)

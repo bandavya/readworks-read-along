@@ -6,7 +6,7 @@ Making the audio · Status: built and tested locally
 
 Sound Along runs as one package in Amazon's cloud. It holds a store for passages, a store for recordings, the reader website, a job table, and the audio workflow. When a file lands in the passage store, a chain of small tasks runs. They read the text, check whether its audio already exists, make a new recording if needed, check it, and publish the result. The passage and recording stores stay private. The reader site is served through a public delivery network.
 
-The ordinary setup uses the Joanna voice and publishes to the reader. Optional switches add the Ruth voice, a check of heard words, and a signed submission service. The voice and check switches change the workflow itself. The submission service changes only how a passage can enter. A cached job can skip generation, and a held or failed job stops before publishing.
+The ordinary setup uses the Joanna voice and publishes to the reader. Optional switches add the Ruth voice, a check of heard words, pronunciation-guide clips in the passage voice, and a signed submission service. The voice and check switches change the workflow itself. The submission service changes only how a passage can enter. A cached job can skip generation, and a held or failed job stops before publishing.
 
 It helps to record which switches each deployment used, so a content teammate can tell how a passage was made.
 
@@ -22,7 +22,7 @@ Follow the blue line for the default path. Each dashed box is added by a switch:
 
 ## Where it stands
 
-The stack builds and its cloud template generates locally. No deployment or run of this version has been seen on the event AWS account, and no person has heard its output there. Local unit tests use stand-in AWS services. The muted reader browser checks cover the site, not this deployed workflow. No target-device trial with sound and a reader was confirmed.
+The team reports that `SoundAlong-alex` was deployed from CDK to the event AWS account in `us-west-2`, with Ruth (`generativeVoice=true`), `qualityGate` and the reader bridge on, and `passageApi` off. The team reports five passages generated through the pipeline, CloudFront delivery, and a repeated passage that avoided regeneration. Direct S3 access returned 403 in an earlier check. The site is public to anyone with its address, the legacy `/generate` route can start paid runs without credentials, and there is no human approval before generated audio can reach students. No person has judged the sound by ear or tried it on a target device with sound.
 
 ---
 
@@ -38,13 +38,14 @@ The stack builds and its cloud template generates locally. No deployment or run 
 | `soundAlong.language` | `en-US` | Language and hash input. |
 | `generativeVoice` | off | Exact context string `true` selects Ruth/generative and Transcribe timing; requires `en-US`. |
 | `qualityGate` | off | Exact context string `true` adds heard-word check and hold path. |
+| `syllableAudio` | on only with `generativeVoice` | Exact context string `false` turns off passage-voice Words to know audio; the default Joanna bundle uses older clips. |
 | `readerBridge` | on | Exact context string `false` removes reader publication. |
 | `passageApi` | off | String `true` or boolean true adds signed REST intake. |
 | `apiSourceBucket` | unset | Optional extra source bucket, used with passage API. |
 | AWS account | `CDK_DEFAULT_ACCOUNT` | Account from CDK environment; no account is fixed in code. |
 | AWS region | `CDK_DEFAULT_REGION` or `us-east-1` | Stack deployment region. |
 
-The default workflow timeout is 15 minutes; quality gate or generative voice makes it 30. Polly is polled every five seconds; Transcribe every ten. The browser API has open CORS, including `/generate` and `/jobs`; production identity and private content access are not built. The validation design's volunteer track, approval console, and catalog-scale distributed map are ideas, not part of this stack. Run `npm run build` and `npm run synth` locally to check types and template generation.
+The team's build doc describes guide audio as on with generative voice. The code also grants Polly permission to the bridge whenever `generativeVoice` is on, even if `-c syllableAudio=false`; permission therefore outlasts that switch. The default workflow timeout is 15 minutes; quality gate or generative voice makes it 30. Polly is polled every five seconds; Transcribe every ten. The browser API has open CORS, including `/generate` and `/jobs`; the team reports that `/generate` can start paid runs without a credential. The site has no sign-in, while direct S3 access returned 403 in an earlier check. The validation design's volunteer track, approval console, and catalog-scale distributed map are ideas, not part of this stack. Run `npm run build` and `npm run synth` locally to check types and template generation.
 
 ---
 

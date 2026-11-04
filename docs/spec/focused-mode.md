@@ -29,7 +29,7 @@ Start with [Story library](story-library.md) to see the first screen, then [The 
 
 ## Where it stands
 
-The build team's Nov. 4, 2026 run passed 41 of 41 focused browser checks on The Big Hike and both long passages at six screen sizes, in muted Edge. Focused mode has not run on the event AWS account or a real device, and no child, teacher, or ReadWorks reviewer has tried it. ReadWorks reviewed only an earlier themed demo. The browser run did not test listening quality.
+The build team's Nov. 4, 2026 run passed 41 of 41 focused browser checks on The Big Hike and both long passages at six screen sizes, in muted Edge. The team reports focused mode is deployed on the event AWS account with generated voice (Ruth). It has not been tried on a real device, and no child, teacher, or ReadWorks reviewer has tried it. ReadWorks reviewed only an earlier themed demo. The browser run was muted and did not test listening quality. The team reports the live site is public to anyone with its address and has no sign-in.
 
 ---
 
@@ -37,7 +37,7 @@ The build team's Nov. 4, 2026 run passed 41 of 41 focused browser checks on The 
 
 `frontend-src/src/focused.js` holds a Vue `ref`, initially true unless local storage key `rwp-focused-mode` equals `off`. `setFocused` writes `on` or `off`; storage failure leaves the choice in memory for the page. `frontend-src/src/router.js` redirects an empty hash to `#/look/mix/` when this is not the public sample and either focused mode is active or the build sets `VITE_SHOWCASE=1`. `frontend-src/src/looks/index.js` resolves that route to `MixLibrary.vue` and its passage route to `MixReader.vue`. It routes the younger-reader link through `MixReader.vue` with `kid: true` while focused mode is on.
 
-`frontend-src/src/App.vue` shows the theme bar and return button only outside focused mode. The Mix library and reader each show **All features** while focused. The focused reader hides highlight colors, voice visualization, line masking, and the sound toggle, while retaining its core reading tools. `PUBLIC_SAMPLE` has separate routing and should not be taken as this entry flow.
+`frontend-src/src/App.vue` shows the theme bar and return button only outside focused mode. The Mix library and reader each show **All features** while focused. The focused reader hides highlight colors, voice visualization, line masking, and the sound toggle, while retaining its core reading tools. `PUBLIC_SAMPLE` has separate routing and should not be taken as this entry flow. The default stack uses Joanna; the team reports the live stack uses Ruth with the word check on and the passage API off.
 
 To check locally, start the frontend with `npm run dev -- --host 127.0.0.1 --port 8992` from `frontend-src`, then, from the repo root, run `node frontend-src/tests/focused_browser.mjs http://127.0.0.1:8992`. That script needs Microsoft Edge in its default Windows install folder (the path is fixed in the script) and local passage data; it mutes audio. Confirm the storage choice in a normal browser as well, since the automated check does not establish behavior across a real device's browser settings.
 

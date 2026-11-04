@@ -12,18 +12,9 @@ An identical resubmission is reused. A changed passage at the same ID is rejecte
 
 **This optional route lets another system submit a passage and check its result, using signed calls and a cleaned source record.**
 
-One call submits, a later call asks for status:
+A signed submission writes an intake file, then a later call checks its state:
 
-```mermaid
-sequenceDiagram
-  participant C as "Content system"
-  participant A as "Signed service"
-  participant W as "Audio workflow"
-  C->>A: "Send passage"
-  A->>W: "Write intake file"
-  C->>A: "Ask for status"
-  A-->>C: "State and available links"
-```
+![The optional signed API checks and cleans a passage, writes a job marker and intake file, and later returns queued, running, held, published or failed status; published includes short-lived audio and marks links but does not prove reader publication.](shots/fig-send-a-passage-api.svg)
 
 ## How it connects
 
@@ -31,7 +22,7 @@ sequenceDiagram
 
 ## Where it stands
 
-The service is built, off by default, and tested locally with stand-in services. No live endpoint or event AWS run was confirmed. ReadWorks' content system has not tried it, and no person has used it with real content. No target-device trial with sound and a reader was confirmed.
+The signed passage service is built and off by default. The team reports that `passageApi` was not enabled on the event AWS stack, so its submit and status routes were not verified there. The deployed legacy browser API is separate; the team reports that `/generate` accepts requests without credentials and can start paid runs. No ReadWorks content system has tried the signed route, and no target-device trial with sound was confirmed.
 
 ---
 

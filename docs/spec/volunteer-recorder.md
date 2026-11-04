@@ -16,15 +16,9 @@ The screen below is the recorder's how-it-works page, which lists the steps a vo
 
 ![Recorder explanation screen](shots/recorder-how-it-works.png)
 
-In the chart, notice that the reader is the last stop and only a reviewer's approval gets a recording there.
+The local recorder moves a reading through checks and a person's listening decision:
 
-```mermaid
-flowchart LR
- A["Volunteer reads"] -->|"audio"| B["Word and sound checks"]
- B -->|"reread and cleaned file"| C["Volunteer listens"]
- C -->|"submit exact file"| D["Reviewer listens"]
- D -->|"approve"| E["Reader human voice"]
-```
+![A volunteer's local recording becomes a cleaned, timed file, waits for a reviewer to listen to that exact file, then reaches the reader only on approval.](shots/fig-volunteer-recorder.svg)
 
 ## How it connects
 
@@ -32,7 +26,7 @@ To see what happens after approval, including undo, go to [Human recordings](hum
 
 ## Where it stands
 
-The recorder's local tests passed 156 guard rules, using invented text and synthetic sound. The on-device speech recognizer, a real microphone, and a joined take still need a listening trial. The optional Amazon cloud listener has only a local stand-in test and is off by default. Nothing has run on the event AWS account, a real student device, or with a ReadWorks volunteer.
+The recorder's local tests passed 156 guard rules, using invented text and synthetic sound. The on-device speech recognizer, a real microphone, and a joined take still need a listening trial. The optional Amazon cloud listener has only a local stand-in test and is off by default. This local recorder has not run on the event AWS account or a real student device, or with a ReadWorks volunteer. The team reports that the separate generated-audio pipeline has run on the event account.
 
 ---
 
@@ -42,7 +36,7 @@ The recorder's local tests passed 156 guard rules, using invented text and synth
 
 From the repo root, run `python tools/recorder/make_demo.py`, then `python tools/recorder/serve.py`, and open `http://localhost:8975/` in Chrome or Edge. The reviewer opens `/review`. Full word checking needs `ffmpeg`, `ffprobe`, and `SOUND_ALONG_SPEECH_PYTHON` pointing to the speech environment's Python; `--speech-python PATH` is another option. The server can save a take without the checker but cannot complete its word check. A microphone needs localhost or HTTPS. Real permitted data goes under `tools/recorder/private/passages/` and `tools/recorder/private/reader/`, or through `--passages PATH --site PATH`.
 
-The server binds to loopback. A worker queue runs one heavy speech job at a time, retries a busy GPU, and reports an unavailable checker. Approval checks reviewer name, a statement that they listened, the submitted file hash, and the gate decision. A reviewer can release word flags, but structural checks still have to pass. `python -I tools/recorder/tests/test_recorder_local.py` is the local regression command. It needs no AWS call, speech model, or microphone.
+The server binds to loopback. A worker queue runs one heavy speech job at a time, retries a busy GPU, and reports an unavailable checker. Approval checks reviewer name, a statement that they listened, the submitted file hash, and the gate decision. A reviewer can release word flags, but approval is refused if too little of the take matches the story or its word timing is broken. `python -I tools/recorder/tests/test_recorder_local.py` is the local regression command. It needs no AWS call, speech model, or microphone.
 
 ---
 

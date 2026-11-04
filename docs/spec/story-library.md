@@ -24,11 +24,13 @@ The screenshot shows the focused library at laptop size.
 
 ## Where it stands
 
-The build team's Nov. 4 focused run passed 41 of 41 checks on The Big Hike and both long passages at six sizes in muted Edge. That supports the local list and navigation, not the completeness or rights of a future ReadWorks catalog. The library has not run on the event AWS account or a real device. No child, teacher, or ReadWorks reviewer has tried focused mode, and ReadWorks reviewed only an earlier themed demo.
+The build team's Nov. 4 focused run passed 41 of 41 checks on The Big Hike and both long passages at six sizes in muted Edge. That supports the local list and navigation, not the completeness or rights of a future ReadWorks catalog. On Nov. 4, 2026, the live library listed 14 passages: 13 labeled "Generated voice (Ruth)," seven of those also labeled "Human voice (ReadWorks recording)," and one Spanish passage with only a human voice. It listed a 1,435-word passage and a 2,046-word excerpt with Ruth as their only voice, and one passage with 46 words to know. The team reports this library is deployed on the event AWS account. It has not been tried on a real device; no child, teacher, or ReadWorks reviewer has tried focused mode, and ReadWorks reviewed only an earlier themed demo.
 
 ---
 
 ## Technical details
+
+The live list is observed, while the team reports five passages were generated through the pipeline. The default stack uses Joanna; the team reports the live stack uses Ruth with the word check on and passage API off.
 
 `frontend-src/src/looks/mix/MixLibrary.vue` calls `loadIndex()` from `frontend-src/src/api.js`. In local mode that reads `data/index.json`; a configured published data base selects a managed index or API endpoint. The component filters client-side by case-insensitive title substring, numeric grade, `EN` or `ES`, voice ID, and bookmark membership. It sorts by grade then title. Grade options derive from the loaded items. The bookmark set persists as `mix-bookmarks`; the all-features layout persists as `mix-library-view` in the app store.
 

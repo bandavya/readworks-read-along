@@ -12,16 +12,9 @@ These checks cannot hear. They do not catch a mispronounced name, confirm that e
 
 **Passing these checks shows the file and timing are well formed; a person still has to listen.**
 
-Problems stop the run, while warnings travel with the passage:
+The MP3 and word starts lead to different kinds of findings:
 
-```mermaid
-flowchart LR
-  A["MP3 and word marks"] -->|size, audio frames, last word| B["Problems"]
-  A -->|pace, longest gap| C["Warnings"]
-  B -->|any problem| D["Run fails"]
-  B -->|none| E["Continue, warnings kept in the report"]
-  C --> E
-```
+![Tiny or unreadable MP3, missing word marks, or a last mark more than half a second beyond audio stop the run; gaps over 1.5 seconds and pace outside 90â€“200 words per minute remain warnings.](shots/fig-audio-and-pace-checks.svg)
 
 ## How it connects
 
@@ -29,7 +22,7 @@ flowchart LR
 
 ## Where it stands
 
-The checks are implemented and locally testable. No current run on the event AWS account was confirmed. A local version of the word comparison would hold both long passages timed against existing ReadWorks audio, partly because recognition errs. That audio is not in the repo, and no result from a person listening to this stack is either. No target-device trial with sound and a reader was confirmed.
+The checks have local tests. The team reports that generation and timing ran on the event AWS account, but it does not report individual pace warnings or a deliberate bad-file test there. A local comparison of the two long ReadWorks recordings would hold both, partly because recognition errs; that audio is outside this repo. No person has listened to this stack's output, and no target-device trial with sound was confirmed.
 
 ---
 

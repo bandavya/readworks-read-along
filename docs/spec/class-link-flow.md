@@ -10,13 +10,9 @@ The big limit is identity. Nothing checks who a student is. Anyone with the stud
 
 **The link can demonstrate class reporting; it cannot verify a child's identity.**
 
-```mermaid
-flowchart LR
-  T["Teacher"] -->|"student link"| P["Name picker"]
-  P -->|"chosen name"| R["Reader"]
-  R -->|"yes or level"| S["Prototype server"]
-  S -->|"class rows"| D["Teacher dashboard"]
-```
+A class link can attach coarse reports to a chosen name, but it cannot establish who chose it:
+
+![A teacher link leads to a visible roster, a chosen key, classic-reader events, a server and dashboard; anyone with the link can choose any name, while the no-name path sends no report.](shots/fig-class-link-flow.svg)
 
 ## How it connects
 
@@ -24,7 +20,7 @@ flowchart LR
 
 ## Where it stands
 
-The student link opens the classic reader, not the focused reader, which records no events. The flow is implemented against a configured server. The server side is not in this repo; only its written contract is, so what answers those requests couldn't be confirmed. The repo's data sheet describes a local end-to-end check with made-up students and a local server, which is not evidence of operation on the event AWS account. No real student, teacher, or ReadWorks person has used it, and no real device trial or human listening check could be confirmed. The build team's browser checks used muted sound.
+The student link opens the classic reader, not the focused reader, which records no events. The flow is implemented against a configured server. The server side is not in this repo; only its written contract is, so what answers those requests couldn't be confirmed. The repo's data sheet describes a local end-to-end check with made-up students and a local server, which does not establish that class reporting runs on the event AWS account. The team reports the reader deployed there with `passageApi` off and student access through the legacy API only; class-link reporting was not verified. No real student, teacher, or ReadWorks person has used it, and no real device trial or human listening check could be confirmed. The build team's browser checks used muted sound.
 
 ---
 
@@ -34,7 +30,7 @@ The student link opens the classic reader, not the focused reader, which records
 
 `frontend-src/src/dataKit/classroom/classLink.js` reads `a`, fetches the roster, and keeps a chosen `{ assignmentId, passageId, key, name }` in session storage. `StudentPick.vue` shows every name and an “I'm not on this list” path that disables reporting. `notMe()` clears the choice. `dataKit/report.js` listens to new events and sends only allowed yes or level fields for the assigned passage through `POST /api/progress`; it does not send the device's old totals. `TeacherClass.vue` posts the teacher key to `/api/class-progress` and renders the result alphabetically.
 
-`frontend-src/src/dataKit/data_sheet.html` says the local test server accepts only listed fields and sets records to expire after 14 days. The identity gap remains even with that field filter: a visitor can select another name or send allowed values under that student's key. Real sign-in and access control are ideas, not built. Test the client path with `cd frontend-src; node src/dataKit/usage.test.mjs` and a local API-backed class-link session. The event AWS path could not be confirmed.
+`frontend-src/src/dataKit/data_sheet.html` says the local test server accepts only listed fields and sets records to expire after 14 days. The identity gap remains even with that field filter: a visitor can select another name or send allowed values under that student's key. Real sign-in and access control are ideas, not built. Test the client path with `cd frontend-src; node src/dataKit/usage.test.mjs` and a local API-backed class-link session. The event AWS class-reporting path could not be confirmed. The team reports that the public site has no sign-in and its legacy `/generate` route can start paid runs without a credential.
 
 ---
 

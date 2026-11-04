@@ -14,13 +14,9 @@ Audio coverage says what the player ran, not what anyone heard. A tap can mean c
 
 **These numbers describe tool use and cannot grade reading.**
 
-```mermaid
-flowchart LR
-  R["Classic or younger reader"] -->|"event + passage"| U["Device totals"]
-  U -->|"toggles, CSV, delete"| P["Device screen"]
-  R -->|"new event, if a name was chosen"| Q["Class reporter"]
-  Q -->|"yes or level"| S["Prototype server"]
-```
+The device keeps eight tool-use measures, while the optional class report sends only coarse progress:
+
+![A table of eight device counts, the six that can become a yes or a coarse audio level in an assigned class report, and that the default focused reader counts nothing.](shots/fig-usage-counts.svg)
 
 ## How it connects
 
@@ -28,7 +24,7 @@ flowchart LR
 
 ## Where it stands
 
-The device counts, the local CSV export, and the class reporter are built. The repo's data sheet describes a local end-to-end run with made-up students and a local server, not the event AWS account. No real student, teacher, or ReadWorks person has used this reporting flow, no classroom-device trial or human listening check could be confirmed, and no event AWS run has been observed. Browser tests used muted sound, so audio coverage does not show anyone listened.
+The device counts, the local CSV export, and the class reporter are built. The repo's data sheet describes a local end-to-end run with made-up students and a local server, not the event AWS account. No real student, teacher, or ReadWorks person has used this reporting flow, no classroom-device trial or human listening check could be confirmed. The team reports the reader deployed on the event AWS account, with `passageApi` off and student access through the legacy API only; the named class reporter was not verified there. Browser tests used muted sound, so audio coverage does not show anyone listened.
 
 ---
 
@@ -38,7 +34,7 @@ The device counts, the local CSV export, and the class reporter are built. The r
 
 The hooks are called from `views/Passage.vue`, `views/KidView.vue` and `components/KidReader.vue`; `looks/mix/MixReader.vue` (focused) has none. `dataKit/report.js` listens to *new* events, not device totals. It sends `{ assignmentId, studentKey, progress }` for the assigned passage. Fields marked `teacher: 'yes'` become `1`; `playback` is `teacher: 'level'`, with `1` Partway, `2` Significant part, and `3` Nearly all. Its thresholds are any playback, at least half, and at least 95 percent of duration. The browser debounces reports for 3 seconds and retries failures after 30 seconds. Counts such as `play_started` and `reached_end` stay on the device because they have no teacher mark.
 
-`frontend-src/src/dataKit/data_sheet.html` is generated against the options table by `node src/dataKit/make_sheet.mjs` and is checked for drift. It also states the main limit: anyone with the student link can choose another name. Test the kit with `cd frontend-src; node src/dataKit/usage.test.mjs`. The report's yes or level rule is a prototype choice for ReadWorks and its counsel to evaluate before real use.
+`frontend-src/src/dataKit/data_sheet.html` is generated against the options table by `node src/dataKit/make_sheet.mjs` and is checked for drift. It also states the main limit: anyone with the student link can choose another name. Test the kit with `cd frontend-src; node src/dataKit/usage.test.mjs`. The team reports the public site has no sign-in, and the legacy `/generate` route can start paid runs without a credential. The report's yes or level rule is a prototype choice for ReadWorks and its counsel to evaluate before real use.
 
 ---
 
