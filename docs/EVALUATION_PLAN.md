@@ -73,8 +73,7 @@ passages, use the first 60 to 90 seconds so raters do not tire.
 Also include: the four demo passages and the kit's `sample-red-kite` (our own synthetic text,
 no licence issue), and one passage hand-marked for timing (section 6.4).
 
-ReadWorks text and recordings may be used on the event AWS account and shown to ReadWorks.
-Ask before putting them in a public repository.
+ReadWorks text and recordings may be used on the event AWS account and in this repository.
 
 ### 4.2 Voices (the candidates)
 

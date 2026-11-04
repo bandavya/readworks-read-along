@@ -17,6 +17,8 @@ compiled-only frontend). It is not this build. Where the two differ, this docume
 
 ---
 
+> A longer page-by-page spec, with pictures, is in `docs/spec/`.
+
 ## 1. What this is
 
 A browser read-along reader: a student sees a passage, hears it read aloud, and sees each word
@@ -203,8 +205,7 @@ passage voice; sense IDs match across the passage HTML, vocab and syllable data.
 - Legacy API routes (`/passages`, `/jobs`, `/generate`, `/access`) have no authorization; `/generate`
   can start Polly runs without credentials. The passage service (`/v1/passages`), when enabled,
   requires AWS IAM signing.
-- ReadWorks passages, recordings and images are licensed material used only in this private
-  prototype. They may be used on the event AWS account; ask before putting them in a public repo.
+- ReadWorks passages, recordings and images are ReadWorks' own material, used for this prototype.
 - Generated audio and pronunciation entries are drafts ("needs human check") until a person approves.
 
 ---
@@ -268,10 +269,7 @@ the live site; none judged by ear.
 ## 11. Repository and git
 
 - Repo: `github.com/bandavya/readworks-read-along`. Default branch `main`; teammate branch `alex`;
-  this work is on **`demo-build`** (branched from `alex`).
-- `demo-build` commits ahead of `alex`: caption fix; planning docs + lockfile; pronunciation-guide
-  audio in the passage voice.
-- **Not yet pushed to GitHub** from this environment (no credentials here); the branch is ready.
+  this build is on **`master`**.
 - Media is gitignored (section 6). `pyphen` is vendored under `lambdas/syllable_audio/` with only
   the English dictionaries.
 

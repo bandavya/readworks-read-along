@@ -1,6 +1,6 @@
 # Sound Along: build plan for team review
 
-Draft of November 4, 2026. Estimates are mine and should be corrected by whoever does the work.
+Draft of November 4, 2026. Estimates are first guesses, to be corrected by whoever does the work.
 Items marked **Decision** need an answer before the work that depends on them starts.
 
 > Status note (2026-11-04): this plan predates the move to the `alex`/`demo-build` line. That build
@@ -87,7 +87,7 @@ Each item has an acceptance test so the team can tell when it is done.
 Order: L2 and L1 first (small, independent), then L3, then L4 and L5 (both need L3), then L7. L6 can run in parallel with a human recording.
 
 Total: about 16 to 23 engineering hours, so 2 to 3 working days for one engineer. The validation
-doc estimated about 1 day for the Lean list. I think that is tight for all seven items. If time is
+doc estimated about 1 day for the Lean list. That looks tight for all seven items. If time is
 short, cut in this order: L6, then L7's dashboard (keep the alarms), then L4's release script.
 
 QC record (proposed), stored on the job item, with long difference lists stored in S3 and
@@ -111,8 +111,7 @@ The study itself (workstreams V1 to V8, materials, methods, pass criteria and de
 | S2 | Blind listening page | A static page that plays clips in random order per rater with no voice names, and collects the rating fields listed in the evaluation plan (6.1). Exports a CSV keyed by rater code, with no names | A test rater completes one passage and the CSV has every field. Order differs between two raters | 3 to 4 |
 | S3 | Gold-set tooling | Convert Audacity label files (hand-marked onsets) into the timing format and compare against our timing; report p90 and the share beyond 150 and 300 ms | Run on one hand-marked passage and produce the numbers | 2 |
 
-S1 and S2 depend on D4 (which voices). S3 pairs with L5. ReadWorks material stays on the event AWS
-account and out of any public repository.
+S1 and S2 depend on D4 (which voices). S3 pairs with L5. 
 
 ## 6. Phase 3: Voice options (male and female)
 
@@ -201,7 +200,7 @@ only, and 20 to 30 hours for Balanced across the catalog. Replace with pilot mea
 | Edits to the compiled reader conflict with later copies from ReadWorks | Keep the edit as a small, documented patch (D5) |
 | A hold hides the only version of a passage | Students keep the last good version; a first-time passage is simply not listed |
 | Rater availability and sample size | Covered in `docs/EVALUATION_PLAN.md` (D8; report spread and preference share, not only averages) |
-| Estimates are mine | Team re-estimates in review |
+| Estimates are first guesses | Team re-estimates in review |
 
 ## 13. What the team is asked to do
 
