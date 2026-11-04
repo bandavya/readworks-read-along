@@ -1,6 +1,6 @@
 ﻿# Holds lab
 
-See [the tools index](../README.md). gpt-6-astra's suggestion, unruled by Alex.
+See [the tools index](../README.md)
 
 From the repo root, run `python tools/holds-lab/serve.py` (or use its absolute path from elsewhere), then open `http://127.0.0.1:8993/index.html`. The committed pages use four made-up takes and need no audio. `python tools/holds-lab/simulate.py --json` prints the modeled outcomes; `python -I tools/holds-lab/test_policy.py` runs the guards.
 

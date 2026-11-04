@@ -164,6 +164,23 @@ class GateTests(unittest.TestCase):
         self.assertFalse(result["cached"])
         self.assertEqual(self.table.puts[-1]["status"], "running")
 
+    def test_finished_passage_is_reused_and_never_breaks_the_workflow(self):
+        self.table.item = {"status": "generated", "readerPublishedAt": "2026-11-04T12:00:00Z",
+                           "audioKey": "audio/a.mp3", "speechMarksKey": "audio/a.json"}
+        self.event["charCount"] = 10
+        with mock.patch.dict(os.environ, {"JOB_TABLE": "jobs", "VOICE_ID": "Joanna", "ENGINE": "neural"}):
+            result = self.module.check_existing_manifest(self.event, None)
+        self.assertTrue(result["cached"])
+        self.assertIs(result["readerNeedsPublish"], False)
+
+    def test_checked_passage_the_reader_missed_is_sent_again(self):
+        self.table.item = {"status": "reader_publish_failed", "audioKey": "audio/a.mp3", "speechMarksKey": "audio/a.json"}
+        self.event["charCount"] = 10
+        with mock.patch.dict(os.environ, {"JOB_TABLE": "jobs", "VOICE_ID": "Joanna", "ENGINE": "neural"}):
+            result = self.module.check_existing_manifest(self.event, None)
+        self.assertTrue(result["readerNeedsPublish"])
+        self.assertEqual(result["pollyMarksKey"], "audio/a.json")
+
     def test_gated_manifest_uses_polly_marks(self):
         self.s3.seed("audio", "polly/take.mp3", b"made-up-audio")
         self.event.update({"qualityGatePassed": True, "audioId": "made-up-audio",

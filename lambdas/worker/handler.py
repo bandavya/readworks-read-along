@@ -15,6 +15,8 @@ from datetime import datetime, timezone
 
 import boto3
 
+import audio_check
+
 CONTENT_BUCKET = os.environ.get("CONTENT_BUCKET", "")
 AUDIO_BUCKET = os.environ.get("AUDIO_BUCKET", "")
 JOB_TABLE = os.environ.get("JOB_TABLE", "")
@@ -190,10 +192,11 @@ def _key_from_uri(uri: str) -> str:
 def validate_outputs(event, _context):
     problems = []
     # Audio exists and is non-trivial.
+    audio = b""
     try:
-        head = s3.head_object(Bucket=AUDIO_BUCKET, Key=event["pollyAudioKey"])
-        event["audioBytes"] = head["ContentLength"]
-        if head["ContentLength"] < 1000:
+        audio = s3.get_object(Bucket=AUDIO_BUCKET, Key=event["pollyAudioKey"])["Body"].read()
+        event["audioBytes"] = len(audio)
+        if len(audio) < 1000:
             problems.append("audio too small")
     except Exception as exc:  # noqa: BLE001
         problems.append(f"audio missing: {exc}")
@@ -207,6 +210,9 @@ def validate_outputs(event, _context):
             problems.append("no word speech marks")
         event["wordMarkCount"] = len(word_marks)
         event["speechMarks"] = marks
+        if audio:
+            event["qc"] = audio_check.report(audio_check.mp3_duration(audio), word_marks, len(event["normalizedText"].split()))
+            problems.extend(event["qc"]["problems"])
     except Exception as exc:  # noqa: BLE001
         problems.append(f"speech marks missing: {exc}")
 
@@ -258,7 +264,8 @@ def write_manifest(event, _context):
         "audioKey": event["audioKey"],
         "speechMarksKey": event["speechMarksKey"],
         "status": "approved",
-        "reviewStatus": "sampled",
+        "reviewStatus": "unreviewed",
+        "qc": event.get("qc"),
         "createdAt": _now(),
     }
     s3.put_object(
@@ -273,7 +280,8 @@ def write_manifest(event, _context):
             "passageId": event["passageId"],
             "textHash": event["textHash"],
             "status": "approved",
-            "reviewStatus": "sampled",
+            "reviewStatus": "unreviewed",
+            "qcWarnings": len((event.get("qc") or {}).get("warnings", [])),
             "voiceId": event["voiceId"],
             "engine": event["engine"],
             "audioKey": event["audioKey"],
@@ -316,15 +324,22 @@ def publish_demo_json(event, _context):
 # ---------------------------------------------------------------------------
 def emit_metrics(event, _context):
     cw = boto3.client("cloudwatch")
+    event["estimatedCostUsd"] = audio_check.polly_cost(event.get("charCount", 0), event.get("engine", ENGINE))
+    qc = event.get("qc") or {}
+    values = [
+        ("CharactersSubmitted", event.get("charCount", 0), "Count"),
+        ("AudioBytes", event.get("audioBytes", 0), "Bytes"),
+        ("WordMarks", event.get("wordMarkCount", 0), "Count"),
+        ("GenerationsCompleted", 1, "Count"),
+        ("EstimatedCostUsd", event["estimatedCostUsd"], "None"),
+        ("AudioSeconds", qc.get("durationSeconds") or 0, "Seconds"),
+        ("WordsPerMinute", qc.get("wordsPerMinute") or 0, "None"),
+        ("QcWarnings", len(qc.get("warnings", [])), "Count"),
+    ]
+    # Source keeps Polly and volunteer numbers from ever being averaged together.
+    dimensions = [{"Name": "Source", "Value": "polly"}, {"Name": "Voice", "Value": event.get("voiceId", VOICE_ID)}]
     cw.put_metric_data(
         Namespace="SoundAlong",
-        MetricData=[
-            {"MetricName": "CharactersSubmitted", "Value": event.get("charCount", 0), "Unit": "Count"},
-            {"MetricName": "AudioBytes", "Value": event.get("audioBytes", 0), "Unit": "Bytes"},
-            {"MetricName": "WordMarks", "Value": event.get("wordMarkCount", 0), "Unit": "Count"},
-            {"MetricName": "GenerationsCompleted", "Value": 1, "Unit": "Count"},
-        ],
+        MetricData=[{"MetricName": name, "Value": value, "Unit": unit, "Dimensions": dimensions} for name, value, unit in values],
     )
-    # Approx cost input from section 13: ~$4 per million characters.
-    event["estimatedCostUsd"] = round(event.get("charCount", 0) / 1_000_000 * 4.0, 6)
     return event

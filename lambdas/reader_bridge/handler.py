@@ -301,7 +301,7 @@ def publish(event, s3, table, content_bucket, audio_bucket, frontend_bucket, set
     table.update_item(Key={"passageId": pid, "textHash": event["textHash"]},
                       UpdateExpression="SET #s = :s, readerPublishedAt = :u REMOVE readerFailureReason",
                       ExpressionAttributeNames={"#s": "status"},
-                      ExpressionAttributeValues={":s": "approved", ":u": datetime.now(timezone.utc).isoformat()})
+                      ExpressionAttributeValues={":s": "generated" if os.environ.get("QUALITY_GATE") == "true" else "approved", ":u": datetime.now(timezone.utc).isoformat()})
     return {**event, "readerReady": True, "readerKey": f"data/{pid}.json", "readerAudioKey": audio_path}
 
 

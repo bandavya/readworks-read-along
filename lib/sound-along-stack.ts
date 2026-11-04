@@ -12,6 +12,7 @@ import * as tasks from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import * as apigw from 'aws-cdk-lib/aws-apigatewayv2';
 import * as apigwi from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import * as logs from 'aws-cdk-lib/aws-logs';
+import * as cloudwatch from 'aws-cdk-lib/aws-cloudwatch';
 import * as path from 'path';
 import { QualityGate } from './quality-gate';
 import { PassageService } from './passage-service';
@@ -143,7 +144,8 @@ export class SoundAlongStack extends cdk.Stack {
     const writeManifestFn = makeWorker('WriteManifestFn', 'write_manifest');
     const publishDemoFn = makeWorker('PublishDemoFn', 'publish_demo_json');
     const emitMetricsFn = makeWorker('EmitMetricsFn', 'emit_metrics');
-    const readerBridgeEnabled = this.node.tryGetContext('readerBridge') === 'true';
+    // A run that ends with nothing in the reader isn't useful, so this is on unless switched off.
+    const readerBridgeEnabled = String(this.node.tryGetContext('readerBridge')) !== 'false';
     const readerBridgeFn = readerBridgeEnabled ? new lambda.Function(this, 'ReaderBridgeFn', {
       runtime: lambda.Runtime.PYTHON_3_12,
       handler: 'handler.handler',
@@ -398,6 +400,26 @@ export class SoundAlongStack extends cdk.Stack {
     httpApi.addRoutes({ path: '/passages/{id}/access', methods: [apigw.HttpMethod.GET], integration: apiIntegration });
     httpApi.addRoutes({ path: '/jobs', methods: [apigw.HttpMethod.GET], integration: apiIntegration });
     httpApi.addRoutes({ path: '/generate', methods: [apigw.HttpMethod.POST], integration: apiIntegration });
+
+    // ---------------------------------------------------------------------
+    // One dashboard for the validation numbers, by source and voice.
+    // ---------------------------------------------------------------------
+    const qcMetric = (metricName: string, statistic: string) => new cloudwatch.Metric({
+      namespace: 'SoundAlong',
+      metricName,
+      statistic,
+      dimensionsMap: { Source: 'polly', Voice: voiceId },
+      period: cdk.Duration.hours(1),
+    });
+    const dashboard = new cloudwatch.Dashboard(this, 'ValidationDashboard', {
+      dashboardName: `SoundAlong-${envName}-validation`,
+    });
+    dashboard.addWidgets(
+      new cloudwatch.GraphWidget({ title: 'Passages generated', left: [qcMetric('GenerationsCompleted', 'Sum')] }),
+      new cloudwatch.GraphWidget({ title: 'Estimated Polly cost (USD)', left: [qcMetric('EstimatedCostUsd', 'Sum')] }),
+      new cloudwatch.GraphWidget({ title: 'QC warnings', left: [qcMetric('QcWarnings', 'Sum')] }),
+      new cloudwatch.GraphWidget({ title: 'Words per minute', left: [qcMetric('WordsPerMinute', 'Average')] }),
+    );
 
     // ---------------------------------------------------------------------
     // Outputs (environment-specific values; nothing hard-coded in frontend).

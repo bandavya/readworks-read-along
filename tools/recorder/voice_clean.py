@@ -37,9 +37,9 @@ import tempfile
 import time
 
 # ---------------------------------------------------------------------------------------------------------------------
-# Settings (BEHAVIOR, pencil). One place, so Alex can change a number without reading the code.
+# Settings (BEHAVIOR, pencil). One place, so anyone can change a number without reading the code.
 # ---------------------------------------------------------------------------------------------------------------------
-TARGET_LUFS = -19.9          # Alex picks. This is the Polly narrations' median measured the way a tablet plays it (see RESULTS.md).
+TARGET_LUFS = -19.9          # This is the Polly narrations' median measured the way a tablet plays it (see RESULTS.md).
                              # Other candidates: -16 (podcast/Apple convention, louder), -18 (AES streaming speech). The same target
                              # can be passed per call.
 WORKING_LUFS = -23.0         # level the file is brought to BEFORE the compressor, so one threshold means the same on every file

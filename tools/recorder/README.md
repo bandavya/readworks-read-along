@@ -1,6 +1,6 @@
 ﻿# Volunteer recorder
 
-See [the tools index](../README.md). gpt-6-astra's suggestion, unruled by Alex.
+See [the tools index](../README.md)
 
 Create an invented passage with `python tools/recorder/make_demo.py`. Then run `python tools/recorder/serve.py` and open `http://localhost:8975/` in Chrome or Edge. A reviewer uses `http://localhost:8975/review`. The microphone needs localhost or HTTPS. ffmpeg and ffprobe must be on PATH. Word checking needs a local speech environment: set `SOUND_ALONG_SPEECH_PYTHON` to its Python executable or pass `--speech-python PATH`. The server says plainly if that setting is missing. It can start and save a recording without the checker, but cannot finish the word check.
 

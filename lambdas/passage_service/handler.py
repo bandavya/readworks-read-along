@@ -225,13 +225,13 @@ def status(pid, marker, reused=False):
                       and all(isinstance(reason, str) for reason in reasons)
                       else ["quality gate held this passage; inspect the job row"])
         return result
-    if matching and matching.get("status") in ("running", "approved"):
+    if matching and matching.get("status") in ("running", "approved", "generated"):
         result["status"] = "running"
     manifest = existing(CONTENT_BUCKET, f"manifests/{pid}.json")
     content = existing(CONTENT_BUCKET, f"content/{pid}.json")
     if manifest and manifest.get("textHash") == marker["pipeline_hash"] and content:
         audio_key, marks_key = manifest.get("audioKey"), manifest.get("speechMarksKey")
-        if (manifest.get("status") == "approved" and manifest.get("voiceId") == marker["voice"]
+        if (manifest.get("status") in ("approved", "generated") and manifest.get("voiceId") == marker["voice"]
                 and content.get("passageId") == pid and hashlib.sha256(content.get("text", "").encode("utf-8")).hexdigest() == marker["text_sha256"]
                 and content.get("audioManifest", {}).get("audioKey") == audio_key
                 and content.get("audioManifest", {}).get("speechMarksKey") == marks_key
@@ -247,7 +247,7 @@ def status(pid, marker, reused=False):
                               timing_json_url=s3.generate_presigned_url("get_object", Params={"Bucket": AUDIO_BUCKET, "Key": marks_key}, ExpiresIn=900))
         else:
             result.update(status="failed", reasons=["published artifacts do not match the submission"])
-    elif matching and matching.get("status") not in ("running", "approved"):
+    elif matching and matching.get("status") not in ("running", "approved", "generated"):
         result.update(status="failed", reasons=["pipeline job did not complete"])
     if result["status"] in ("queued", "running"):
         age = (datetime.now(timezone.utc) - datetime.fromisoformat(marker["submitted_at"])).total_seconds()

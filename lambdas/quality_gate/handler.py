@@ -100,7 +100,15 @@ def check_existing_manifest(event, _context):
     table = boto3.resource("dynamodb").Table(os.environ["JOB_TABLE"])
     item = table.get_item(Key={"passageId": event["passageId"],
                                "textHash": event["textHash"]}).get("Item")
-    event["cached"] = bool(item and item.get("status") == "generated")
+    finished = bool(item and item.get("status") == "generated")
+    # A checked passage the reader never received is sent again, without new audio.
+    event["readerNeedsPublish"] = bool(item and item.get("status") in ("generated", "reader_publish_failed")
+                                       and not item.get("readerPublishedAt") and item.get("audioKey")
+                                       and item.get("speechMarksKey"))
+    if event["readerNeedsPublish"]:
+        event["audioKey"] = item["audioKey"]
+        event["pollyMarksKey"] = item["speechMarksKey"]
+    event["cached"] = finished or event["readerNeedsPublish"]
     if not event["cached"]:
         table.put_item(Item={
             "passageId": event["passageId"], "textHash": event["textHash"],

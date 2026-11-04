@@ -123,20 +123,30 @@ node scripts/generate.js --arn <StateMachineArn> --passage demo-passage-001
 # open https://<DistributionDomain>/
 ```
 
-## Reader bridge (optional)
+## Reader bridge
 
-On a fresh deployment, deploy with `npx cdk deploy -c readerBridge=true --all`,
+On a fresh deployment, deploy with `npm run deploy`,
 publish the static frontend with
 `node scripts/publish-frontend.js --frontend-bucket <FrontendBucketName>`, then
 seed or generate passages. The `PublishToReader` task
 copies validated Polly audio and writes `data/<id>.json` and `data/index.json`
-after `PublishDemoJson`; the default stack omits this task. A failed word match
+after `PublishDemoJson`. A failed word match
 stops at `ReaderPublishFailed`, with the reason in the job table. To disable it,
-deploy without `-c readerBridge=true`. A later frontend publish merges live
+deploy with `-c readerBridge=false`. A later frontend publish merges live
 `data/index.json` rows into a local index. Older local `data/<id>.json` files
 can still replace generated documents, so publish local media before generation.
 
-## Voice quality gate (optional) use `npx cdk synth -c readerBridge=true -c qualityGate=true`
+## Validation checks
+
+Every run checks the real audio: it reads the MP3's actual length, stops if the last word is timed past the end,
+and records pace and the longest gap in the manifest's `qc` field. `reviewStatus` is `unreviewed` until a person has
+listened, so `approved` means only that the automatic checks passed.
+
+The `SoundAlong-<env>-validation` CloudWatch dashboard shows passages, estimated Polly cost, warnings and pace.
+Run `python tests/test_audio_check.py` for the local checks. `python scripts/timing_report.py --marks <marks> --transcribe <job output> --hand <csv>`
+compares speech marks with Transcribe and a hand-marked passage.
+
+## Voice quality gate (optional) use `npx cdk synth -c qualityGate=true`
 to inspect the gate, or deploy with both flags when authorized. The gate is off by
 default. After `ValidateOutputs`, it asks Amazon Transcribe what words the new
 MP3 contains. A clean word match continues to publishing; a swap, omission, or
@@ -182,13 +192,14 @@ preview. Audio playback requires a real generation run.
 
 ## Cost model (section 13)
 
-Metrics are emitted to CloudWatch namespace `SoundAlong`
-(`CharactersSubmitted`, `AudioBytes`, `WordMarks`, `GenerationsCompleted`).
-The workflow estimates cost at ~$4 / million characters as a hackathon input —
-verify current Amazon Polly pricing before any production commitment.
+Metrics are emitted to CloudWatch namespace `SoundAlong`, by `Source` and `Voice`:
+`CharactersSubmitted`, `AudioBytes`, `WordMarks`, `GenerationsCompleted`,
+`EstimatedCostUsd`, `AudioSeconds`, `WordsPerMinute` and `QcWarnings`.
+The estimate uses each engine's price and counts both the audio and speech marks
+requests. Verify current Amazon Polly pricing before any production commitment.
 
 ## Not included (hackathon non-goals)
 
-Full catalog generation, ReadWorks production integration, teacher analytics,
+Full catalog generation, ReadWorks production integration, real teacher analytics,
 full Spanish support, production identity, and an AI evaluator agent.
 ```

@@ -92,7 +92,7 @@ guard('a paused voice has a closed mouth, wherever the clock stopped, and the po
   const shut = mouthShut(mid)
   if (shut.talk !== 0 || shut.mouth !== 'rest' || shut.lips.open !== 0 || shut.lips.wide !== 0 || shut.lips.round !== 0) throw new Error('mouth still open')
   if (shut.x !== mid.x || shut.k !== mid.k) throw new Error('closing the mouth moved the point')
-  const full = readFileSync(new URL('../src/character/buddyDriver.js', import.meta.url), 'utf8')
+  const full = readFileSync(new URL('../src/character/buddyDriver.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n')
   if ((full.match(/engine\.audio\.paused \|\| engine\.audio\.ended \? mouthShut\(/g) || []).length !== 2) throw new Error('the driver must close the mouth whenever it sets the head')
 })
 
@@ -108,26 +108,26 @@ guard('words are grouped into lines and pages', () => {
 })
 
 guard('a buddy is off unless someone chose one', () => {
-  const src = readFileSync(new URL('../src/character/buddies.js', import.meta.url), 'utf8')
+  const src = readFileSync(new URL('../src/character/buddies.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n')
   if (!/BUDDY_UI = fromAddress !== null \|\| !!buildDefault \|\| showcase/.test(src)) throw new Error('the switch for showing it changed')
   if (!/saved = BUDDY_UI \? store\.get\('buddy', buildDefault\) : ''/.test(src) || !/knownBuddy\(fromAddress \?\? saved, ids\)/.test(src) || !/VITE_BUDDY \|\| ''/.test(src)) throw new Error('default changed')
-  const app = readFileSync(new URL('../src/App.vue', import.meta.url), 'utf8')
+  const app = readFileSync(new URL('../src/App.vue', import.meta.url), 'utf8').replace(/\r\n/g, '\n')
   if (!/<BuddyHost v-if="BUDDY_UI && buddyChoice/.test(app)) throw new Error('nothing may run until a character is chosen')
-  const bar = readFileSync(new URL('../src/components/ThemeBar.vue', import.meta.url), 'utf8')
+  const bar = readFileSync(new URL('../src/components/ThemeBar.vue', import.meta.url), 'utf8').replace(/\r\n/g, '\n')
   if (!/<BuddyPicker v-if="BUDDY_UI"/.test(bar)) throw new Error('an ordinary build must not show the picker')
-  const host = readFileSync(new URL('../src/character/BuddyHost.js', import.meta.url), 'utf8')
+  const host = readFileSync(new URL('../src/character/BuddyHost.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n')
   if (!/if \(!wanted \|\| !ready\)/.test(host)) throw new Error('host no longer stands down when none is chosen')
 })
 
 guard('the buddy changes nothing in the engine except its safe line, and puts that back', () => {
-  const full = readFileSync(new URL('../src/character/buddyDriver.js', import.meta.url), 'utf8')
+  const full = readFileSync(new URL('../src/character/buddyDriver.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n')
   if (!/engine\.getSafeBottom = safeBottom\n/.test(full)) throw new Error('safe line not restored')
   const src = full.replace(/engine\.getSafeBottom = [^\n]*\n/g, '\n')
   if (/engine\.[\w.]+\s*=[^=]/.test(src) || /engine\.[\w.]*\.(play|pause|load)\(|engine\.(play|pause|seek\w*|resume|toggle|setRate|setVoice|setEnabled)\(/.test(src)) throw new Error('writes to the engine')
 })
 
 guard('a paged reader keeps its own text layout: the buddy changes it only where the reader scrolls', () => {
-  const full = readFileSync(new URL('../src/character/buddyDriver.js', import.meta.url), 'utf8')
+  const full = readFileSync(new URL('../src/character/buddyDriver.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n')
   const scoped = full.slice(full.indexOf('if (engine.follow) {\n    if (room.lineHeight)'))
   if (!scoped.startsWith('if (engine.follow)')) throw new Error('layout changes moved out of the scrolling branch')
   const outside = full.replace(/if \(engine\.follow\) \{\n    if \(room\.lineHeight\)[\s\S]*?\n  \}\n/, '')
