@@ -7,7 +7,7 @@ const harnesses = [
   'fixhelp_harness.mjs', 'guide_sharing_harness.mjs', 'holds_panel_harness.mjs',
   'kid_lead_render_harness.mjs', 'kid_units_harness.mjs', 'look_lazy_harness.mjs',
   'reading_head_harness.mjs', 'rehearsal_harness.mjs', 'review_harness.mjs',
-  'teacher_preview_harness.mjs', 'word_help_shared_harness.mjs',
+  'teacher_demo_harness.mjs', 'teacher_preview_harness.mjs', 'word_help_shared_harness.mjs',
   '../src/dataKit/usage.test.mjs',
 ];
 let failed = false;

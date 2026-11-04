@@ -1,7 +1,7 @@
 // Browser guard for the classic reader and kid view. Shell command:
 // node tests/reader_layout_browser.mjs http://localhost:8992 <passage-id> [shot-directory]
 // Requires a running local Vite server and installed Edge; no npm package or AWS call.
-import { spawn } from 'node:child_process'
+import { spawn, spawnSync } from 'node:child_process'
 import { mkdtempSync, rmSync, mkdirSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -12,7 +12,7 @@ const sizes = [[320,568],[390,844],[844,390],[768,1024],[1180,820],[1366,768],[1
 const edge = process.env.EDGE || (process.platform === 'win32' ? join(process.env['PROGRAMFILES(X86)'] || process.env.PROGRAMFILES || '', 'Microsoft', 'Edge', 'Application', 'msedge.exe') : 'msedge')
 const port = 19300 + Math.floor(Math.random() * 400)
 const dir = mkdtempSync(join(tmpdir(), 'reader-layout-'))
-const proc = spawn(edge, ['--headless=new', `--remote-debugging-port=${port}`, `--user-data-dir=${dir}`, '--mute-audio', '--autoplay-policy=no-user-gesture-required', '--no-first-run', '--disable-gpu', 'about:blank'], { stdio: 'ignore' })
+const proc = spawn(edge, ['--headless=new', '--inprivate', '--disable-background-networking', `--remote-debugging-port=${port}`, `--user-data-dir=${dir}`, '--mute-audio', '--autoplay-policy=no-user-gesture-required', '--no-first-run', '--disable-gpu', 'about:blank'], { stdio: 'ignore' })
 let ws, serial = 0
 const pending = new Map()
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms))
@@ -29,7 +29,16 @@ async function key(name, vk) {
   await send('Input.dispatchKeyEvent', { type: 'keyUp', key: name, code: name, windowsVirtualKeyCode: vk })
 }
 async function go(hash) {
-  await send('Page.navigate', { url: `${base.replace(/\/$/, '')}/#/${hash}` })
+  await send('Page.navigate', { url: base.replace(/\/$/, '') + '/#/' + hash })
+  if (hash.startsWith('p/')) {
+    for (let i = 0; i < 80; i++) {
+      const ready = await evaluate('({ words: !!document.querySelector(".sa-text .sa-w:not(.sa-unread)"), slider: !!document.querySelector(".speed-slider input"), error: document.querySelector(".notice")?.textContent || "" })')
+      if (ready.error.startsWith('Could not load')) return
+      if (ready.words && ready.slider) return
+      await pause(125)
+    }
+    throw new Error(hash + ': reader did not finish loading')
+  }
   await pause(1300)
 }
 const measure = `(() => {
@@ -51,7 +60,7 @@ const measure = `(() => {
 })()`
 try {
   let tabs
-  for (let i = 0; i < 40; i++) { try { tabs = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json(); if (tabs.some(t => t.type === 'page')) break } catch {} await pause(250) }
+  for (let i = 0; i < 80; i++) { try { tabs = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json(); if (tabs.some(t => t.type === 'page')) break } catch {} await pause(500) }
   if (!tabs?.some(t => t.type === 'page')) throw new Error('Edge debugging port unavailable')
   ws = new WebSocket(tabs.find(t => t.type === 'page').webSocketDebuggerUrl)
   await new Promise(resolve => { ws.onopen = resolve })
@@ -101,11 +110,12 @@ try {
           const stops = [...document.querySelectorAll('.speed-stops span')].map(s => {
             const r = s.getBoundingClientRect(); return { left: r.left, right: r.right, top: r.top, bottom: r.bottom };
           });
+          if (!slider) return null;
           slider.value = '1.05'; slider.dispatchEvent(new Event('input', { bubbles: true }));
           return { max: Number(slider.max), snapped: Number(slider.value), normal: stops[1], slower: stops[0], faster: stops[2] };
         })()`)
         guard(`speed slider ${width}x${height}: 2x and Normal detent`, () => {
-          if (speedDetails.max !== 2 || speedDetails.snapped !== 1 ||
+          if (!speedDetails || speedDetails.max !== 2 || speedDetails.snapped !== 1 ||
               !(speedDetails.slower.left < speedDetails.normal.left && speedDetails.normal.left < speedDetails.faster.left) ||
               (speedDetails.slower.right > speedDetails.normal.left && speedDetails.slower.bottom > speedDetails.normal.top))
             throw Error(JSON.stringify(speedDetails))
@@ -199,5 +209,21 @@ try {
     }
   }
 } catch (e) { guard('browser harness ran', () => { throw e }) }
-finally { try { ws?.close() } catch {} proc.kill(); await pause(300); try { rmSync(dir, { recursive: true, force: true }) } catch {} }
+finally {
+  try { ws?.close() } catch {}
+  if (proc.exitCode === null && proc.signalCode === null) {
+    const exited = new Promise(resolve => { proc.once('exit', resolve); setTimeout(resolve, 5000) })
+    if (process.platform === 'win32' && proc.pid) {
+      const killed = spawnSync('taskkill', ['/PID', String(proc.pid), '/T', '/F'], { stdio: 'ignore' })
+      if (killed.status !== 0) proc.kill()
+    } else proc.kill()
+    await exited
+  }
+  let removed = false
+  for (let attempt = 0; attempt < 5 && !removed; attempt++) {
+    try { rmSync(dir, { recursive: true, force: true, maxRetries: 2, retryDelay: 200 }); removed = true }
+    catch { await pause(500 * (attempt + 1)) }
+  }
+  if (!removed) console.warn(`Could not remove Edge profile: ${dir}`)
+}
 finish({ printGuardPasses: false })

@@ -15,6 +15,7 @@ import { itemsForPassage, reviewOf, setReview, clearReview, tally, buildExport, 
 import '../review.css'
 
 const props = defineProps({ id: String })
+const demoReview = window.location.hash.includes('td=1')
 
 const data = shallowRef(null)
 const items = shallowRef([])
@@ -175,12 +176,13 @@ onBeforeUnmount(() => {
 
 <template>
   <main class="rv" aria-labelledby="rv-title">
-    <a class="rv-back" :href="`#/p/${id}`">&larr; Back to the passage</a>
-    <a v-if="holdsBase" class="rv-back" href="#/holds">&nbsp;&middot;&nbsp;Held narration takes (team passcode)</a>
+    <a class="rv-back" :href="demoReview ? '#/class-demo?as=priya' : `#/p/${id}`">&larr; {{ demoReview ? 'Back to content work' : 'Back to the passage' }}</a>
+    <a v-if="holdsBase && !demoReview" class="rv-back" href="#/holds">&nbsp;&middot;&nbsp;Held narration takes (team passcode)</a>
     <p v-if="error" class="muted" role="alert">{{ error }}</p>
     <template v-else-if="data">
       <h1 id="rv-title">Check word help: {{ data.title }}</h1>
-      <p class="rv-lede">
+      <p v-if="demoReview" class="rv-lede">Sample content queue. Read or listen, then choose Approve or Needs a fix. Choices stay in this browser.</p>
+      <p v-else class="rv-lede">
         For grown-ups. The meanings, word parts and voice clips below were made by a computer. Read or listen, then choose
         <strong>Approve</strong> or <strong>Needs a fix</strong>. Your choices are saved in this browser only. Use
         <strong>Save as JSON</strong> to hand them to whoever updates the data files.
@@ -258,7 +260,7 @@ onBeforeUnmount(() => {
       <p v-else class="rv-lede">Nothing here{{ filter === 'todo' ? ': every item has a choice.' : '.' }}</p>
       <button v-if="shown.length > limit" type="button" class="rv-btn" @click="limit += 30">Show {{ Math.min(30, shown.length - limit) }} more ({{ shown.length - limit }} left)</button>
 
-      <section class="rv-export" aria-labelledby="rv-ex-h">
+      <section v-if="!demoReview" class="rv-export" aria-labelledby="rv-ex-h">
         <h2 id="rv-ex-h">Save your choices</h2>
         <div class="rv-actions">
           <button type="button" class="rv-btn" @click="download">Save as JSON</button>

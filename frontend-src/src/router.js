@@ -20,6 +20,8 @@ export const route = computed(() => {
   const holds = holdsBase ? hash.value.match(/^#\/holds(?:\/(all)|\/([\w-]+)\/(generated|human))?\/?$/) : null
   if (holds) return { name: 'holds', all: !!holds[1], id: holds[2], voice: holds[3] }
   if (!PUBLIC_SAMPLE && /^#\/experiments\/?$/.test(hash.value)) return { name: 'experiments' }
+  const classDemo = PUBLIC_SAMPLE ? null : hash.value.match(/^#\/class-demo\/?(?:\?as=([a-z]+))?$/)
+  if (classDemo) return { name: 'classDemo', person: classDemo[1] || 'teacher' }
   if (/^#\/teacher\/?(?:\?|$)/.test(hash.value)) return { name: 'library', teacher: true }
   const teacherClass = PUBLIC_SAMPLE ? null : hash.value.match(/^#\/teacher\/class\/([\w-]+)/)
   if (teacherClass) return { name: 'teacherClass', id: teacherClass[1] }

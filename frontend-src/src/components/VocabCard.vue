@@ -8,7 +8,8 @@ import ReviewMark from './ReviewMark.vue'
 import { verifyAudio, needsAudioVerification } from '../review'
 import { PUBLIC_SAMPLE } from '../mode'
 
-const props = defineProps({ card: Object, anchor: Object, focusOnOpen: Boolean, saying: Boolean, compact: Boolean })
+const props = defineProps({
+  hideReview: Boolean, card: Object, anchor: Object, focusOnOpen: Boolean, saying: Boolean, compact: Boolean })
 const emit = defineEmits(['close', 'say', 'guide-start'])
 // card.guide = syllable entry (replaces the single speaker button); card.hold = opened by press-and-hold;
 // card.canSay = a spoken meaning exists (hold cards)
@@ -126,10 +127,10 @@ defineExpose({ el: pop })
         <span v-if="card.pos" class="vpop-pos">{{ card.pos }}</span>
         <button type="button" class="vpop-close" aria-label="Close" @click="emit('close')">&times;</button>
       </div>
-      <ReviewMark v-for="source in compact ? [] : reviewSources" :key="source.pid" :items="source.items" :pid="source.pid" />
+      <ReviewMark v-for="source in compact || hideReview ? [] : reviewSources" :key="source.pid" :items="source.items" :pid="source.pid" />
       <!-- The opted-in card already carries the eligible guide item in reviewSources. Hide the
            guide's fallback draft note while leaving its pid blank to avoid a mount-time fetch. -->
-      <SyllableGuide v-if="!compact && card.guide" :key="card.id" class="vpop-guide" :class="{ 'vpop-guide-policy': card.helpMode && card.helpMode !== 'current' }" :entry="card.guide" :pid="!card.helpMode || card.helpMode === 'current' ? card.pid : ''" :sid="card.sid" :mark-kid="false" @start="emit('guide-start')" />
+      <SyllableGuide v-if="!compact && card.guide" :key="card.id" class="vpop-guide" :class="{ 'vpop-guide-policy': card.helpMode && card.helpMode !== 'current' }" :entry="card.guide" :pid="!card.helpMode || card.helpMode === 'current' ? card.pid : ''" :sid="card.sid" :mark-kid="false" :hide-review="hideReview" @start="emit('guide-start')" />
       <p v-if="card.definition" class="vpop-def">{{ card.definition }}</p>
       <p v-if="!compact && card.example" class="vpop-ex">{{ card.example }}</p>
       <p v-if="card.spanish" class="vpop-es" lang="es">En español: {{ card.spanish }}</p>

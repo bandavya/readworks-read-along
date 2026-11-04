@@ -16,9 +16,9 @@ import { PUBLIC_SAMPLE } from '../mode'
 
 const props = defineProps({ id: String })
 const assigned = reactive(linkSettings())
-const autoWords = ref(false)
-try { autoWords.value = globalThis.localStorage?.getItem('soundAlong.autoWordCards.v1') === 'true' } catch { /* storage unavailable */ }
-watch(autoWords, (on) => { try { globalThis.localStorage?.setItem('soundAlong.autoWordCards.v1', String(on)) } catch { /* storage unavailable */ } })
+const autoWords = ref(assigned.demo ? assigned.vocabAutoShow : false)
+try { if (!assigned.demo) autoWords.value = globalThis.localStorage?.getItem('soundAlong.autoWordCards.v1') === 'true' } catch { /* storage unavailable */ }
+watch(autoWords, (on) => { try { if (!assigned.demo) globalThis.localStorage?.setItem('soundAlong.autoWordCards.v1', String(on)) } catch { /* storage unavailable */ } })
 
 const data = shallowRef(null)
 const gloss = shallowRef(null)
@@ -36,10 +36,10 @@ const needsTap = ref(false)
 const settings = reactive({
   voice: assigned.voice || store.get('kid-voice', 'human'),
   rate: store.get('kid-rate', 1),
-  size: store.get('kid-size', 'M'),
-  font: store.get('kid-reading-font', 'andika'),
-  spacing: store.get('reading-spacing', false),
-  tint: store.get('reading-tint', false),
+  size: assigned.demo ? assigned.size : store.get('kid-size', 'M'),
+  font: assigned.demo ? assigned.font : store.get('kid-reading-font', 'andika'),
+  spacing: assigned.demo ? assigned.spacing : store.get('reading-spacing', false),
+  tint: assigned.demo ? assigned.contrast : store.get('reading-tint', false),
   lineGuide: store.get('kid-line-guide', false),
 })
 settings.rate = Math.min(1.25, Math.max(0.75, Number(settings.rate) || 1))
@@ -48,12 +48,12 @@ if (!['andika', 'sans'].includes(settings.font)) settings.font = 'andika'
 settings.spacing = settings.spacing === true
 settings.tint = settings.tint === true
 settings.lineGuide = settings.lineGuide === true
-watch(() => settings.voice, (v) => { if (!assigned.fromTeacher) store.set('kid-voice', v) })
+watch(() => settings.voice, (v) => { if (assigned.demo) window.dispatchEvent(new CustomEvent('teacherDemo:choice', { detail: { studentId: assigned.student, key: 'voice', value: v } })); else if (!assigned.fromTeacher) store.set('kid-voice', v) })
 watch(() => settings.rate, (v) => store.set('kid-rate', v))
-watch(() => settings.size, (v) => store.set('kid-size', v))
-watch(() => settings.font, (v) => store.set('kid-reading-font', v))
-watch(() => settings.spacing, (v) => store.set('reading-spacing', v))
-watch(() => settings.tint, (v) => store.set('reading-tint', v))
+watch(() => settings.size, (v) => { if (!assigned.demo) store.set('kid-size', v) })
+watch(() => settings.font, (v) => { if (!assigned.demo) store.set('kid-reading-font', v) })
+watch(() => settings.spacing, (v) => { if (!assigned.demo) store.set('reading-spacing', v) })
+watch(() => settings.tint, (v) => { if (!assigned.demo) store.set('reading-tint', v) })
 watch(() => settings.lineGuide, (v) => store.set('kid-line-guide', v))
 const sizeMul = computed(() => ({ S: 0.88, M: 1, L: 1.2, XL: 1.4, XXL: 1.6 })[settings.size] || 1)
 
@@ -128,7 +128,7 @@ onMounted(async () => {
   }
   document.title = `${data.value.title} · Sound Along kid view`
   if (!voices.value.some((v) => v.id === settings.voice)) settings.voice = voices.value[0]?.id || 'human'
-  if (assigned.soundOn !== false) speakWelcome()
+  if (!assigned.demo && assigned.soundOn !== false) speakWelcome()
 })
 onBeforeUnmount(() => {
   window.removeEventListener('hashchange', onLinkChange)
@@ -147,6 +147,12 @@ function onLinkChange() {
     return
   }
   settings.voice = next.voice || store.get('kid-voice', 'human')
+  if (next.demo) { settings.size = next.size; settings.font = next.font; settings.spacing = next.spacing; settings.tint = next.contrast; autoWords.value = next.vocabAutoShow }
+  else {
+    settings.size = store.get('kid-size', 'M'); settings.font = store.get('kid-reading-font', 'andika')
+    settings.spacing = store.get('reading-spacing', false); settings.tint = store.get('reading-tint', false)
+    try { autoWords.value = globalThis.localStorage?.getItem('soundAlong.autoWordCards.v1') === 'true' } catch { autoWords.value = false }
+  }
   if (voices.value.length && !voices.value.some((v) => v.id === settings.voice)) settings.voice = voices.value[0].id
   if (next.fromTeacher && !next.soundOn) {
     prompts.interrupt()
@@ -197,7 +203,7 @@ async function goHome() {
   screen.value = 'start'
   await nextTick()
   viewEl.value?.querySelector('.kv-choice')?.focus({ preventScroll: true })
-  speakWelcome()
+  if (!assigned.demo) speakWelcome()
 }
 async function toWords() {
   prompts.interrupt()
@@ -253,23 +259,23 @@ const vocabCards = computed(() => {
   <main
     ref="viewEl"
     class="kv"
-    :class="{ 'kv-speaking': speaking, 'kv-font-sans': settings.font === 'sans', 'kv-spaced': settings.spacing, 'kv-calm': settings.tint }"
+    :class="{ 'kv-speaking': speaking, 'kv-font-sans': settings.font === 'sans', 'kv-spaced': settings.spacing, 'kv-calm': settings.tint && !assigned.demo, 'td-kid-contrast': assigned.demo && settings.tint }"
     :style="{ '--z': z, '--size-mul': sizeMul }"
     @contextmenu.prevent
   >
     <div v-if="error" class="kv-msg">
       <p>{{ error }}</p>
-      <a class="kv-link" href="#/">Back to the list</a>
+      <a class="kv-link" :href="assigned.demo ? `#/class-demo?as=${assigned.student || 'teacher'}` : '#/'">Back to the list</a>
     </div>
     <div v-else-if="!data" class="kv-msg" role="status"><p>Loading&hellip;</p></div>
 
     <section v-else-if="assigned.fromTeacher && !assigned.soundOn" class="kv-plain">
-      <p class="kv-assigned-note">Set by your teacher</p>
+      <p v-if="!assigned.demo" class="kv-assigned-note">Set by your teacher</p>
       <h1>{{ data.title }}</h1>
       <div :lang="data.lang === 'ES' ? 'es' : 'en'" v-html="data.html"></div>
     </section>
     <template v-else>
-      <p v-if="assigned.fromTeacher" class="kv-assigned-note">Set by your teacher</p>
+      <p v-if="assigned.fromTeacher && !assigned.demo" class="kv-assigned-note">Set by your teacher</p>
       <KidStart v-if="screen === 'start'" :title="data.title" :need-tap="needsTap" :has-voice="!PUBLIC_SAMPLE || voices.length > 0" @choose="choose" />
       <KidReader
         v-else-if="screen === 'read'"
@@ -299,6 +305,7 @@ const vocabCards = computed(() => {
         @again="readAgain"
       />
       <KidGrownups
+        v-if="!assigned.demo"
         v-model:open="panelOpen"
         :settings="settings"
         :auto-words="autoWords"
@@ -308,6 +315,7 @@ const vocabCards = computed(() => {
         @request-open="openPanel"
       />
     </template>
+    <a v-if="assigned.demo" class="kv-demo-back" :href="`#/class-demo?as=${assigned.student || 'teacher'}`">Back to my reading</a>
     <div id="kid-feedback-slot" class="kv-feedback-slot"></div>
   </main>
 </template>

@@ -6,6 +6,8 @@ import { computed } from 'vue'
 const props = defineProps({
   options: { type: Array, required: true },
   students: { type: Array, required: true }, // [{ name, progress: { optionId: value } }]
+  showStatus: { type: Boolean, default: false },
+  note: { type: String, default: '' },
 })
 const columns = computed(() => props.options.filter((option) => option.teacher))
 const rows = computed(() => [...props.students].sort((a, b) => a.name.localeCompare(b.name)))
@@ -32,16 +34,18 @@ const opened = (student) => student.progress?.opened > 0
     </div>
     <div class="dash-wrap">
       <table>
-        <thead><tr><th scope="col">Student</th><th v-for="option in columns" :key="option.id" scope="col">{{ option.teacherLabel }}</th></tr></thead>
+        <thead><tr><th scope="col">Student</th><th v-if="showStatus" scope="col">Status</th><th v-for="option in columns" :key="option.id" scope="col">{{ option.teacherLabel }}</th></tr></thead>
         <tbody>
           <tr v-for="student in rows" :key="student.name">
             <th scope="row">{{ student.name }}<span v-if="!opened(student)" class="dash-none"> · not opened here</span></th>
+            <td v-if="showStatus">{{ student.status }}</td>
             <td v-for="option in columns" :key="option.id">{{ cell(option, student) }}</td>
           </tr>
         </tbody>
       </table>
     </div>
-    <p class="dash-note">"Not opened here" may mean absent, reading on paper, or a network problem. "Audio played" is about the player, not what a child heard or read. Blank tools are not a problem: a strong reader may need none. These show use, not how well anyone reads.</p>
+    <p class="dash-note" v-if="note">{{ note }}</p>
+    <p class="dash-note" v-else>"Not opened here" may mean absent, reading on paper, or a network problem. "Audio played" is about the player, not what a child heard or read. Blank tools are not a problem: a strong reader may need none. These show use, not how well anyone reads.</p>
   </section>
 </template>
 

@@ -3,7 +3,7 @@ import { record } from '../usage'
 import { helpChoice, eligibleHelp } from '../helpPolicy'
 import { PUBLIC_SAMPLE } from '../mode'
 
-export function useAutoWordCards({ id, data, soundOn, state, spanish, tab, getEngine }) {
+export function useAutoWordCards({ id, data, soundOn, state, spanish, tab, getEngine, persist = () => true }) {
   const help = typeof helpChoice === 'function' ? helpChoice() : 'current'
   const autoWords = ref(false)
   try { autoWords.value = globalThis.localStorage?.getItem('soundAlong.autoWordCards.v1') === 'true' } catch { /* private browsing */ }
@@ -19,7 +19,7 @@ export function useAutoWordCards({ id, data, soundOn, state, spanish, tab, getEn
     autoAnchor.value = null
   }
   watch(autoWords, (on) => {
-    try { globalThis.localStorage?.setItem('soundAlong.autoWordCards.v1', String(on)) } catch { /* private browsing */ }
+    try { if (persist()) globalThis.localStorage?.setItem('soundAlong.autoWordCards.v1', String(on)) } catch { /* private browsing */ }
     if (!on) dismissAutoCard()
   })
   function onCurrentWord(k, prevK) {

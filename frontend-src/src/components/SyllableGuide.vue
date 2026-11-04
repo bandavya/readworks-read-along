@@ -19,6 +19,7 @@ const props = defineProps({
   note: { type: String, default: '' }, // '' | 'short' | 'full' : adult-facing "not reviewed" text
   pid: { type: String, default: '' }, // passage + sense ids let the guide look up its review state (review.js);
   sid: { type: String, default: '' }, // without them it behaves as before and says "not checked yet"
+  hideReview: Boolean,
   markKid: { type: Boolean, default: true }, // icons-only (kid) guides show the tiny draft marker unless the parent does
 })
 const emit = defineEmits(['start', 'done'])
@@ -143,7 +144,7 @@ defineExpose({ playWhole, playSlow, stop })
         <span v-if="!iconsOnly" class="sg-label">Slowly</span>
       </button>
     </div>
-    <template v-if="presenting" />
+    <template v-if="presenting || hideReview" />
     <template v-else-if="note && !iconsOnly">
       <p v-if="rstate === 'draft'" class="sg-note" data-review="draft">
         Computer voice, not checked by a person yet.<template v-if="note === 'full' && entry.uncertainty"> {{ entry.uncertainty }}</template>
