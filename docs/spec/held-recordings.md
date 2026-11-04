@@ -6,20 +6,15 @@ Tools for people · Status: built, off by default
 
 Sometimes a check can't tell whether a voice said the written words. That take is held, and a person has to decide. The reviewer panel is built for a content reviewer, not a child, and works through one flagged spot at a time.
 
-For each spot it shows the written word, what the recognizer heard, and the sentence around it. The reviewer can play the word or sentence, compare an older take when one exists, mark “Sounds right” or “Sounds wrong,” and leave a note. After the last flag, the panel says what remains unresolved and offers the fitting next step: clear the hold, publish the take, or ask for a new generated take.
+For each spot it shows the written word, what the recognizer heard, and the sentence around it. The reviewer can play the word or sentence, compare an older take when one exists, mark “Sounds right” or “Sounds wrong,” and leave a note. After the last flag, the panel says what remains unresolved and offers the fitting next step: clear the hold, publish the take, ask for a new generated take, or put back the older take.
 
 Each answer is tied to the exact take it was given about. If the take changes, pending answers are dropped instead of landing on the wrong audio. Showing a flagged word, or leaving it unanswered, never counts as approving it.
 
 **An answer belongs to one particular take, and publishing needs a separate decision.**
 
-The chart shows a held take moving from listening to a decision, with the answers carrying the take's fingerprint.
+A held take moves from listening to a decision, and the answers carry the take's fingerprint:
 
-```mermaid
-flowchart LR
- A["Held take"] -->|"flags"| B["Listen and answer"]
- B -->|"answers and fingerprint"| C["Decision screen"]
- C -->|"reviewer action"| D["Request to the server"]
-```
+![A held take, a reviewer listening and answering sounds right or sounds wrong, and the steps offered after the last flag, depending on the answers](shots/fig-held-recordings.svg)
 
 ## How it connects
 

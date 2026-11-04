@@ -6,36 +6,15 @@ Making the audio · Status: built and tested locally
 
 Sound Along runs as one package in Amazon's cloud. It holds a store for passages, a store for recordings, the reader website, a job table, and the audio workflow. When a file lands in the passage store, a chain of small tasks runs. They read the text, check whether its audio already exists, make a new recording if needed, check it, and publish the result. The passage and recording stores stay private. The reader site is served through a public delivery network.
 
-The ordinary setup uses the Joanna voice and publishes to the reader. Optional switches add the Ruth voice, a check of heard words, and a signed submission service. The voice and check switches change the workflow itself. The submission service changes only how a passage can enter. A cached job can skip generation, and a held or failed job never reaches normal completion.
+The ordinary setup uses the Joanna voice and publishes to the reader. Optional switches add the Ruth voice, a check of heard words, and a signed submission service. The voice and check switches change the workflow itself. The submission service changes only how a passage can enter. A cached job can skip generation, and a held or failed job stops before publishing.
 
 It helps to record which switches each deployment used, so a content teammate can tell how a passage was made.
 
 **The switches are deployment choices, and the default path is neural audio, structural checks, and reader publication.**
 
-Follow the default path down the left, and see where each switch adds a branch:
+Follow the blue line for the default path. Each dashed box is added by a switch:
 
-```mermaid
-flowchart TD
-  A["Passage upload"] -->|ID and file location| B["Load text, clean, fingerprint, check for existing audio"]
-  B -->|"found, reader current"| Z["Already generated"]
-  B -->|"found, reader missing"| R["Publish to reader"]
-  B -->|new| C["Submit audio request"]
-  C -->|failed| F["Generation failed"]
-  C -->|"done, default voice"| V["Check outputs"]
-  C -->|"done, Ruth voice on"| T["Recognize speech for word times"]
-  T -->|failed| F
-  T -->|timed marks| V
-  V -->|invalid| F
-  V -->|"valid, word check off"| M["Write job record and passage copy"]
-  V -->|"valid, word check on"| Q["Recognize and compare words"]
-  Q -->|held| H["Held for voice check"]
-  Q -->|clear| M
-  M -->|"reader publishing on"| R
-  M -->|"reader publishing off"| E["Record metrics, done"]
-  R -->|failed| RF["Publication failure recorded"]
-  R -->|new audio| E
-  R -->|existing audio| G["Done, no metrics"]
-```
+![The audio workflow left to right, with dashed boxes for the switches, an amber box where a take waits for a person, and gray boxes for other endings](shots/fig-aws-stack.svg)
 
 ## How it connects
 

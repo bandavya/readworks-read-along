@@ -12,16 +12,9 @@ A count of timed words is not enough to judge a passage. An interjection can fil
 
 **A timing row drives the highlight; it does not show that the word was spoken correctly.**
 
-Each end comes from the next word's start, and the last word gets 0.4 seconds:
+Each end comes from the next word's start, and the last word gets an estimate:
 
-```mermaid
-flowchart LR
-  A["Word start marks"] -->|positions in text| B["Match to passage words"]
-  B -->|start of next word| C["End time"]
-  B -->|last word: start + 0.4 s| C
-  C -->|start, end| D["Timing row"]
-  B -->|punctuation only| E["No highlight"]
-```
+![A spoken sentence with a start mark at each word, and the table those marks become: each end is the next word's start, and the last word gets its start plus 0.4 seconds](shots/fig-word-timing.svg)
 
 ## How it connects
 

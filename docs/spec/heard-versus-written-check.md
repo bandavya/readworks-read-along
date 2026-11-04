@@ -14,13 +14,7 @@ Passing means the recognition run found no blocking difference. It does not mean
 
 A clear result moves on; a difference or an error holds the take:
 
-```mermaid
-flowchart LR
-  A["Validated MP3"] -->|audio| B["Recognize heard words"]
-  B -->|transcript| C["Compare with text"]
-  C -->|clear| D["Publish steps"]
-  C -->|difference or error| E["Hold and reasons"]
-```
+![Speech recognition's words compared with the page: a replaced word, a dropped word or an extra phrase holds the take, as does a failed recognition; otherwise it goes on to publish](shots/fig-heard-versus-written.svg)
 
 ## How it connects
 

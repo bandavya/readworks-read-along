@@ -14,14 +14,9 @@ The highlight is only as good as its timing data. If the recording and the text 
 
 **The recording's clock drives the highlight, and the timing data sets how accurate it is.**
 
-The diagram follows one tick of the clock to a lit word.
+This follows one tick of the clock to a lit word:
 
-```mermaid
-flowchart LR
-  A["Recording time"] -->|"look up"| B["Voice timing list"]
-  B -->|"word number"| C["Word on page"]
-  C -->|"light it and scroll to it"| D["Reader view"]
-```
+![The recording's clock at one tick, the timing list finding the latest word whose start has passed, and that word lit on the page; dragging, pace, voice and taps all act on the clock](shots/fig-reader-engine.svg)
 
 ## How it connects
 

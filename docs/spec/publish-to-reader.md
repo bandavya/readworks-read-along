@@ -14,14 +14,7 @@ The reader labels a generated voice as needing a human check, because automatic 
 
 The library list is updated last, after everything else is in place:
 
-```mermaid
-flowchart LR
-  A["Checked MP3 and marks"] -->|marks and text| B["Map marks to words"]
-  B -->|MP3 copy| C["Reader audio folder"]
-  B -->|passage record| D["Passage record"]
-  D -->|row added last| E["Library list"]
-  B -->|mismatch| F["Publication failure recorded"]
-```
+![The MP3, start marks and text are checked to fit, then the sound, the passage record and the library list are written in that order; a mismatch records a publication failure](shots/fig-publish-to-reader.svg)
 
 ## How it connects
 
