@@ -136,9 +136,7 @@ deploy without `-c readerBridge=true`. A later frontend publish merges live
 `data/index.json` rows into a local index. Older local `data/<id>.json` files
 can still replace generated documents, so publish local media before generation.
 
-## Voice quality gate (optional)
-
-GPT-6's suggestion, unruled by Alex: use `npx cdk synth -c readerBridge=true -c qualityGate=true`
+## Voice quality gate (optional) use `npx cdk synth -c readerBridge=true -c qualityGate=true`
 to inspect the gate, or deploy with both flags when authorized. The gate is off by
 default. After `ValidateOutputs`, it asks Amazon Transcribe what words the new
 MP3 contains. A clean word match continues to publishing; a swap, omission, or

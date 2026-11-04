@@ -1,6 +1,6 @@
 # Passage service v1
 
-This is gpt-6-astra's suggestion, unruled by Alex. It is off by default. `-c passageApi=true` adds an IAM signed REST API without changing the existing browser API or processing path. `-c apiSourceBucket=<bucket-name>` optionally permits a pointer into one other S3 bucket. The API Lambda only writes `api-jobs/<id>.json` and sanitized `passages/<id>.json` in the team's content bucket. The existing S3 notification starts Step Functions.
+This It is off by default. `-c passageApi=true` adds an IAM signed REST API without changing the existing browser API or processing path. `-c apiSourceBucket=<bucket-name>` optionally permits a pointer into one other S3 bucket. The API Lambda only writes `api-jobs/<id>.json` and sanitized `passages/<id>.json` in the team's content bucket. The existing S3 notification starts Step Functions.
 
 ## Identity and requests
 
