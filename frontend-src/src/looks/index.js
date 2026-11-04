@@ -1,6 +1,7 @@
 // One entry for every experimental look: route.look picks the look, route.screen the screen (library / p / kid).
 // #/looks opens a theme library; the theme bar above every screen does the choosing. Unknown looks fall through to Sharpened.
 import { defineAsyncComponent, h } from 'vue'
+import { focused } from '../focused.js'
 
 const loadingComponent = { render: () => h('p', { role: 'status', 'aria-live': 'polite' }, 'Opening…') }
 const errorComponent = {
@@ -31,8 +32,8 @@ const MixLibrary = lazyLook(() => import('./mix/MixLibrary.vue'))
 export function resolveLook(r) {
   if (r.name === 'looks' || r.screen === 'compare') return h(PaletteLibrary)
   if (r.name === 'look' && r.look === 'mix') {
-    if (r.screen === 'p') return h(MixReader, { id: r.id, key: `mix:p:${r.id}` })
-    if (r.screen === 'kid') return h(MixKid, { id: r.id, key: `mix:kid:${r.id}` })
+    if (r.screen === 'p') return h(MixReader, { id: r.id, key: `mix:p:${r.id}:${focused.value}` })
+    if (r.screen === 'kid') return focused.value ? h(MixReader, { id: r.id, kid: true, key: `mix:article-kid:${r.id}` }) : h(MixKid, { id: r.id, key: `mix:kid:${r.id}` })
     return h(MixLibrary)
   }
   if (r.name === 'look' && r.look === 'palette' && r.screen === 'p') return h(Palette, { id: r.id })

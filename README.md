@@ -123,6 +123,13 @@ node scripts/generate.js --arn <StateMachineArn> --passage demo-passage-001
 # open https://<DistributionDomain>/
 ```
 
+## Focused mode
+
+The site opens in focused mode: one reader in ReadWorks' colors and fonts, with a speed slider, voice, text size, and
+three ways to follow along. Younger readers get the same article with larger text. The **All features** button brings
+back the themes, focus tools, paged kid view and teacher demo for comparing ideas. `npm run test:frontend` covers the
+logic, and `node frontend-src/tests/focused_browser.mjs <site url> [screenshot folder]` checks it in Edge with sound muted.
+
 ## Reader bridge
 
 On a fresh deployment, deploy with `npm run deploy`,

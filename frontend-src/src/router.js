@@ -2,8 +2,9 @@
 import { ref, computed } from 'vue'
 import { PUBLIC_SAMPLE } from './mode'
 import { holdsBase } from './holdsApi'
+import { focused } from './focused.js'
 
-if (import.meta.env?.VITE_SHOWCASE === '1' && /^(#\/?)?$/.test(window.location.hash)) window.location.hash = '#/look/mix/'
+if (!PUBLIC_SAMPLE && (import.meta.env?.VITE_SHOWCASE === '1' || focused.value) && /^(#\/?)?$/.test(window.location.hash)) window.location.hash = '#/look/mix/'
 const hash = ref(window.location.hash || '#/')
 window.addEventListener('hashchange', () => {
   hash.value = window.location.hash || '#/'

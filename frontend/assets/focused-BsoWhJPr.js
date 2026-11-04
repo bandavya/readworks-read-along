@@ -1,0 +1,1 @@
+import{m as e}from"./preload-helper-Bl1nDMYN.js";var t=`rwp-focused-mode`;function n(){try{return localStorage.getItem(t)!==`off`}catch{return!0}}var r=e(n());function i(e){r.value=e;try{localStorage.setItem(t,e?`on`:`off`)}catch{}}export{i as n,r as t};

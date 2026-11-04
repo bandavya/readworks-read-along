@@ -30,6 +30,7 @@ import './teacherDemo/reader.css'
 import StudentPick from './dataKit/classroom/StudentPick.vue'
 import { readingAs, needsPick, notMe } from './dataKit/classroom/classLink'
 import { PUBLIC_SAMPLE } from './mode'
+import { focused, setFocused } from './focused.js'
 import BuddyHost from './character/BuddyHost.js'
 import { BUDDY_UI, buddyChoice } from './character/buddies.js'
 const demoRoute = computed(() => route.value.name === 'classDemo' || (['passage', 'kid'].includes(route.value.name) ? linkSettings().demo : route.value.name === 'review' && window.location.hash.includes('td=1')))
@@ -37,7 +38,8 @@ const showPick = computed(() => needsPick.value && !demoRoute.value)
 </script>
 
 <template>
-  <ThemeBar v-if="!demoRoute && !PUBLIC_SAMPLE && (SHOWCASE || route.name === 'look' || route.name === 'looks')" />
+  <ThemeBar v-if="!focused && !demoRoute && !PUBLIC_SAMPLE && (SHOWCASE || route.name === 'look' || route.name === 'looks')" />
+  <button v-if="!focused && !PUBLIC_SAMPLE && !demoRoute" type="button" class="focused-back" @click="setFocused(true)">Back to focused mode</button>
   <aside v-if="!SHOWCASE && route.name !== 'kid' && route.name !== 'classDemo' && !demoRoute && (PUBLIC_SAMPLE || (route.name !== 'look' && route.name !== 'looks'))" class="banner" aria-label="About this prototype">{{ PUBLIC_SAMPLE ? 'Sound Along public sample · silent reading prototype' : 'Prototype for ReadWorks · not the live site · private' }}</aside>
   <p v-if="!demoRoute && readingAs && !needsPick && route.id === readingAs.passageId" class="reading-as">Reading as {{ readingAs.name }}. Your teacher can see that you opened this, how much audio played, and which tools you used, but not which words. <button type="button" @click="notMe">Not you?</button></p>
   <StudentPick v-if="showPick" />
@@ -54,6 +56,6 @@ const showPick = computed(() => needsPick.value && !demoRoute.value)
   <Compare v-else-if="route.name === 'compare'" :key="route.id" :id="route.id" />
   <Experiments v-else-if="route.name === 'experiments'" />
   <Passage v-else-if="route.name === 'passage'" :key="route.id" :id="route.id" />
-  <BuddyHost v-if="BUDDY_UI && buddyChoice && !PUBLIC_SAMPLE && !demoRoute" />
+  <BuddyHost v-if="BUDDY_UI && buddyChoice && !focused && !PUBLIC_SAMPLE && !demoRoute" />
   <Feedback v-if="!demoRoute && (SHOWCASE || (route.name !== 'look' && route.name !== 'looks' && route.name !== 'holds' && route.name !== 'classDemo'))" :pill="!SHOWCASE" />
 </template>

@@ -25,6 +25,7 @@ const props = defineProps({
 const emit = defineEmits(['start', 'done'])
 
 const audio = new Audio()
+const SLOW_WORD_RATE = 0.6
 const mode = ref('') // 'whole' | 'slow' | 'one:<i>' | ''
 const activeIndex = ref(-1)
 const wholeLit = ref(false)
@@ -99,9 +100,18 @@ function play(path, m) {
   })
 }
 
-function playWhole() { return play(props.entry.audio?.whole, 'whole') }
-function playSlow() { return play(props.entry.audio?.slow, 'slow') }
-function playOne(i) { return play(props.entry.audio?.syllables?.[i], `one:${i}`) }
+function playWhole() { setRate(1); return play(props.entry.audio?.whole, 'whole') }
+// Setting a new source resets playbackRate to the default rate, so set both.
+function setRate(rate) { audio.defaultPlaybackRate = rate; audio.playbackRate = rate }
+
+// A one-syllable word has nothing to split, so its slow clip only repeats it. Say it slowly instead.
+function playSlow() {
+  if (parts.value.length > 1) { setRate(1); return play(props.entry.audio?.slow, 'slow') }
+  setRate(SLOW_WORD_RATE)
+  audio.preservesPitch = true
+  return play(props.entry.audio?.whole || props.entry.audio?.slow, 'slow')
+}
+function playOne(i) { setRate(1); return play(props.entry.audio?.syllables?.[i], `one:${i}`) }
 
 onBeforeUnmount(() => {
   releaseGuide(stop)
@@ -115,7 +125,7 @@ defineExpose({ playWhole, playSlow, stop })
 </script>
 
 <template>
-  <div class="sg" :class="{ 'sg-icons': iconsOnly }">
+  <div class="sg" :class="{ 'sg-icons': iconsOnly, 'sg-one': parts.length === 1 }">
     <div class="sg-row" role="group" :aria-label="`Parts of ${entry.word}`">
       <template v-for="(part, i) in parts" :key="i">
         <span v-if="i" class="sg-dot" aria-hidden="true">&middot;</span>

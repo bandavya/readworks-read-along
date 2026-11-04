@@ -23,3 +23,5 @@
 .mix-library-more label{flex:0 1 200px;margin:0}
 .mix-library-filters{background:none;border:0;padding:0}
 .mix-library-more{flex:1 1 auto}
+
+.mix-library-top{display:flex;align-items:center;justify-content:space-between;gap:12px}.mix-library-top .mix-all-features{min-height:44px;padding:6px 12px;border:1px solid #9ac8d1;border-radius:5px;background:none;color:#fff;font:inherit;font-weight:700;cursor:pointer}
