@@ -4,8 +4,7 @@ Status as of 2026-11-04. Describes the build in **this repo** (`readworks-read-a
 `alex` line), as deployed to stack **`SoundAlong-alex`** in the event sandbox
 (region `us-west-2`). The live address is shared separately.
 
-Source design: `Sound_Along_AWS_Compatible_Technical_Design.docx`.
-Validation design: `Sound Along — TTS Validation Design Doc.docx`.
+Source designs: the team's technical and validation design documents, not in this repository.
 
 Statements marked **Verified** were checked against the running system or a test. Statements
 marked **Not verified** were not. No child, teacher or ReadWorks reviewer has used it, and
@@ -70,7 +69,7 @@ passages/<id>.json ─► Content bucket ─► S3 event ─► Trigger Lambda �
        │   data/<uuid>.json         (words, html with sa-w spans, voices[].t timing, vocab)
        │   audio/<uuid>/<digest>.mp3 (passage audio)
        │   audio/syl/*.mp3 + data/syllables/<uuid>.json  (pronunciation guide, passage voice)
-       │   data/index.json          (library listing, rebuilt with a read-back check)
+       │   data/index.json          (library listing, updated with a read-back check)
        ▼
   EmitMetrics ─► CloudWatch (namespace SoundAlong, by Source and Voice)
 
@@ -87,7 +86,7 @@ passages/<id>.json ─► Content bucket ─► S3 event ─► Trigger Lambda �
 | Text-to-speech | Amazon Polly — neural (Joanna) default, or generative (Ruth) |
 | Word timing (generative) | Amazon Transcribe batch |
 | Fidelity check | Amazon Transcribe (quality gate) |
-| Job state / library source of truth | Amazon DynamoDB |
+| Job state | Amazon DynamoDB |
 | Browser API | API Gateway HTTP API + Lambda |
 | Metrics | Amazon CloudWatch |
 
@@ -124,8 +123,8 @@ Functions execution. Can also be started with `scripts/generate.js`.
 
 | State | What it does |
 |---|---|
-| LoadPassage → NormalizeText → ComputeTextHash | Read passage; build the spoken text (title, optional byline, body); SHA-256 hash of text + voice + engine |
-| CheckExistingManifest | Approved record with the same hash **and** published reader files → skip (cache hit) |
+| LoadPassage → NormalizeText → ComputeTextHash | Read the passage's `text` field and collapse its whitespace; SHA-256 hash of that text + voice + engine + language |
+| CheckExistingManifest | A job row with the same hash and status `approved` (`generated` with the voice check on) → skip (cache hit). If that row has no `readerPublishedAt`, it publishes to the reader again first. It reads the job row, and doesn't look for the files themselves. |
 | SubmitPollyAudio | Neural: async MP3 + word speech marks. Generative: MP3 only |
 | StartTranscribeWordTimes → WaitForWordTimes → CheckWordTimes | Generative only: Transcribe batch job; align words to the written text; emit a speech-marks-shaped timing file |
 | ValidateOutputs | Real MP3 duration (parsed from MPEG frames, no ffmpeg); last word not timed past the end; pace and longest gap recorded in the job's `qc` field |
@@ -144,7 +143,7 @@ hear generated audio.**
 
 **Voice / timing:**
 - Neural (Joanna): word timing from Polly speech marks.
-- Generative (Ruth): timing from Amazon Transcribe. Per the branch README, the generative path has
+- Generative (Ruth): timing from Amazon Transcribe. Per `README.md`, the generative path has
   been exercised against fake AWS in `tests/test_generative_voice.py` and now on the live `alex`
   stack (5 passages generated). **Not verified:** audio quality by ear.
 
@@ -155,12 +154,12 @@ hear generated audio.**
 Per passage, the reader loads `data/<uuid>.json`:
 - `uuid` (derived from `passageId`), `title`, `grade`, `lexile`, `lang`, `words`
 - `html`: `<p>` per paragraph; each word `<span class="sa-w" data-i="N">`; vocab words wrapped with `data-vocab-sense-id`
-- `voices[]`: `{id, label, voiceId, audio, lead, t, source, review}`. `t` is `[start_s, end_s]` per body word; `lead` covers title/byline words. **The reader plays `voices[0]` by default.**
+- `voices[]`: `{id, label, voiceId, audio, lead, t, source, review}`. `t` is `[start_s, end_s]` per body word; `lead` covers title/byline words. **The focused and classic readers play the voice saved in that browser (a class link's assigned voice comes first in the classic reader). With nothing saved, they play the human voice when the passage has one, and otherwise `voices[0]`.**
 - `vocab`: `{senseId: {word, definition, example, pos, ...}}`
 
-Library listing: `data/index.json` = one row per published passage, rebuilt by the reader bridge
-from DynamoDB with a write-then-read-back check so concurrent runs do not drop entries.
-**Note:** the bridge adds/removes `data/<uuid>.json` but does not prune an index row on delete;
+Library listing: `data/index.json` = one row per published passage. The reader bridge reads the existing
+`data/index.json` from S3, adds or replaces this passage's row, writes it, and reads it back to confirm its own row is there. That makes a dropped entry from concurrent runs less likely, but doesn't rule it out.
+**Note:** the bridge writes `data/<uuid>.json` and never removes passage files or index rows;
 rows are replaced per uuid on regeneration.
 
 ### 5.1 Pronunciation guide ("Words to know")
@@ -173,7 +172,7 @@ For each vocabulary word, generated in the **same Polly voice as the passage**:
 - `data/syllables/<uuid>.json` — `word`, `syllables[]`, `stress_index`, `audio{}`,
   `whole_segments[]`, `slow_phases[]`, in the shape `SyllableGuide.vue` reads
 
-Syllabification uses **pyphen** (Hunspell hyphenation; English dictionaries only, ~0.5 MB,
+Syllabification uses **pyphen** (Hunspell hyphenation; the US English dictionary only,
 bundled in the Lambda). It is approximate, so every entry is marked **"needs human check"**.
 One-syllable words get only a whole clip; the reader plays those slowly via playback rate, so the
 "slow says the word twice" issue does not occur.
@@ -233,10 +232,10 @@ passage voice; sense IDs match across the passage HTML, vocab and syllable data.
 | T04 Timing references the text | Verified (Transcribe-aligned word times published) |
 | T05 Play through the reader | Partly: audio loads and the clock runs in a headless browser. Sound not heard |
 | T06 Highlight within tolerance | Partly: highlight follows the timing data word by word. Tolerance not agreed/measured |
-| T07 Tap a word to seek | Not verified in this build |
+| T07 Tap a word to seek | Partly: a muted scripted run with real mouse clicks tapped a word on two passages on the live site, and the highlight moved to it. Not judged by ear |
 | T08 Student access | Legacy API only; not wired into the reader |
 | T09 Human audio plays | Shipped passages include it; not re-tested here |
-| T10 Same passage twice avoids regeneration | Verified (cache requires published reader files) |
+| T10 Same passage twice avoids regeneration | Verified (a matching finished job row skips regeneration) |
 | T11 Failed job visible/retryable | Verified in the earlier build; the hold/fail paths exist here |
 | T12 Keyboard operation | Not verified |
 | T13 Private storage denies direct access | Verified earlier (both buckets 403) |
@@ -261,7 +260,7 @@ the live site; none judged by ear.
 | Underline-plus-highlight distracting | Open: reader uses highlight; the underline concern needs a reader-style decision |
 | "Help with a word" confusing | Open |
 | Words-to-know layout redundant; Kid view; focus tools unclear | Open (reader UX) |
-| Longer ~1,500-word sample | Open: needs the two passage texts from ReadWorks |
+| Longer ~1,500-word sample | Present: Grandma's Music (1,435 words) and the Jesse Jackson excerpt (2,046 words) are in the live library, with Ruth as their only voice. Not judged by ear. |
 | Match ReadWorks product-page styling for integration | Partly: focused mode already uses ReadWorks colours/fonts |
 
 ---
@@ -270,8 +269,7 @@ the live site; none judged by ear.
 
 - Repo: `github.com/bandavya/readworks-read-along`. Default branch `main`; teammate branch `alex`;
   this build is on **`master`**.
-- Media is gitignored (section 6). `pyphen` is vendored under `lambdas/syllable_audio/` with only
-  the English dictionaries.
+- Media is gitignored (section 6). `pyphen` is vendored under `lambdas/syllable_audio/` with only the US English dictionary.
 
 ---
 
@@ -306,8 +304,8 @@ rows, then re-run, so the new voice is the only (default) voice rather than stac
    leave a stale row. Not observed; the live index is consistent.
 7. **Pronunciation-guide audio only runs on the generative deploy** (bundling); the default Joanna
    deploy would still use the older shipped guide clips.
-8. **Python 3.12 Lambda runtime** and the BB technical document's **Express/Node API layer** gap
-   both still apply (see the BB conformance note in the earlier build's history).
+8. **Python 3.12 Lambda runtime** and the Breaking Barriers technical document's **Express/Node API layer** gap
+   both still apply.
 9. **Estimates and pass bars** in the plan/evaluation docs are proposals, not agreed.
 
 ---
