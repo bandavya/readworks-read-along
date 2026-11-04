@@ -174,6 +174,25 @@ the names list or reruns the passage. Disable the gate by omitting
 `-c qualityGate=true`; removing `lib/quality-gate.ts` and
 `lambdas/quality_gate/` then removes its implementation.
 
+## Generative voice (optional) use `npx cdk synth -c generativeVoice=true`
+Off by default; with it off the synthesized template is unchanged. It switches the voice to Polly generative
+`Ruth`. AWS documents that generative voices return no speech marks, so Polly makes only the MP3. When the audio
+is ready, `StartTranscribeWordTimes` asks Amazon Transcribe for a batch transcript, and `CheckWordTimes` turns its
+word times into a speech-marks-shaped file (one `word` mark per written word, with byte offsets into the normalized
+text). Validation, the manifest and the reader bridge then read that file as before; the reader's voice source reads
+"Polly generative, timed by Amazon Transcribe".
+
+Transcribe's words are aligned to the written text with a difflib word alignment. Numbers are compared as spoken
+words, and a changed spelling of a name keeps its place. A written word Transcribe missed gets an evenly spaced
+time between its neighbors. If fewer than 80% of the spoken words match, the run fails and the reason is saved in
+the job row's `failureReason`. Alignment only times the audio; it does not judge whether Polly read the passage
+well, so use `-c qualityGate=true` as well for that. With both flags the voice check reads the transcript already
+made instead of starting a second job. The switch works with `qualityGate` and `passageApi` on or off.
+
+The code lives in `lambdas/generative_voice/` and loads the worker, voice-check and bridge code from their own folders.
+The cost estimate still counts Polly only. Transcribe's list price (assumed $0.006 per minute, not checked) is not
+added. This path has been run only against fake AWS services in `tests/test_generative_voice.py`, not on AWS.
+
 ## Destroy (after confirming cleanup is permitted)
 
 ```bash
