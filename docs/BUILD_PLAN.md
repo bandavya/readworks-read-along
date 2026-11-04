@@ -1,8 +1,14 @@
 # Sound Along: build plan for team review
 
-Draft of November 4, 2026. Nothing in this plan is built unless it says so. Estimates are
-mine and should be corrected by whoever does the work. Items marked **Decision** need an
-answer before the work that depends on them starts.
+Draft of November 4, 2026. Estimates are mine and should be corrected by whoever does the work.
+Items marked **Decision** need an answer before the work that depends on them starts.
+
+> Status note (2026-11-04): this plan predates the move to the `alex`/`demo-build` line. That build
+> already ships several items the plan treated as future work: focused mode, the Transcribe
+> voice-quality gate, the generative (Ruth) voice path, the reader bridge, real-audio validation
+> with `reviewStatus`, and the pronunciation-guide audio in the passage voice. See `docs/SPEC.md`
+> (final) section 1 and 10 for what is actually deployed. Treat the phases below as the remaining /
+> proposed work, not a from-scratch plan.
 
 Inputs: `Sound Along — TTS Validation Design Doc.docx` (Nov 3), `docs/SPEC.md` (current
 state), the AWS MCP review of the deployed stack (Nov 4), and the request for male and

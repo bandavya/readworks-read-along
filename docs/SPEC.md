@@ -1,540 +1,324 @@
-# Sound Along: build specification
+# Sound Along: build specification (final)
 
-> Note: this spec describes the earlier `sound-along` build (CodeCommit, stack
-> `SoundAlong-sandbox`, compiled-only frontend). This repo is the `alex` build, which has the
-> Vue source in `frontend-src/`, focused mode, a voice quality gate, generative-voice and
-> reader-bridge paths. Treat the architecture, pipeline and data-contract sections as broadly
-> accurate for both builds; treat specific file paths, the CI/CD pipeline and the API details as
-> belonging to the other build. The authoritative docs for this build are its README, `docs/API.md`
-> and `docs/COST.md`.
+Status as of 2026-11-04. Describes the build in **this repo** (`readworks-read-along`, the
+`alex` line), as deployed to stack **`SoundAlong-alex`** in the event sandbox
+(region `us-west-2`). The live address is shared separately.
 
-Status as of 2026-11-04. Describes what is built and deployed in the event sandbox
-(region `us-west-2`, stack `SoundAlong-sandbox`).
 Source design: `Sound_Along_AWS_Compatible_Technical_Design.docx`.
+Validation design: `Sound Along — TTS Validation Design Doc.docx`.
 
-Statements marked **Verified** were checked against the running system. Statements marked
-**Not verified** were not checked. Nothing here has had a child, teacher or ReadWorks reviewer
-use it, and no one has judged the sound by ear.
+Statements marked **Verified** were checked against the running system or a test. Statements
+marked **Not verified** were not. No child, teacher or ReadWorks reviewer has used it, and
+browser checks ran muted, so nobody has judged the sound by ear.
+
+A separate earlier build exists (`sound-along`, CodeCommit, stack `SoundAlong-sandbox`,
+compiled-only frontend). It is not this build. Where the two differ, this document describes the
+`alex` build only.
 
 ---
 
-## 1. Purpose and scope
+## 1. What this is
 
-A read-along experience for short reading passages: the student sees the text, hears it read
-aloud, and sees each word highlighted as it is spoken.
+A browser read-along reader: a student sees a passage, hears it read aloud, and sees each word
+highlighted as it is spoken. Generated audio is produced by Amazon Polly; word timing comes from
+Polly speech marks (neural) or Amazon Transcribe (generative). A pronunciation guide ("Words to
+know") plays each vocabulary word, by syllable, in the same voice as the passage.
 
-The build has three parts:
+The reader opens in **focused mode**: one simple reader in ReadWorks colours and fonts, with a
+speed control, voice, text size and three ways to follow along. An **All features** button reveals
+the theme variants, extra reading tools, paged kid view and a teacher demo, for comparing ideas.
 
-1. **Generation pipeline.** A passage JSON uploaded to S3 becomes audio plus word timing, using
-   Amazon Polly, orchestrated by Step Functions.
-2. **Reader app.** A pre-built Vue app (the "reference" UX) served by CloudFront. Its code is
-   compiled; there is no readable source in this repo.
-3. **CI/CD.** A push to CodeCommit `main` deploys the stack and the app shell.
-
-### Built
+### Built and deployed on `SoundAlong-alex`
 
 | Area | State |
 |---|---|
-| CDK stack (S3, CloudFront, DynamoDB, Lambda, Step Functions, API Gateway, CI/CD) | Deployed |
-| Passage text to Polly audio and speech marks | Deployed, 4 passages generated |
-| Generated passages shown in the reader app (library, highlight, vocab) | Deployed |
-| Dedup of unchanged passages | Deployed |
-| CodeCommit repo, CodePipeline, CodeBuild | Deployed, push-triggered |
-| Browser API (`/passages`, `/access`, `/jobs`, `/generate`) | Deployed, **not used** by the reader app |
-| Passage service: IAM-signed `POST /v1/passages` and `GET /v1/passages/{id}` (see `docs/API.md`) | Deployed, tested with signed calls |
+| CDK v2 (TypeScript) stack; S3 + CloudFront (OAC) + DynamoDB + Step Functions + Lambda + HTTP API | Deployed |
+| Passage text → Polly audio + word timing → reader | Deployed; 5 generated passages live |
+| Generative voice (Polly **Ruth**), timing from Amazon Transcribe | Deployed (`-c generativeVoice=true`); all 5 generated passages use it |
+| Voice quality gate (Transcribe word check; holds on mismatch) | Deployed (`-c qualityGate=true`) |
+| Reader bridge (writes `data/<uuid>.json`, audio, library index) | Deployed |
+| Pronunciation-guide audio in the passage voice (whole/slow/per-syllable) | Deployed (`-c syllableAudio`, on with generative) |
+| Focused mode + Vue source in `frontend-src/` with a build step | Deployed |
+| Passage service: IAM-signed `POST/GET /v1/passages` | In the stack (`-c passageApi=true`); not enabled on the live `alex` stack |
+| Legacy browser API (`/passages`, `/jobs`, `/generate`, `/access`) | Deployed |
 
-### Deferred or out of scope (from the design doc non-goals and later decisions)
+### Not in this build (hackathon non-goals)
 
-Full catalog generation (6,893 passages), ReadWorks production integration, human-audio
-alignment, teacher analytics, Spanish support for generation, production identity, an AI
-evaluator, and the parts of the kit's passage service that need a publication gate or SNS (section 7.1).
+Full catalog generation, ReadWorks production integration, real teacher analytics, full Spanish
+support, production identity, an AI evaluator, and image generation (generated passages show a
+"Picture unavailable" placeholder).
 
 ---
 
 ## 2. Architecture
 
 ```
-                      git push
-  Developer ─────────────────────► CodeCommit (main)
-                                        │ EventBridge
-                                        ▼
-                                  CodePipeline (V2)
-                                        │
-                                  CodeBuild: npm ci, tsc, cdk deploy,
-                                  publish app shell, invalidate CDN
-                                        │
-                                        ▼
-                        ┌───────────────────────────────┐
-                        │      SoundAlong-sandbox       │
-                        └───────────────────────────────┘
+passages/<id>.json ─► Content bucket ─► S3 event ─► Trigger Lambda ─► Step Functions
+                                                                           │
+  LoadPassage ► NormalizeText ► ComputeTextHash ► CheckExistingManifest ─ cached ─► done
+       │ new
+       ▼
+  SubmitPollyAudio ─ generative: MP3 only ─► StartTranscribeWordTimes ► Wait ► CheckWordTimes
+       │ neural: MP3 + speech marks                                              (→ speech-marks shape)
+       ▼
+  ValidateOutputs ► [QualityGate: Transcribe word check] ► WriteManifest ► PublishDemoJson
+       │                                 hold on mismatch ─► HeldForVoiceCheck
+       ▼
+  PublishToReader (reader bridge)  ─► writes to the Frontend bucket:
+       │   data/<uuid>.json         (words, html with sa-w spans, voices[].t timing, vocab)
+       │   audio/<uuid>/<digest>.mp3 (passage audio)
+       │   audio/syl/*.mp3 + data/syllables/<uuid>.json  (pronunciation guide, passage voice)
+       │   data/index.json          (library listing, rebuilt with a read-back check)
+       ▼
+  EmitMetrics ─► CloudWatch (namespace SoundAlong, by Source and Voice)
 
-  passages/<id>.json ─► Content bucket ─► S3 event ─► Trigger Lambda ─► Step Functions
-                                                                            │
-   LoadPassage ► NormalizeText ► ComputeTextHash ► CheckExistingManifest ─ cached ─► done
-        │ new
-        ▼
-   SubmitPollyAudio (audio task + speech-marks task) ► Wait 5s ► CheckPollyStatus ┐
-        ▲                                                           running       │
-        └───────────────────────────────────────────────────────────────────────┘
-        │ completed
-        ▼
-   ValidateOutputs ► WriteManifest ► PublishDemoJson ► PublishReaderData ► EmitMetrics
-
-   PublishReaderData ──► Frontend bucket: audio/, data/<uuid>.json, data/index.json
-                                  │
-   Browser ◄── CloudFront (OAC, HTTPS) ◄──────┘     (Polly output lives in the Audio bucket)
+  Browser ◄── CloudFront (OAC, HTTPS) ◄── Frontend bucket
 ```
+
+| Layer | Service |
+|---|---|
+| IaC | AWS CDK v2 (TypeScript) |
+| Content / audio / frontend storage | Amazon S3 (private, Block Public Access, OAC) |
+| Delivery | Amazon CloudFront |
+| TTS orchestration | AWS Step Functions |
+| Workers | AWS Lambda (Python 3.12) |
+| Text-to-speech | Amazon Polly — neural (Joanna) default, or generative (Ruth) |
+| Word timing (generative) | Amazon Transcribe batch |
+| Fidelity check | Amazon Transcribe (quality gate) |
+| Job state / library source of truth | Amazon DynamoDB |
+| Browser API | API Gateway HTTP API + Lambda |
+| Metrics | Amazon CloudWatch |
 
 ---
 
-## 3. Environment and resources
+## 3. Deploy modes (context flags)
 
-One CDK stack, `SoundAlong-<env>` (`sandbox` by default; `env` context or `SOUND_ALONG_ENV`).
-Removal policy is DESTROY for `sandbox` and `local`, RETAIN otherwise. Region comes from
-`CDK_DEFAULT_REGION` (default `us-east-1` in code; the sandbox runs in `us-west-2`).
+One stack, `SoundAlong-<env>` (`env` context, default `sandbox`; the demo uses `env=alex`).
 
-| Resource | Purpose |
-|---|---|
-| Content bucket | Input passages, mock assignments, manifests, backups |
-| Audio bucket | Raw Polly output and canonical MP3 + speech marks |
-| Frontend bucket | Everything the browser loads (app shell, data, audio, images) |
-| CloudFront distribution | Only public entry point; one origin (Frontend bucket) via OAC |
-| DynamoDB table `JobTable` | Job state and the source of truth for the library index |
-| 11 worker Lambdas + trigger + API Lambda | Python 3.12, 256 MB, 5 min (trigger 1 min, API 15 s) |
-| Step Functions state machine | 15 minute timeout, X-Ray tracing, logs to CloudWatch |
-| HTTP API (API Gateway v2) | Legacy browser API, CORS `*` |
-| CodePipeline, CodeBuild project, artifact bucket, EventBridge rule | CI/CD |
-
-Stack outputs: `ContentBucketName`, `AudioBucketName`, `FrontendBucketName`,
-`DistributionDomain`, `DistributionId`, `ApiUrl`, `StateMachineArn`, `JobTableName`.
-
-### Bucket layout
-
-| Bucket | Prefix | Contents |
+| Flag | Default | Effect |
 |---|---|---|
-| Content | `passages/` | Input passage JSON. **Uploading here starts generation.** |
-| | `content/` | `assignments.json` (mock student access) and published demo JSON |
-| | `manifests/` | One audio manifest per passage |
-| | `submissions/<id>/` | Passages saved by the passage service. A prefix with **no** S3 trigger, so a submission starts exactly one run |
-| | `products/` | Where a pointer submission may read a record from |
-| | `media/` | Backup tarball of the reader media |
-| | `downloads/` | Zip downloads shared via presigned URLs (see section 8) |
-| Audio | `polly/<audioId>/` | Raw Polly task output |
-| | `audio/` | `<audioId>.mp3` and `<audioId>.speechmarks.json` |
-| Frontend | `index.html`, `assets/` | Compiled reader app shell |
-| | `data/` | `index.json`, `index.base.json`, `<uuid>.json`, plus shipped `gloss/`, `syllables/`, `bundles/`, `kid_audio.json` |
-| | `audio/`, `img/`, `look-art/` | Shipped recordings, images, art; plus generated `<uuid>-generated.mp3` |
-| | `timing/` | Generated `<uuid>.<digest>.v1.zip` word-timing files for the passage service |
+| `generativeVoice` | false | Switch the voice to Polly generative **Ruth**; time words with Amazon Transcribe (generative returns no speech marks). The live `alex` stack is deployed with this on. |
+| `qualityGate` | false | After validation, ask Transcribe what words the MP3 contains; a swap/omission/extra holds at `HeldForVoiceCheck` and never reaches the reader. |
+| `readerBridge` | true | Publish generated passages into the reader (`data/`, `audio/`, index). Off with `-c readerBridge=false`. |
+| `syllableAudio` | on with generative | Generate the pronunciation-guide audio in the passage voice. Needs the whole `lambdas/` tree, which only the generative bundle ships, so it is effective only with `generativeVoice`. |
+| `passageApi` | false | Add IAM-signed `POST/GET /v1/passages`. Not enabled on the live `alex` stack. |
+
+Deploy the live configuration:
+```
+npx cdk deploy SoundAlong-alex -c env=alex -c generativeVoice=true
+```
 
 ---
 
 ## 4. Generation pipeline
 
-**Trigger:** S3 `ObjectCreated` on `passages/*.json` in the Content bucket calls the trigger Lambda,
-which starts one execution with `{passageId, key}`. An execution can also be started with
-`scripts/generate.js` or `POST /generate`.
+**Trigger:** S3 `ObjectCreated` on `passages/*.json` in the content bucket starts one Step
+Functions execution. Can also be started with `scripts/generate.js`.
 
-**Input passage** (`demo-data/passages/*.json`):
+**Input passage** (`demo-data/passages/*.json`): `passageId`, `title`, `gradeBand`, `lexile`,
+`language`, `text` (blank line = new paragraph), optional `authors` and `vocabulary`.
 
-```json
-{
-  "passageId": "demo-passage-001",
-  "title": "A Very Small Garden",
-  "gradeBand": "2-3",
-  "lexile": 430,
-  "language": "en-US",
-  "text": "Paragraph one.\n\nParagraph two.",
-  "authors": ["optional"],
-  "vocabulary": [{"word": "color", "definition": "...", "example": "", "pos": "", "spanish": ""}],
-  "questions": [],
-  "soundAlong": {"enabled": true, "audioAccess": "assignment"}
-}
-```
+### States (Step Functions)
 
-Paragraphs are separated by a blank line. `authors`, and the vocabulary fields other than
-`word` and `definition`, are optional.
-
-### States and workers (`lambdas/worker/handler.py`)
-
-| # | State | Function | What it does |
-|---|---|---|---|
-| 1 | LoadPassage | `load_passage` | Reads the passage JSON; carries title, authors, grade, Lexile, vocabulary |
-| 2 | NormalizeText | `normalize_text` | Splits paragraphs; builds `ttsText` (title, optional byline, body) |
-| 3 | ComputeTextHash | `compute_hash` | SHA-256 of `ttsText`, voice, engine, language and `FORMAT_VERSION` |
-| 4 | CheckExistingManifest | `check_existing_manifest` | Approved record with same hash means skip; else writes a `running` record |
-| 5 | SubmitPollyAudio | `submit_polly` | Starts two async Polly tasks: MP3, and JSON speech marks (word + sentence). Retries 4 times, 2 s backoff x2 |
-| 6 | WaitForCompletion / CheckPollyStatus | `check_polly` | Polls every 5 s; on completion records Polly output keys |
-| 7 | ValidateOutputs | `validate_outputs` | MP3 at least 1000 bytes; at least one word mark; sets `valid` |
-| 8 | WriteManifest | `write_manifest` | Copies MP3 to canonical key, stores marks as one JSON array, writes manifest and DynamoDB record (`approved`), drops marks from state |
-| 9 | PublishDemoJson | `publish_demo_json` | Writes `content/<id>.json` with the legacy `au` field (used by the legacy API only) |
-| 10 | PublishReaderData | `publish_reader_data` | Writes reader audio, passage file, timing ZIP and library index (section 5) |
-| 11 | EmitMetrics | `emit_metrics` | CloudWatch namespace `SoundAlong`: `CharactersSubmitted`, `AudioBytes`, `WordMarks`, `GenerationsCompleted`; cost estimate at $4 per million characters |
-
-Terminal states: `AlreadyGenerated` (cache hit), `GenerationComplete`, `GenerationFailed`
-(Polly failed or validation failed).
-
-**Voice:** Amazon Polly `Joanna`, `neural`, `en-US`, set in `cdk.json` context `soundAlong`.
-
-**Dedup rule:** same `ttsText`, voice, engine, language and `FORMAT_VERSION` returns a cache hit and
-no Polly call, **provided the record is `approved` and has a `readerUuid`** (the reader files were
-published). Changing `FORMAT_VERSION` in `reader_format.py` forces regeneration.
-**Verified:** a re-run of a published passage returned `cached: true`.
-
-**Why `readerUuid` is part of the rule:** the record turns `approved` when the manifest is written,
-which is before the reader publish step. A run that failed between the two used to be treated as a
-cache hit on retry and skipped, so it could never recover. Found by the passage-service failure test and fixed.
-
-**Retry of a failed job:** start a new execution for the passage (`POST` the same request to the
-passage service, or `scripts/generate.js`). **Verified:** a job that failed in `PublishReaderData`
-re-ran on retry (executions went from 18 to 19) and failed again for the same reason; the same id
-with fixed text then published.
-
-**Failure guard:** if fewer than 90% of the words match Polly speech marks, `PublishReaderData`
-raises and the execution fails rather than publishing bad timing. **Verified** with text that has no speakable words.
-
-**Step Functions state:** `textSha256` (SHA-256 of the submitted text) is recorded on job records;
-the raw text and a normalized copy are not carried in state.
-
----
-
-## 5. Reader data format
-
-The reader app loads three kinds of file. `reader_format.py` produces them from the passage and
-Polly's speech marks. It has no AWS calls.
-
-### 5.1 Identifiers
-
-The app requires a UUID in each passage URL. The UUID is derived, not random:
-`uuid5(NAMESPACE_URL, "soundalong:" + passageId)`. Example: `demo-passage-001` becomes
-`a3743af1-e0f3-51b0-b8cf-9472ae4d2685`. The original id is kept as `sourceId`.
-
-### 5.2 Text sent to Polly
-
-```
-<title>.          (a period is added unless the title already ends in . ? ! :)
-by <authors>.     (only if authors are given)
-<paragraph 1>
-
-<paragraph 2>
-```
-
-Every display word keeps its UTF-8 **byte** range in this string, the same unit Polly uses in
-speech marks.
-
-### 5.3 `data/<uuid>.json`
-
-| Field | Value |
+| State | What it does |
 |---|---|
-| `uuid`, `sourceId`, `title`, `authors`, `lang`, `grade`, `lexile` | From the passage. `grade` is the first part of `gradeBand` (`2-3` gives `2`); `lang` is `EN` for `en-US` |
-| `wordcount`, `words` | Body word count |
-| `title_words`, `by_words` | The reader builds the title and byline itself from these |
-| `html` | `<p>` per paragraph; each word is `<span class="sa-w" data-i="N">` (N starts at 0 in the body) |
-| `voices[0]` | `id: "generated"`, label, `audio: "audio/<uuid>-generated.mp3"`, `lead`, `t`, `source` |
-| `vocab` | Map of sense id to `{word, definition, example, pos, spanish, say}` |
-| `credit` | States the text is synthetic and the audio is unreviewed |
+| LoadPassage → NormalizeText → ComputeTextHash | Read passage; build the spoken text (title, optional byline, body); SHA-256 hash of text + voice + engine |
+| CheckExistingManifest | Approved record with the same hash **and** published reader files → skip (cache hit) |
+| SubmitPollyAudio | Neural: async MP3 + word speech marks. Generative: MP3 only |
+| StartTranscribeWordTimes → WaitForWordTimes → CheckWordTimes | Generative only: Transcribe batch job; align words to the written text; emit a speech-marks-shaped timing file |
+| ValidateOutputs | Real MP3 duration (parsed from MPEG frames, no ffmpeg); last word not timed past the end; pace and longest gap recorded in the job's `qc` field |
+| QualityGate (optional) | Transcribe word match; mismatch → `HeldForVoiceCheck`; with generative it reuses the transcription already made |
+| WriteManifest → PublishDemoJson | Manifest + ReadWorks-shaped demo JSON (keeps the backward-compatible `au` field) |
+| PublishToReader (reader bridge) | Writes `data/<uuid>.json`, `audio/<uuid>/<digest>.mp3`, pronunciation-guide files, and the library index |
+| EmitMetrics | CloudWatch namespace `SoundAlong`, dimensions `Source` and `Voice` |
 
-Timing arrays hold `[start_seconds, end_seconds, 0]`. `lead` has one entry per title and byline
-word; `t` has one entry per body word. The third value is a flag; the shipped data uses `0` for
-almost every word, and so does the generator.
+Terminal states: `AlreadyGenerated` (cache hit), `GenerationComplete`, `GenerationFailed`,
+`ReaderPublishFailed`, `HeldForVoiceCheck`.
 
-### 5.4 Timing rules
+**Review status:** `reviewStatus` is `unreviewed` until a person has listened. With the quality
+gate on, a machine-passed take is recorded as `generated` / "needs human check". `approved` means
+only that the automatic checks passed. **There is no human approval gate before students could
+hear generated audio.**
 
-- Each Polly **word** mark is assigned to the display word whose byte range contains the mark's
-  start offset. A word's start is its earliest mark.
-- Words with no mark (for example a lone `&`) are interpolated between neighbours.
-- Fewer than 90% matched raises an error and the execution fails, rather than publishing bad timing.
-- End time is the next word's start. The last word ends at the estimated audio length, capped at 1.5 s
-  after its start. Audio length is estimated from file size: 48 kbps for neural, generative and
-  long-form voices, 32 kbps for standard.
-- Before a pause (last word of the title, byline or a paragraph, or a word ending in `. ! ?`),
-  the end is capped at `start + 0.12 s + 0.07 s per letter`, so the highlight does not hold through silence.
-- Start times are forced to be non-decreasing.
-
-### 5.5 Vocabulary
-
-Each vocabulary word links to its **first** occurrence (exact match, or plus `s` / `es`), by
-wrapping the word span in `data-vocab-sense-id`. Trailing punctuation is placed outside the
-span. Vocabulary words that never appear in the body are left out.
-The sense id is derived from `sha1(uuid:word)` so it is stable across regenerations.
-
-### 5.6 `data/index.json` (library)
-
-Entry: `{uuid, title, grade, lexile, lang, words, voices: ["generated"]}`.
-
-The pipeline owns this file. It is built as:
-
-> shipped catalog (`data/index.base.json`) + every approved passage with an `indexEntry` in DynamoDB
-
-- `index.base.json` is saved automatically from the first `index.json` it finds.
-- Newest record wins per uuid; generated entries replace shipped ones with the same uuid.
-- Concurrent executions: after writing, each execution re-reads DynamoDB and the S3 file and rewrites
-  if its published entries are missing, up to 4 attempts, otherwise the execution fails.
-  **Verified:** three executions started together produced 13 entries (9 shipped + 4 generated), none lost.
-
-### 5.7 Caching
-
-Generated JSON and audio are written with `Cache-Control: public, max-age=60`, so new or
-regenerated passages appear within about a minute. Shipped hashed assets use a one-year
-immutable cache; `index.html` is `no-cache`.
-
-### 5.8 What generated passages do not have
-
-No `gloss/`, `syllables/`, `bundles/` or cover image. The app fetches these optionally and
-falls back, so each load logs 403 responses for them. **Verified:** no page errors; the
-affected features are simply absent. **Not verified:** Kid view, word-help popups, tapping a
-word to seek, and the human voice option for generated passages (there is none).
+**Voice / timing:**
+- Neural (Joanna): word timing from Polly speech marks.
+- Generative (Ruth): timing from Amazon Transcribe. Per the branch README, the generative path has
+  been exercised against fake AWS in `tests/test_generative_voice.py` and now on the live `alex`
+  stack (5 passages generated). **Not verified:** audio quality by ear.
 
 ---
 
-## 6. Delivery (CloudFront)
+## 5. Reader data contract (Frontend bucket)
 
-- One origin: the Frontend bucket, through Origin Access Control (SigV4). Default behavior only.
-- `REDIRECT_TO_HTTPS`; `CACHING_OPTIMIZED` policy (default TTL 1 day, honours origin `Cache-Control`); compression on.
-- Default root object `index.html`. No custom 403/404 error pages, so a missing file returns a real error.
-- All three buckets: Block Public Access on, SSL enforced, S3-managed encryption.
-  **Verified:** direct S3 requests to the Audio and Frontend buckets return 403.
+Per passage, the reader loads `data/<uuid>.json`:
+- `uuid` (derived from `passageId`), `title`, `grade`, `lexile`, `lang`, `words`
+- `html`: `<p>` per paragraph; each word `<span class="sa-w" data-i="N">`; vocab words wrapped with `data-vocab-sense-id`
+- `voices[]`: `{id, label, voiceId, audio, lead, t, source, review}`. `t` is `[start_s, end_s]` per body word; `lead` covers title/byline words. **The reader plays `voices[0]` by default.**
+- `vocab`: `{senseId: {word, definition, example, pos, ...}}`
 
----
+Library listing: `data/index.json` = one row per published passage, rebuilt by the reader bridge
+from DynamoDB with a write-then-read-back check so concurrent runs do not drop entries.
+**Note:** the bridge adds/removes `data/<uuid>.json` but does not prune an index row on delete;
+rows are replaced per uuid on regeneration.
 
-## 7. Browser API (legacy)
+### 5.1 Pronunciation guide ("Words to know")
 
-HTTP API at the `ApiUrl` output. Not called by the current reader app; it served the earlier
-custom player and remains deployed.
+For each vocabulary word, generated in the **same Polly voice as the passage**:
+- `audio/syl/<sense>-<uuid>-whole.mp3` — the word once
+- `audio/syl/<sense>-<uuid>-s<i>.mp3` — one per syllable
+- `audio/syl/<sense>-<uuid>-slow.mp3` — syllables in turn, then the whole word (joined by
+  concatenating MP3 frames with short SSML-break silences; no ffmpeg)
+- `data/syllables/<uuid>.json` — `word`, `syllables[]`, `stress_index`, `audio{}`,
+  `whole_segments[]`, `slow_phases[]`, in the shape `SyllableGuide.vue` reads
 
-| Route | Behavior |
-|---|---|
-| `GET /passages` | Lists `content/*.json` (skips `assignments.json`) |
-| `GET /passages/{id}` | Returns one published demo JSON plus `cdnDomain` |
-| `GET /passages/{id}/access?student=` | Reads `content/assignments.json`; returns `allowed` |
-| `GET /jobs` | Scans up to 100 DynamoDB job records |
-| `POST /generate` | Starts an execution for `{passageId}` |
-
-The routes above have no authorization; CORS allows every origin. Student identity is mock data.
-**Verified:** `student-001` allowed and `student-002` denied for `demo-passage-001`.
-The reader app does not use this check, so student-level gating is **not** in effect in the UI.
-
-### 7.1 Passage service (IAM-signed)
-
-| Route | Behavior |
-|---|---|
-| `POST /v1/passages` | Validates a ReadWorks-shaped record (or a `products/` pointer), saves it under `submissions/<id>/<fingerprint>.json`, starts the state machine. Returns 202 queued, 200 for a request already running or an identical published take (`reused: true`), 400, or 409 |
-| `GET /v1/passages/{id}` | Status `queued`, `running`, `published` or `failed` (`held` is reserved, never returned), the word list, and audio / timing / reader links once published |
-
-Full contract, field rules and differences from the kit: `docs/API.md` and `docs/openapi.yaml`.
-Client: `scripts/passage-client.sh`. Stack output: `PassageApiUrl`.
-
-- **Auth:** API Gateway IAM authorizer on these two routes only. Callers need `execute-api:Invoke`.
-- **Status source:** Step Functions `DescribeExecution`, then a check that the MP3, timing ZIP and reader data exist,
-  the voice matches, and the reader word count equals the submitted text. A mismatch is reported as `failed`.
-- **Timing file:** `timing/<uuid>.<digest>.v1.zip` containing `timing.v1.json` (`schema_version`, `text`, `lead`, `paras`,
-  `t` rows with code 0 heard or 1 filled, `duration`, `checks`, `timing_source`, `text_sha256`).
-- **Submission record:** a row in `JobTable` with sort key `api-job` holding the text fingerprint, execution ARN and submission key.
-- **Fields kept from a record:** `uuid`, `title`, `text`, `lang` (EN only), `a` / `authors`, `gradeBand` / `grade`, `lexile`, `vocabulary`.
-  All else, including `content`, `soundAlong`, `questionSets`, `answers`, `answerHashes`, `answerMapA`, is discarded.
-- **Limits:** 1 MiB body, 5,000 words (the kit allows 20,000; this pipeline's state limit is lower).
-
-### DynamoDB `JobTable`
-
-Key: `passageId` (hash) + `textHash` (range). Index `byStatus` on `status` + `updatedAt`.
-Attributes: `status` (`running` or `approved`), `voiceId`, `engine`, `charCount`, `textSha256`, `updatedAt`,
-`reviewStatus`, `audioKey`, `speechMarksKey`, and after publishing `readerUuid`, `indexEntry` and `timingKey`.
-The passage service adds one row per id with `textHash = "api-job"` (status `queued`, `textSha256`, `executionArn`,
-`submissionKey`, `submittedAt`). On-demand billing.
+Syllabification uses **pyphen** (Hunspell hyphenation; English dictionaries only, ~0.5 MB,
+bundled in the Lambda). It is approximate, so every entry is marked **"needs human check"**.
+One-syllable words get only a whole clip; the reader plays those slowly via playback rate, so the
+"slow says the word twice" issue does not occur.
+**Verified:** on the live stack, opening "Words to know" plays the newly generated clip in the
+passage voice; sense IDs match across the passage HTML, vocab and syllable data.
 
 ---
 
-## 8. Security and access
+## 6. Frontend
 
-| Topic | State |
-|---|---|
-| Private storage | All buckets private; CloudFront is the only reader of the Frontend bucket |
-| **Public app URL** | **The CloudFront URL is open to anyone who has it.** `noindex, nofollow` is set, but there is no authentication. Options discussed: disable the distribution, basic auth via CloudFront Function, IP allowlist with WAF, signed URLs. None applied |
-| IAM | Per-function grants from CDK. Polly actions use resource `*` (Polly has no resource-level scoping for these); `cloudwatch:PutMetricData` is `*` |
-| CI/CD role | Can assume `cdk-*` bootstrap roles, `cloudformation:DescribeStacks`, read/write the Frontend bucket, create CloudFront invalidations |
-| Secrets | None in the repo. Git auth uses the instance role through the CodeCommit credential helper |
-| ReadWorks content | Shipped passages, recordings and images are ReadWorks material "used only in a private prototype" (per the data's credit line). Kit guidance: fine on the event AWS account, ask before putting in a public repo |
-| Media in zips | `downloads/sound-along-full.zip` in the Content bucket contains the licensed media and has had presigned URLs issued (7 day expiry). Delete it when no longer needed |
-| Generated audio review | The pipeline marks output `approved` / `sampled` automatically. There is **no human approval gate**; treat generated audio as a draft |
+- Source in `frontend-src/` (Vue 3 + Vite). `npm run build:frontend` rebuilds the compiled shell
+  into `frontend/index.html` + `frontend/assets/`, leaving `frontend/data|audio|img|look-art` alone.
+- Served from the Frontend bucket via CloudFront (OAC). The app fetches `data/`, `audio/`, `img/`
+  by relative path, so it works from any origin.
+- **Media is not in git** (`frontend/audio|data|img|look-art`): large and ReadWorks-licensed.
+  It lives in the sandbox bucket and is backed up as a tarball in the content bucket under `media/`.
+- Focused mode is the default view; `MixReader.vue` + `looks/mix/mix.css` render it.
 
 ---
 
-## 9. CI/CD
+## 7. Delivery and security
 
-```
-CodeCommit sound-along / main ─(EventBridge)─► CodePipeline "SoundAlong-sandbox" (V2)
-   Source ─► BuildAndDeploy (CodeBuild, STANDARD_7_0, SMALL, 30 min)
-```
-
-`buildspec.yml`: install (Node 20, Python 3.12, `npm ci`), `tsc --noEmit`, `cdk deploy`,
-`publish-frontend.js`, then invalidate `/index.html` and `/assets/*` only if the build succeeded.
-
-- **The pipeline is always part of the stack.** The pipeline deploys its own stack. If it is left
-  out of a synthesis, the deploy deletes the pipeline mid-run. This happened once and is why
-  the pipeline is unconditional.
-- **Code only:** the repo has no media, so CI publishes only `index.html` and `assets/`. Media,
-  `data/` and generated files in the bucket are never overwritten or deleted by CI.
-- **Do not run a local `cdk deploy` while a pipeline run is in progress.** CloudFormation rejects
-  concurrent updates.
-- **Not in git, so not in CI:** a deploy from CI reflects only what is pushed. Local, unpushed
-  stack changes are reverted by the next CI deploy.
-- **Verified:** manual start, and push-triggered runs, both succeeded.
-- Pipeline artifacts expire after 30 days.
+- One CloudFront origin (Frontend bucket) via Origin Access Control; `REDIRECT_TO_HTTPS`;
+  compression on.
+- All buckets: Block Public Access on, SSL enforced, S3-managed encryption. **Verified** earlier:
+  direct S3 access returns 403.
+- **The CloudFront URL is public to anyone who has it**, with the default certificate (minimum
+  TLS 1.0). No WAF, no auth. `noindex, nofollow` is set, but that is not access control.
+- Legacy API routes (`/passages`, `/jobs`, `/generate`, `/access`) have no authorization; `/generate`
+  can start Polly runs without credentials. The passage service (`/v1/passages`), when enabled,
+  requires AWS IAM signing.
+- ReadWorks passages, recordings and images are licensed material used only in this private
+  prototype. They may be used on the event AWS account; ask before putting them in a public repo.
+- Generated audio and pronunciation entries are drafts ("needs human check") until a person approves.
 
 ---
 
-## 10. Source control and media
+## 8. Current live state (`SoundAlong-alex`)
 
-- Repo: CodeCommit `sound-along`, branch `main`, private to the account. Local remote name `codecommit`;
-  credential helper configured in the repo's local config.
-- Tracked: CDK (`bin/`, `lib/`), Lambdas, scripts, demo data, `buildspec.yml`, app shell
-  (`frontend/index.html`, `frontend/assets/`), docs.
-- Not tracked (`.gitignore`): `node_modules/`, `cdk.out/`, and `frontend/audio|data|img|look-art/`
-  (about 52 MB of licensed media). It is served from the Frontend bucket and backed up at
-  `s3://<ContentBucket>/media/frontend-media.tgz`. The README explains how to restore it.
-- Restoring a fresh environment: deploy the stack, restore media into the Frontend bucket, then generate
-  passages; the first generation saves `index.base.json` from the restored `index.json`.
-
----
-
-## 11. Operations
-
-```bash
-npm install
-npm run build                    # tsc type-check
-cdk bootstrap                    # first time per account/region
-npm run deploy                   # cdk deploy --all
-node scripts/seed.js --bucket <ContentBucket>              # uploads passages; starts generation
-node scripts/generate.js --arn <StateMachineArn> --passage demo-passage-001
-node scripts/publish-frontend.js --frontend-bucket <FrontendBucket>   # needs local media; skips an existing data/index.json
-npm run destroy                  # only after confirming cleanup is permitted
-```
-
-Logs: CloudWatch (Lambda, Step Functions, CodeBuild). Metrics: namespace `SoundAlong`.
-Cost model: about $4 per million characters for Polly (from the design doc; confirm current pricing).
-Each demo passage is 200 to 400 characters.
+- 14 library passages: 9 shipped ReadWorks passages (original generated + human voices) + 5
+  pipeline-generated passages.
+- The 5 generated passages use **Ruth (generative)** as their only, default voice, timed by
+  Amazon Transcribe. **Verified:** each `data/<uuid>.json` lists one voice, `Ruth`; passage audio
+  and pronunciation-guide audio load through CloudFront.
+- The library index is internally consistent: every entry resolves to a data file and a playable
+  default-voice audio. **Verified.**
+- The 9 shipped passages are unchanged (their audio is not ours to re-synthesize).
 
 ---
 
-## 12. Verification status against the design's tests
+## 9. Verification against the design's tests
 
 | Test | Result |
 |---|---|
-| T01 Deploy from clean sandbox with CDK | Verified (no console configuration) |
-| T02 Upload mock passage | Verified |
-| T03 Generate audio and manifest | Verified |
-| T04 Speech marks reference the text | Verified (all words matched in 4 of 4 passages) |
-| T05 Play through the unified player | Partly: the reader app loaded the audio and its clock ran 0:00 to 0:13 in a headless browser. Sound not heard |
-| T06 Highlight within tolerance | Partly: highlight advanced word by word following the timing data. Tolerance not agreed or measured against the sound |
-| T07 Tap a word to replay | Not verified in the reader app |
-| T08 Student-specific access | API verified; not wired into the reader app |
-| T09 Existing human audio | Shipped passages include human voices in the reader; not tested by this work |
-| T10 Same passage twice avoids regeneration | Verified |
-| T11 Failed job visible and retryable | Verified through the passage service: a failing job shows `failed` with a reason, and a retry re-runs (see section 4). This test found and fixed a dedup bug |
+| T01 Deploy from clean sandbox with CDK | Verified (`SoundAlong-alex` created from CDK) |
+| T02 Upload a passage | Verified |
+| T03 Generate audio + manifest | Verified |
+| T04 Timing references the text | Verified (Transcribe-aligned word times published) |
+| T05 Play through the reader | Partly: audio loads and the clock runs in a headless browser. Sound not heard |
+| T06 Highlight within tolerance | Partly: highlight follows the timing data word by word. Tolerance not agreed/measured |
+| T07 Tap a word to seek | Not verified in this build |
+| T08 Student access | Legacy API only; not wired into the reader |
+| T09 Human audio plays | Shipped passages include it; not re-tested here |
+| T10 Same passage twice avoids regeneration | Verified (cache requires published reader files) |
+| T11 Failed job visible/retryable | Verified in the earlier build; the hold/fail paths exist here |
 | T12 Keyboard operation | Not verified |
-| T13 Private storage denies direct access | Verified for Audio and Frontend buckets |
-| T14 Compare two voices | Not done (single voice configured) |
+| T13 Private storage denies direct access | Verified earlier (both buckets 403) |
+| T14 Compare two voices | Not done (single configured voice per deploy) |
 
-Other checks: generated file schema matches a shipped passage file (same keys plus `sourceId`);
-HTML word spans, `t` and `lead` counts agree; timings are non-decreasing; CloudFront serves the
-data and audio with correct content types; the live library lists all 14 passages (13 plus the passage-service
-sample); no page errors when opening and playing a generated passage.
+Other checks on this build: generated passages render and play with word highlighting; the
+pronunciation guide plays in the passage voice; the image-caption overlap in the focused reader
+hero is fixed; the library index is consistent. All **Verified** in a headless browser against
+the live site; none judged by ear.
 
-### Passage service checks (signed calls from the sandbox role)
+---
 
-| Check | Result |
+## 10. ReadWorks feedback status (see `docs/PARKING_LOT.md`)
+
+| Item | Status |
 |---|---|
-| Unsigned `POST` and `GET` | 403 from API Gateway. Legacy routes still return 200 |
-| Submit the kit's `sample-red-kite` record | 202, then `queued`, `running`, `published`. MP3, timing ZIP and reader data all returned 200 with correct content types |
-| Timing ZIP | Contains `timing.v1.json`; digest in the URL matches the file; rows equal lead plus text words (7 + 26); fingerprint matches the POST |
-| Same request again | 200 with `reused: true`; Step Functions execution count unchanged |
-| Different text or `force` while running | 409. Same text while running: 200, current job |
-| Text changed after publish | New run, republished; the word list changed |
-| Pointer submission (`products/` key) | Published. Other bucket, key outside `products/`, or `..`: 400 |
-| Validation | 400 for missing title, reserved id, non-English, invalid JSON, non-boolean `force`; 404 for an unknown id |
-| Failing job, then retry | `failed` with the error code and message; the retry re-ran and failed the same way |
-| Status never goes backward | A bug where `running` fell back to `queued` near the end was found and fixed |
+| Image caption overlaps the layout (focused reader) | **Fixed** and deployed |
+| "Words to know" voice differs from the passage voice | **Fixed**: guide now generated in the passage voice (Ruth) |
+| "Slow" repeats one-syllable words twice | **Addressed**: one-syllable words play the whole clip slowly |
+| Pronunciation consistency (e.g. "Tamara") | Partly: the quality gate carries a names lexicon (`config/names.json`); not demonstrated end to end |
+| Focused mode / simpler reader | **Present**: focused mode is the default |
+| Underline-plus-highlight distracting | Open: reader uses highlight; the underline concern needs a reader-style decision |
+| "Help with a word" confusing | Open |
+| Words-to-know layout redundant; Kid view; focus tools unclear | Open (reader UX) |
+| Longer ~1,500-word sample | Open: needs the two passage texts from ReadWorks |
+| Match ReadWorks product-page styling for integration | Partly: focused mode already uses ReadWorks colours/fonts |
 
-Validation rules were also checked in isolation (27 cases). **Not verified:** a caller other than the sandbox role,
-IAM denial for a principal without `execute-api:Invoke`, concurrent POSTs for one id, and passages near the 5,000 word cap.
-Test passages other than the kit sample were deleted afterwards.
+---
+
+## 11. Repository and git
+
+- Repo: `github.com/bandavya/readworks-read-along`. Default branch `main`; teammate branch `alex`;
+  this work is on **`demo-build`** (branched from `alex`).
+- `demo-build` commits ahead of `alex`: caption fix; planning docs + lockfile; pronunciation-guide
+  audio in the passage voice.
+- **Not yet pushed to GitHub** from this environment (no credentials here); the branch is ready.
+- Media is gitignored (section 6). `pyphen` is vendored under `lambdas/syllable_audio/` with only
+  the English dictionaries.
+
+---
+
+## 12. Operations
+
+```
+npm install
+(cd frontend-src && npm install)          # Vite/Vue for the frontend build
+npm run build                              # tsc type-check the CDK app
+npm run build:frontend                     # rebuild the reader shell from frontend-src
+cdk bootstrap                              # first time per account/region
+npx cdk deploy SoundAlong-alex -c env=alex -c generativeVoice=true
+node scripts/publish-frontend.js --frontend-bucket <FrontendBucket>   # publish shell (needs local media for a full sync)
+node scripts/seed.js --bucket <ContentBucket>                          # upload passages; starts generation
+npx cdk destroy SoundAlong-alex -c env=alex   # after confirming cleanup is permitted
+```
+
+Do not run a local `cdk deploy` while a Step Functions generation run or another deploy is in
+progress. Regeneration on the Ruth deploy: delete a passage's generated data/audio and its job
+rows, then re-run, so the new voice is the only (default) voice rather than stacked on the old one.
 
 ---
 
 ## 13. Limitations and risks
 
-1. **Timing precision.** Polly gives word starts only; ends are derived. The shipped generated voice
-   was timed with Amazon Transcribe forced alignment, which may be tighter.
-2. **Public app URL** (section 8).
-3. **No review gate** for generated audio or vocabulary definitions.
-4. **Reader app is compiled.** Changes to the reader (the kit's "reader streamlining" and "data kit") would need the
-   original Vue source, which this repo does not have.
-5. **Generated passages are missing optional features** (section 5.8), and the 403 log noise on every load.
-6. **State size.** Step Functions state is limited to 256 KB. Speech marks are dropped from state after saving, which
-   covers passages of a few thousand words; very long texts have not been tested.
-7. **Single voice and engine**, both fixed per deployment. Changing them changes the hash and regenerates.
-8. **Legacy API** (the five `/passages`, `/jobs`, `/generate` routes) is unauthenticated, lists published demo JSON (which still contains the older, separate format), and is not used by the UI. `POST /generate` can start a run without credentials.
-9. **Passage service limits.** No throttling or quota; each non-reused run is billed by Polly and `force` repeats it. Concurrent POSTs for one id are not atomic.
-    `held` and SNS notices are not built. The job record for a run that failed after the manifest stays `approved` in the table (the API ignores that flag).
-    Records' own HTML (`content`) is ignored, so ReadWorks formatting and images do not carry into the reader.
-10. **Runtime versions.** CodeBuild pins Node 20; the AWS SDK warns that releases after early January 2027 require Node 22 or newer.
-   CodeCommit is closed to new AWS customers; this account has existing access.
-11. **Passage text must be plain text.** Words are split on whitespace; HTML in the input is escaped, not interpreted.
+1. **No human review gate** before generated audio or pronunciation entries reach the reader.
+2. **Public URL** with default-certificate TLS 1.0, no WAF, no auth (section 7).
+3. **Syllable splits are hyphenation-based**, not exact phonetic syllables; flagged for review.
+4. **Generative path quality not judged by ear**; Transcribe timing may differ from a forced aligner.
+5. **Legacy API is unauthenticated**; `/generate` can start billable runs without credentials.
+6. **Index rows are not pruned on delete** (replaced per uuid on regeneration); a failed regen could
+   leave a stale row. Not observed; the live index is consistent.
+7. **Pronunciation-guide audio only runs on the generative deploy** (bundling); the default Joanna
+   deploy would still use the older shipped guide clips.
+8. **Python 3.12 Lambda runtime** and the BB technical document's **Express/Node API layer** gap
+   both still apply (see the BB conformance note in the earlier build's history).
+9. **Estimates and pass bars** in the plan/evaluation docs are proposals, not agreed.
 
 ---
 
-## 14. Decisions
+## 14. Related documents
 
-| Decision | Reason |
-|---|---|
-| Reuse the reference reader app rather than rebuild | A polished, working UX already existed; rebuilding was not wanted |
-| Serve everything from one CloudFront origin | The app fetches `audio/`, `data/`, `img/` by relative path from one base |
-| Keep media out of git, in S3 | 52 MB of licensed binaries; the app needs them but git does not |
-| CodeCommit for the repo | Stays inside the account; IAM-controlled; no external accounts |
-| Pipeline always part of the stack | A pipeline-driven deploy otherwise deletes the pipeline |
-| Library index rebuilt from DynamoDB with a re-check | Several executions finish at once; a plain read-modify-write loses entries |
-| Title is read aloud and timed as `lead` | The reader highlights title words from `lead`, matching the shipped generated voice |
-| Derived UUID per passage | The app validates ids as UUIDs; derived ids are stable across regeneration |
-| Short cache (60 s) on generated files | Avoids the default one-day CloudFront cache hiding new passages |
-
-### Plug-in kit evaluation (`sound-along-plug-in-kit.zip`)
-
-| Piece | Outcome |
-|---|---|
-| 01 Reader streamlining | Not applicable (needs Vue source) |
-| 02 Passage service (`POST /v1/passages`) | **Ported**: same two endpoints, request and response shapes, status values and timing file, reimplemented on this pipeline (section 7.1, `docs/API.md`). Not applied as a patch |
-| 03 Data kit | Not applicable; has a known privacy gap |
-| 04 Volunteer recorder | Not applicable here (needs a GPU and WhisperX) |
-| 05 Holds lab | Applies cleanly (dry run only); optional |
-
----
-
-## 15. Suggested next steps
-
-1. A human approval gate before generated audio is shown (this would also give `held` a meaning in the passage service).
-2. Restrict the public URL, and put the legacy unauthenticated routes (`/generate` especially) behind IAM or remove them.
-3. Passage service hardening: throttling, a finished-job notice (SNS), and an atomic claim for concurrent POSTs.
-4. Load-time work: compress the large `data/bundles/` JSON and confirm bundles load on demand.
-5. Incremental frontend publish and narrower CloudFront invalidations.
-6. Holds lab, if the heard-versus-written check matters for the demo.
-7. Move CodeBuild to Node 22.
-
----
-
-## 16. Repository layout
-
-```
-bin/sound-along.ts            CDK app entry (env, voice settings, pipeline repo)
-lib/sound-along-stack.ts      All application resources
-lib/pipeline-construct.ts     CodePipeline + CodeBuild
-buildspec.yml                 CI build steps
-lambdas/worker/handler.py     Step Functions task handlers
-lambdas/worker/reader_format.py  Passage + speech marks to reader format (pure Python)
-lambdas/trigger/handler.py    S3 event to Step Functions
-lambdas/api/handler.py        Browser API routes (legacy + passage service routing)
-lambdas/api/passage_service.py  Passage service: validation, submit, status
-frontend/                     Compiled reader app (media not tracked)
-demo-data/                    4 passages + mock assignments
-scripts/                      seed.js, generate.js, publish-frontend.js, passage-client.sh
-docs/SPEC.md                  This document
-docs/API.md, docs/openapi.yaml  Passage service contract
-```
+- `README.md` — how to build, deploy and run; feature flags.
+- `docs/API.md`, `docs/openapi.yaml` — passage service contract.
+- `docs/COST.md` — cost model.
+- `docs/BUILD_PLAN.md` — phased plan for team review.
+- `docs/EVALUATION_PLAN.md` — acceptance evaluation (voice quality, timing, accessibility, cost).
+- `docs/PARKING_LOT.md` — ReadWorks feedback captured with triage.

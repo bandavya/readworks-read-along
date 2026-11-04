@@ -1,7 +1,20 @@
 # Parking lot
 
-Captured, not acted on. Items here are feedback and ideas awaiting a decision. When one is
-picked up, move it into `docs/BUILD_PLAN.md` or `docs/EVALUATION_PLAN.md` and note the date.
+Captured feedback and ideas. Some items have now been built on the `alex`/`demo-build` line and
+deployed to `SoundAlong-alex`; those are marked **DONE** with the date. The rest await a decision.
+
+## Status summary (2026-11-04)
+
+| Item | Status |
+|---|---|
+| 2. Image caption overlaps the layout | **DONE** — fixed in the focused reader hero, deployed |
+| 5. Pronunciation consistency (names) | Partial — quality gate + `config/names.json` lexicon exists; not demonstrated end to end |
+| 6. "Words to know" voice ≠ passage voice | **DONE** — guide audio now generated in the passage voice (Ruth) |
+| 7. "Slow" repeats one-syllable words | **DONE** — one-syllable words play the whole clip slowly |
+| Focused mode / simpler reader | **DONE (already in the build)** — focused mode is the default |
+| 1, 3, 9, 12 and the rest | Open — see the triage below |
+
+Details and the original verbatim feedback follow.
 
 The triage notes are mine. They are a first read to help the team decide, not decisions. Some
 items concern the reference reader app (compiled code we did not write), some concern our
