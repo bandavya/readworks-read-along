@@ -13,6 +13,7 @@ import * as apigw from 'aws-cdk-lib/aws-apigatewayv2';
 import * as apigwi from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import * as path from 'path';
+import { QualityGate } from './quality-gate';
 
 export interface SoundAlongStackProps extends cdk.StackProps {
   envName: string;
@@ -102,6 +103,7 @@ export class SoundAlongStack extends cdk.Stack {
     // ---------------------------------------------------------------------
     // 6. Lambda TTS workers (Python). One handler file, routed by STATE env.
     // ---------------------------------------------------------------------
+    const qualityGateEnabled = this.node.tryGetContext('qualityGate') === 'true';
     const commonLambdaEnv = {
       CONTENT_BUCKET: contentBucket.bucketName,
       AUDIO_BUCKET: audioBucket.bucketName,
@@ -110,15 +112,18 @@ export class SoundAlongStack extends cdk.Stack {
       ENGINE: engine,
       LANGUAGE: language,
       ENV_NAME: envName,
+      ...(qualityGateEnabled ? { QUALITY_GATE: 'true' } : {}),
     };
 
-    const workerCode = lambda.Code.fromAsset(path.join(__dirname, '..', 'lambdas', 'worker'));
+    const workerCode = lambda.Code.fromAsset(path.join(__dirname, '..', 'lambdas', 'worker'), { exclude: ['**/__pycache__/**', '**/*.pyc'] });
+    const gatedWorkerCode = qualityGateEnabled
+      ? lambda.Code.fromAsset(path.join(__dirname, '..', 'lambdas', 'quality_gate'), { exclude: ['**/__pycache__/**', '**/*.pyc'] }) : undefined;
 
     const makeWorker = (name: string, handler: string): lambda.Function =>
       new lambda.Function(this, name, {
         runtime: lambda.Runtime.PYTHON_3_12,
         handler: `handler.${handler}`,
-        code: workerCode,
+        code: gatedWorkerCode && ['check_existing_manifest', 'write_manifest'].includes(handler) ? gatedWorkerCode : workerCode,
         timeout: cdk.Duration.minutes(5),
         memorySize: 256,
         environment: commonLambdaEnv,
@@ -139,7 +144,7 @@ export class SoundAlongStack extends cdk.Stack {
     const readerBridgeFn = readerBridgeEnabled ? new lambda.Function(this, 'ReaderBridgeFn', {
       runtime: lambda.Runtime.PYTHON_3_12,
       handler: 'handler.handler',
-      code: lambda.Code.fromAsset(path.join(__dirname, '..', 'lambdas', 'reader_bridge')),
+      code: lambda.Code.fromAsset(path.join(__dirname, '..', 'lambdas', 'reader_bridge'), { exclude: ['**/__pycache__/**', '**/*.pyc'] }),
       timeout: cdk.Duration.minutes(5),
       memorySize: 256,
       environment: { ...commonLambdaEnv, FRONTEND_BUCKET: frontendBucket.bucketName },
@@ -264,7 +269,7 @@ export class SoundAlongStack extends cdk.Stack {
     });
 
     const succeedCached = new sfn.Succeed(this, 'AlreadyGenerated', {
-      comment: 'Identical approved audio already exists; skipped regeneration.',
+      comment: qualityGateEnabled ? 'Identical voice-checked audio already exists; skipped regeneration.' : 'Identical approved audio already exists; skipped regeneration.',
     });
     const succeedDone = new sfn.Succeed(this, 'GenerationComplete');
     const failState = new sfn.Fail(this, 'GenerationFailed', {
@@ -286,6 +291,9 @@ export class SoundAlongStack extends cdk.Stack {
     } else {
       afterPublish = published.next(emitMetrics).next(succeedDone);
     }
+    const afterValidation = qualityGateEnabled
+      ? new QualityGate(this, 'QualityGate', { contentBucket, audioBucket, jobTable, onPass: afterPublish }).entry
+      : afterPublish;
 
     // Poll loop: WaitForCompletion -> CheckPollyStatus -> Choice
     const pollChoice = new sfn.Choice(this, 'IsPollyDone')
@@ -295,7 +303,7 @@ export class SoundAlongStack extends cdk.Stack {
           new sfn.Choice(this, 'IsValid')
             .when(
               sfn.Condition.booleanEquals('$.valid', true),
-              afterPublish,
+              afterValidation,
             )
             .otherwise(failState),
         ),
@@ -317,7 +325,7 @@ export class SoundAlongStack extends cdk.Stack {
 
     const stateMachine = new sfn.StateMachine(this, 'GenerationStateMachine', {
       definitionBody: sfn.DefinitionBody.fromChainable(definition),
-      timeout: cdk.Duration.minutes(15),
+      timeout: cdk.Duration.minutes(qualityGateEnabled ? 30 : 15),
       tracingEnabled: true,
       logs: {
         destination: new logs.LogGroup(this, 'SfnLogs', {

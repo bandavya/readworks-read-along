@@ -136,6 +136,29 @@ deploy without `-c readerBridge=true`. A later frontend publish only uploads
 files, but an older local `frontend/data/<id>.json` or `index.json` will overwrite
 the bridge's newer copy, so publish local media before generating new passages.
 
+## Voice quality gate (optional)
+
+GPT-6's suggestion, unruled by Alex: use `npx cdk synth -c readerBridge=true -c qualityGate=true`
+to inspect the gate, or deploy with both flags when authorized. The gate is off by
+default. After `ValidateOutputs`, it asks Amazon Transcribe what words the new
+MP3 contains. A clean word match continues to publishing; a swap, omission, or
+extra phrase ends at `HeldForVoiceCheck`. Polly speech marks still supply all
+reader timing. A held take never reaches `PublishToReader`, so an existing reader
+voice stays in place.
+
+Read a hold's reasons in `s3://<ContentBucketName>/review/<passageId>.json` or
+the job table's `holdReasons` and `reviewKey` fields. A passed machine check is
+recorded as `generated` with `needs human check`; it does not imply a person
+listened. A review object records the last held take; after a rerun, check the
+job row's current status before acting on an older hold. To accept a known
+recognition spelling for a name, upload a complete
+`{"names":[{"written":"Mira","heard_as":["Meera"],"scope":"<passageId>"}]}`
+list to `config/names.json` in the content bucket, then rerun generation. The
+packaged list is empty. There is no release action in this lane: a person fixes
+the names list or reruns the passage. Disable the gate by omitting
+`-c qualityGate=true`; removing `lib/quality-gate.ts` and
+`lambdas/quality_gate/` then removes its implementation.
+
 ## Destroy (after confirming cleanup is permitted)
 
 ```bash
