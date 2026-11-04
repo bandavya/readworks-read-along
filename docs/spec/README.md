@@ -2,7 +2,7 @@
 
 *A read-along for ReadWorks: how it works, what is built, and what is still open.*
 
-First-pass spec, written with AI and checked against the code at commit 33e2648. Not yet reviewed by a person.
+First-pass spec, written with AI and checked against the code at commit ab6e826. Not yet reviewed by a person.
 
 ReadWorks' brief says it gives teachers 6,893 free reading passages, all with audio. About 64% of them use a computer voice that ReadWorks describes as unnatural, and a student who loses their place can't see which word is being said or easily go back to it. Sound Along is a read-along built for that problem: a natural voice, each word lit as it is spoken, and a tap on any word to hear the passage from there.
 
@@ -18,7 +18,7 @@ A cloud workflow takes a passage's text and makes the audio and a time for each 
 
 ## Where it stands
 
-This spec describes one version of the code: commit `33e2648` of the team repository. The team reports it is deployed on the event's AWS account with the Ruth voice. The live site lists 14 passages, and its reader passed 42 of 42 browser checks with the sound off. Nobody has judged the audio by ear, and no child, teacher or ReadWorks staff member has tried this version. [What is proven and what is not](what-is-proven-and-what-is-not.md) goes through it part by part.
+This spec describes one version of the code: commit `ab6e826` of the team repository. The team reports it is deployed on the event's AWS account with the Ruth voice. The live site lists 14 passages, and its reader passed 42 of 42 browser checks with the sound off. Nobody has judged the audio by ear, and no child, teacher or ReadWorks staff member has tried this version. [What is proven and what is not](what-is-proven-and-what-is-not.md) goes through it part by part.
 
 ## Where to start
 

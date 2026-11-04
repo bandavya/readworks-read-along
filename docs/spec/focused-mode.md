@@ -19,9 +19,9 @@ flowchart LR
   C -->|"Back to focused mode"| B
 ```
 
-The screenshot shows the library as a reader first sees it, with story rows and the All features button.
+The screenshot shows the library as a reader first sees it, with filters on the left, story rows, and the All features button.
 
-![Focused library with story rows and the All features button](shots/library.png)
+![Focused library with filters on the left, story rows, and the All features button](shots/library.png)
 
 ## How it connects
 

@@ -28,7 +28,7 @@ Local tests cover parts of these directories, as detailed in [Tests and how to r
 
 ## Technical details
 
-This map is based on commit `33e2648`. The root `package.json` builds the cloud stack; `frontend-src/` has its own `package.json` and build.
+This map is based on commit `ab6e826`. The root `package.json` builds the cloud stack; `frontend-src/` has its own `package.json` and build.
 
 | Path | Responsibility | Start here |
 |---|---|---|
@@ -46,6 +46,7 @@ This map is based on commit `33e2648`. The root `package.json` builds the cloud 
 | `tools/passage_client.py` | Signed calls to the passage API (needs `botocore`) | the file's docstring |
 | `scripts/` | Build, seed, generate, publish, smoke, and timing-report commands | `build-frontend.js`, `test-frontend.js`, `timing_report.py` |
 | `tests/`, `frontend-src/tests/` | Pipeline and UI checks | [Test inventory](tests-and-how-to-run-them.md) |
+| `.kiro/steering/` | Project context for a coding agent | `sound-along.md` |
 | `demo-data/`, `docs/` | Example passages, the team's build and evaluation documents, plans, and this page spec | `demo-data/passages/`, `docs/SPEC.md`, `docs/BUILD_PLAN.md`, `docs/EVALUATION_PLAN.md`, `docs/PARKING_LOT.md`, `docs/spec/`; verify claims against owning code |
 
 `frontend-src/src/router.js` maps the hash routes. `frontend-src/src/api.js` loads either local `data/index.json` and `data/<id>.json` or a configured managed endpoint. `scripts/build-frontend.js` builds the Vue shell into `frontend/` while preserving media directories. `scripts/publish-frontend.js` uploads that static tree. The `tools/` applications are not wired into the cloud stack. See [Building the reader](building-the-reader.md) for the build sequence.

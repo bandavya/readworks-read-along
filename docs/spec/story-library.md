@@ -4,7 +4,7 @@
 
 The reader · Status: built and tested locally
 
-A reader starts by finding a story. The library lists the available passages, and a reader can search by title or narrow the list by grade. A More section adds language, the kind of voice available, and a bookmarked-only filter. A count updates as filters change, and an empty result offers a way back to all stories.
+A reader starts by finding a story. The library lists the available passages, with filters in a sidebar on the left. A reader can search by title or narrow the list by grade. A More section adds language, the kind of voice available, and a bookmarked-only filter. A count updates as filters change, and an empty result offers a way back to all stories.
 
 Each row shows a title, an illustration or placeholder, grade, Lexile score when supplied (ReadWorks' reading-difficulty measure), word count, and a bookmark button. English stories also get a younger-readers link. Choosing a title opens the article and its player.
 
@@ -24,7 +24,7 @@ The screenshot shows the focused library at laptop size.
 
 ## Where it stands
 
-The build team's Nov. 4 focused run passed 41 of 41 checks on The Big Hike and both long passages at six sizes in muted Edge. That supports the local list and navigation, not the completeness or rights of a future ReadWorks catalog. On Nov. 4, 2026, the live library listed 14 passages: 13 labeled "Generated voice (Ruth)," seven of those also labeled "Human voice (ReadWorks recording)," and one Spanish passage with only a human voice. It listed a 1,435-word passage and a 2,046-word excerpt with Ruth as their only voice, and one passage with 46 words to know. The team reports this library is deployed on the event AWS account. It has not been tried on a real device; no child, teacher, or ReadWorks reviewer has tried focused mode, and ReadWorks reviewed only an earlier themed demo.
+On a phone, the filter panel stays pinned as the list scrolls and covers about a third of the screen. This was reproduced on the live site on Nov. 4 and isn't fixed; it needs a small style fix, then a rebuild and a redeploy. The build team's Nov. 4 focused run passed 41 of 41 checks on The Big Hike and both long passages at six sizes in muted Edge. That supports the local list and navigation, not the completeness or rights of a future ReadWorks catalog. On Nov. 4, 2026, the live library listed 14 passages: 13 labeled "Generated voice (Ruth)," seven of those also labeled "Human voice (ReadWorks recording)," and one Spanish passage with only a human voice. It listed a 1,435-word passage and a 2,046-word excerpt with Ruth as their only voice, and one passage with 46 words to know. The team reports this library is deployed on the event AWS account. It has not been tried on a real device; no child, teacher, or ReadWorks reviewer has tried focused mode, and ReadWorks reviewed only an earlier themed demo.
 
 ---
 
@@ -32,7 +32,7 @@ The build team's Nov. 4 focused run passed 41 of 41 checks on The Big Hike and b
 
 The live list is observed, while the team reports five passages were generated through the pipeline. The default stack uses Joanna; the team reports the live stack uses Ruth with the word check on and passage API off.
 
-`frontend-src/src/looks/mix/MixLibrary.vue` calls `loadIndex()` from `frontend-src/src/api.js`. In local mode that reads `data/index.json`; a configured published data base selects a managed index or API endpoint. The component filters client-side by case-insensitive title substring, numeric grade, `EN` or `ES`, voice ID, and bookmark membership. It sorts by grade then title. Grade options derive from the loaded items. The bookmark set persists as `mix-bookmarks`; the all-features layout persists as `mix-library-view` in the app store.
+`frontend-src/src/looks/mix/mixLibrary.css` puts the filters in the left column of a two-column grid, and keeps them in view with `position: sticky`. Known bug: those rules come after the `max-width: 760px` rules with the same specificity, so on phones they override the two-column filter grid, and the panel stays sticky. Wrapping them in `@media (min-width: 761px)` should fix it; this is untested. `frontend-src/src/looks/mix/MixLibrary.vue` calls `loadIndex()` from `frontend-src/src/api.js`. In local mode that reads `data/index.json`; a configured published data base selects a managed index or API endpoint. The component filters client-side by case-insensitive title substring, numeric grade, `EN` or `ES`, voice ID, and bookmark membership. It sorts by grade then title. Grade options derive from the loaded items. The bookmark set persists as `mix-bookmarks`; the all-features layout persists as `mix-library-view` in the app store.
 
 Each row links to `#/look/mix/p/<uuid>` and English entries also to `#/look/mix/kid/<uuid>`. The component loads each passage in the background, two at a time, to find its first picture's alternative text and create voice-shape maps. Focused mode suppresses those maps and forces rows even if a bookshelf preference is stored. An image failure leaves a labeled fallback. An index failure shows **Could not load the story list.**
 
