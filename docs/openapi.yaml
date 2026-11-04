@@ -1,0 +1,92 @@
+﻿openapi: 3.0.3
+info:
+  title: Sound Along passage service
+  version: 1.0.0
+  description: IAM signed intake and status over the team's S3 triggered pipeline.
+servers:
+  - url: https://{api-id}.execute-api.{region}.amazonaws.com/prod/v1
+    variables:
+      api-id: {default: example}
+      region: {default: us-east-1}
+paths:
+  /passages:
+    post:
+      summary: Submit a product record or configured S3 pointer
+      security: [{awsIam: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/Passage'
+                - $ref: '#/components/schemas/Pointer'
+      responses:
+        '202': {description: Queued or repaired, content: {application/json: {schema: {$ref: '#/components/schemas/Job'}}}}
+        '200': {description: Existing submission, content: {application/json: {schema: {$ref: '#/components/schemas/Job'}}}}
+        '400': {description: Bad input}
+        '409': {description: ID conflict or unsupported force}
+  /passages/{id}:
+    get:
+      summary: Get pipeline status and short lived asset links
+      security: [{awsIam: []}]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: {type: string, pattern: '^[A-Za-z0-9][A-Za-z0-9-]{0,79}$'}
+      responses:
+        '200': {description: Job status, content: {application/json: {schema: {$ref: '#/components/schemas/Job'}}}}
+        '400': {description: Invalid or reserved id}
+        '404': {description: No API submission for id}
+components:
+  securitySchemes:
+    awsIam:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: AWS SigV4 for execute-api:Invoke.
+  schemas:
+    Passage:
+      type: object
+      required: [title, text]
+      description: Provide either uuid or passageId; content may be supplied but is discarded.
+      properties:
+        uuid: {type: string}
+        passageId: {type: string}
+        title: {type: string}
+        text: {type: string, description: Spacing within lines is normalized; paragraph line breaks are retained.}
+        vocabulary:
+          description: Reader vocabulary; only supported word, definition, example, and support.senses fields are retained.
+          oneOf:
+            - {type: array, items: {type: object}}
+            - {type: object}
+        content: {type: string}
+        force: {type: boolean, default: false, description: True returns 409 on this pipeline.}
+      additionalProperties: true
+    Pointer:
+      type: object
+      required: [source]
+      properties:
+        source:
+          type: object
+          required: [bucket, key]
+          properties:
+            bucket: {type: string}
+            key: {type: string}
+        force: {type: boolean, default: false}
+    Job:
+      type: object
+      required: [id, status, voice, text_sha256, words, reasons, audio_url, timing_url, timing_json_url, status_path]
+      properties:
+        id: {type: string}
+        status: {type: string, enum: [queued, running, held, published, failed]}
+        reused: {type: boolean}
+        voice: {type: string}
+        text_sha256: {type: string}
+        words: {type: array, items: {type: string}}
+        reasons: {type: array, items: {type: string}, description: For held jobs, matching quality-gate review reasons.}
+        audio_url: {type: string, nullable: true}
+        timing_url: {type: string, nullable: true, description: Always null; no timing ZIP in this stack.}
+        timing_json_url: {type: string, nullable: true, description: Polly speech marks JSON, not aligned word intervals.}
+        status_path: {type: string}

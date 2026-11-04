@@ -14,12 +14,15 @@ import * as apigwi from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import * as path from 'path';
 import { QualityGate } from './quality-gate';
+import { PassageService } from './passage-service';
 
 export interface SoundAlongStackProps extends cdk.StackProps {
   envName: string;
   voiceId: string;
   engine: string;
   language: string;
+  passageApi?: boolean;
+  apiSourceBucket?: string;
 }
 
 export class SoundAlongStack extends cdk.Stack {
@@ -399,5 +402,11 @@ export class SoundAlongStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'ApiUrl', { value: httpApi.apiEndpoint });
     new cdk.CfnOutput(this, 'StateMachineArn', { value: stateMachine.stateMachineArn });
     new cdk.CfnOutput(this, 'JobTableName', { value: jobTable.tableName });
+    if (props.passageApi) {
+      new PassageService(this, 'PassageService', {
+        contentBucket, audioBucket, jobTable, voiceId, engine, language,
+        sourceBucketName: props.apiSourceBucket,
+      });
+    }
   }
 }

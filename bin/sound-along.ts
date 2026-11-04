@@ -15,6 +15,8 @@ new SoundAlongStack(app, `SoundAlong-${envName}`, {
   voiceId: soundAlongContext.voiceId ?? 'Joanna',
   engine: soundAlongContext.engine ?? 'neural',
   language: soundAlongContext.language ?? 'en-US',
+  passageApi: app.node.tryGetContext('passageApi') === 'true' || app.node.tryGetContext('passageApi') === true,
+  apiSourceBucket: app.node.tryGetContext('apiSourceBucket'),
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
     region: process.env.CDK_DEFAULT_REGION ?? 'us-east-1',
