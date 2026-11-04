@@ -11,7 +11,7 @@
  */
 const fs = require('fs');
 const path = require('path');
-const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const { S3Client, GetObjectCommand, PutObjectCommand } = require('@aws-sdk/client-s3');
 
 function arg(name, fallback) {
   const i = process.argv.indexOf(`--${name}`);
@@ -21,12 +21,6 @@ function arg(name, fallback) {
 const bucket = arg('frontend-bucket', process.env.FRONTEND_BUCKET);
 const region = arg('region', process.env.AWS_REGION || 'us-west-2');
 
-if (!bucket) {
-  console.error('Missing --frontend-bucket <FrontendBucketName>.');
-  process.exit(1);
-}
-
-const s3 = new S3Client({ region });
 const root = path.join(__dirname, '..', 'frontend');
 
 const CONTENT_TYPES = {
@@ -61,17 +55,32 @@ function* walk(dir) {
   }
 }
 
-async function main() {
+async function main(siteRoot = root, s3 = new S3Client({ region }), targetBucket = bucket) {
+  if (!targetBucket) throw new Error('Missing --frontend-bucket <FrontendBucketName>.');
   let count = 0;
   let bytes = 0;
-  for (const full of walk(root)) {
-    const key = path.relative(root, full).split(path.sep).join('/');
+  for (const full of walk(siteRoot)) {
+    const key = path.relative(siteRoot, full).split(path.sep).join('/');
     const ext = path.extname(full).toLowerCase();
-    const body = fs.readFileSync(full);
+    let body = fs.readFileSync(full);
+    if (key === 'data/index.json') {
+      let live = [];
+      try {
+        const response = await s3.send(new GetObjectCommand({ Bucket: targetBucket, Key: key }));
+        live = JSON.parse(await response.Body.transformToString());
+      } catch (err) {
+        if (err.name !== 'NoSuchKey' && err.name !== 'NotFound') throw err;
+      }
+      const local = JSON.parse(body.toString('utf8'));
+      if (!Array.isArray(local) || !Array.isArray(live)) throw new Error('Reader index must be a list.');
+      const rows = new Map(local.map(row => [row.uuid, row]));
+      for (const row of live) rows.set(row.uuid, row);
+      body = Buffer.from(JSON.stringify([...rows.values()]));
+    }
     bytes += body.length;
     await s3.send(
       new PutObjectCommand({
-        Bucket: bucket,
+        Bucket: targetBucket,
         Key: key,
         Body: body,
         ContentType: CONTENT_TYPES[ext] || 'application/octet-stream',
@@ -81,10 +90,11 @@ async function main() {
     count += 1;
     if (count % 50 === 0) console.log(`  …${count} objects uploaded`);
   }
-  console.log(`\nPublished ${count} objects (${(bytes / 1024 / 1024).toFixed(1)} MB) to s3://${bucket}`);
+  console.log(`\nPublished ${count} objects (${(bytes / 1024 / 1024).toFixed(1)} MB) to s3://${targetBucket}`);
 }
 
-main().catch((err) => {
+if (require.main === module) main().catch((err) => {
   console.error(err);
   process.exit(1);
 });
+module.exports = { main };

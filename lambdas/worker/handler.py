@@ -54,8 +54,8 @@ def load_passage(event, _context):
     if not isinstance(raw_text, str) or not raw_text.strip():
         raise ValueError("no reader-ready passage text")
     return {
-        "passageId": passage["passageId"],
-        "title": passage.get("title", passage["passageId"]),
+        "passageId": passage.get("passageId") or passage.get("uuid") or passage_id,
+        "title": passage.get("title") or passage_id,
         "rawText": raw_text,
         "language": passage.get("language", LANGUAGE),
         "soundAlong": passage.get("soundAlong", {"enabled": True, "audioAccess": "assignment"}),
@@ -97,8 +97,14 @@ def check_existing_manifest(event, _context):
     )
     item = resp.get("Item")
     cached = bool(item and item.get("status") == "approved")
-    event["cached"] = cached
-    if not cached:
+    event["readerNeedsPublish"] = bool(item and item.get("status") in ("approved", "reader_publish_failed")
+                                      and not item.get("readerPublishedAt") and item.get("audioKey")
+                                      and item.get("speechMarksKey"))
+    if event["readerNeedsPublish"]:
+        event["audioKey"] = item["audioKey"]
+        event["pollyMarksKey"] = item["speechMarksKey"]
+    event["cached"] = cached or event["readerNeedsPublish"]
+    if not event["cached"]:
         # Record the job as in-progress so the status page (T11) can show it.
         _table().put_item(
             Item={

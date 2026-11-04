@@ -108,17 +108,17 @@ npm run deploy           # cdk deploy --all
 
 # capture outputs: ContentBucketName, FrontendBucketName, ApiUrl, DistributionDomain, StateMachineArn
 
-# seed passages (uploading passages/*.json auto-starts generation)
-node scripts/seed.js --bucket <ContentBucketName>
-
-# (optional) manually (re)generate one passage
-node scripts/generate.js --arn <StateMachineArn> --passage demo-passage-001
-
 # publish the frontend with real, environment-specific config
 node scripts/publish-frontend.js \
   --frontend-bucket <FrontendBucketName> \
   --api <ApiUrl> \
   --cdn <DistributionDomain>
+
+# seed passages (uploading passages/*.json auto-starts generation)
+node scripts/seed.js --bucket <ContentBucketName>
+
+# (optional) manually (re)generate one passage
+node scripts/generate.js --arn <StateMachineArn> --passage demo-passage-001
 
 # open https://<DistributionDomain>/
 ```
@@ -132,9 +132,9 @@ seed or generate passages. The `PublishToReader` task
 copies validated Polly audio and writes `data/<id>.json` and `data/index.json`
 after `PublishDemoJson`; the default stack omits this task. A failed word match
 stops at `ReaderPublishFailed`, with the reason in the job table. To disable it,
-deploy without `-c readerBridge=true`. A later frontend publish only uploads
-files, but an older local `frontend/data/<id>.json` or `index.json` will overwrite
-the bridge's newer copy, so publish local media before generating new passages.
+deploy without `-c readerBridge=true`. A later frontend publish merges live
+`data/index.json` rows into a local index. Older local `data/<id>.json` files
+can still replace generated documents, so publish local media before generation.
 
 ## Voice quality gate (optional)
 

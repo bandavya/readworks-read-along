@@ -22,10 +22,13 @@ class FakeS3:
     class exceptions:
         class NoSuchKey(Exception):
             pass
+        class AccessDenied(Exception):
+            pass
 
     def __init__(self):
         self.objects = {}
         self.writes = []
+        self.allow_list = True
 
     def seed(self, bucket, key, value):
         self.objects[bucket, key] = value if isinstance(value, bytes) else json.dumps(value).encode()
@@ -34,6 +37,8 @@ class FakeS3:
         try:
             return {"Body": io.BytesIO(self.objects[Bucket, Key])}
         except KeyError:
+            if not self.allow_list:
+                raise self.exceptions.AccessDenied("403 AccessDenied") from None
             raise self.exceptions.NoSuchKey(Key) from None
 
     def head_object(self, Bucket, Key):
@@ -167,11 +172,13 @@ class BridgeTests(unittest.TestCase):
         self.assertIn("</p><p>", html_text)
 
     def test_readworks_shaped_content(self):
-        self.source["content"] = f"<p>{self.source['text']}</p>"
+        self.source["content"] = f"<h2>How it works</h2><figure><figcaption>Photo caption</figcaption></figure><p>{self.source['text']}</p>"
         self.source["canonical_grade"] = 18
         self.source["l"] = ["430"]
-        self.source["vocab"] = {"support": {"senses": {"sense-1": {"word": "color",
-                                                                          "definition": "visible quality"}}}}
+        self.source["vocab"] = {"support": {"senses": {"sense-1": {"definition": "visible quality"}},
+                                            "occurrences": {"sense-100": {"word": "color"}}}}
+        self.source["uuid"] = self.pid
+        self.source.pop("passageId")
         self.source.pop("gradeBand")
         self.source.pop("lexile")
         self.source.pop("vocabulary")
@@ -181,7 +188,18 @@ class BridgeTests(unittest.TestCase):
         self.assertEqual(doc["grade"], "2")
         self.assertEqual(doc["lexile"], "430")
         self.assertIn("<p><span", doc["html"])
+        self.assertIn('sa-unread', doc["html"])
+        self.assertEqual(len(re.findall(r'data-i="\d+"', doc["html"])), doc["words"])
+        self.assertEqual(doc["vocab"]["sense-1"]["word"], "color")
         self.assertEqual(doc["vocab"]["sense-1"]["definition"], "visible quality")
+        fake_boto3 = types.SimpleNamespace(client=lambda name: self.s3,
+                                           resource=lambda name: types.SimpleNamespace())
+        with mock.patch.dict(sys.modules, {"boto3": fake_boto3}):
+            worker_spec = importlib.util.spec_from_file_location("worker_uuid", ROOT / "lambdas/worker/handler.py")
+            worker = importlib.util.module_from_spec(worker_spec)
+            worker_spec.loader.exec_module(worker)
+        worker.CONTENT_BUCKET = "content"
+        self.assertEqual(worker.load_passage({"passageId": self.pid}, None)["passageId"], self.pid)
 
     def test_number_and_hyphen(self):
         self.source["text"] = "We saw 12 well-known birds."
@@ -197,6 +215,86 @@ class BridgeTests(unittest.TestCase):
         self.assertEqual(len(t), 5)
         self.assertEqual(t[2], [0.4, 0.6])
         self.assertEqual(t[3], [0.6, 0.9])
+
+    def test_numeric_forms_use_offsets_for_written_and_spoken_marks(self):
+        self.source["text"] = "In 1999, 12 cost $3.50, then 1,000 won 3rd place."
+        self.s3.seed("content", self.event["sourceKey"], self.source)
+        text = self.source["text"]
+        words = list(re.finditer(r"\S+", text))
+        spoken = {1: "nineteen ninety nine", 2: "12", 4: "three dollars fifty cents",
+                  6: "one thousand", 8: "third"}
+        lines = []
+        for i, word in enumerate(words):
+            value = spoken.get(i, re.sub(r"[^\w]", "", word.group()))
+            lines.append(json.dumps({"time": i * 300, "type": "word",
+                                     "start": len(text[:word.start()].encode()),
+                                     "end": len(text[:word.end()].encode()), "value": value}))
+        self.s3.seed("audio", self.event["pollyMarksKey"], "\n".join(lines).encode())
+        self.run_bridge()
+        self.assertEqual(len(self.s3.json("site", f"data/{self.pid}.json")["voices"][0]["t"]), len(words))
+
+    def test_edited_text_rebuilds_and_discards_old_voice_timing(self):
+        self.source["text"] = "One small bird sings."
+        self.s3.seed("content", self.event["sourceKey"], self.source)
+        self.s3.seed("audio", self.event["pollyMarksKey"], marks_for(self.source["text"]))
+        self.run_bridge()
+        self.source["text"] = "One large bird sings."
+        self.source["title"] = "A New Title"
+        self.s3.seed("content", self.event["sourceKey"], self.source)
+        self.s3.seed("audio", self.event["pollyMarksKey"], marks_for(self.source["text"]))
+        self.event["textHash"] = "sha256:new"
+        self.run_bridge()
+        doc = self.s3.json("site", f"data/{self.pid}.json")
+        self.assertEqual(doc["title"], "A New Title")
+        self.assertEqual(len(doc["voices"]), 1)
+        self.assertEqual(doc["voices"][0]["text_hash"], "sha256:new")
+        self.assertEqual(doc["words"], 4)
+
+    def test_unexpected_s3_failure_marks_job_failed(self):
+        self.s3.allow_list = False
+        fake_boto3 = types.SimpleNamespace(client=lambda name: self.s3,
+                                           resource=lambda name: types.SimpleNamespace(Table=lambda table: self.table))
+        env = {"JOB_TABLE": "jobs", "CONTENT_BUCKET": "content", "AUDIO_BUCKET": "audio",
+               "FRONTEND_BUCKET": "site"}
+        with mock.patch.dict(sys.modules, {"boto3": fake_boto3}), mock.patch.dict(os.environ, env):
+            result = bridge.handler(self.event, None)
+        self.assertFalse(result["readerReady"])
+        self.assertIn("403", result["readerFailureReason"])
+        self.assertEqual(self.table.updates[-1]["ExpressionAttributeValues"][":s"], "reader_publish_failed")
+
+    def test_cached_job_reuses_audio_after_bridge_failure(self):
+        self.run_bridge()
+        self.assertIn("readerPublishedAt", self.table.updates[-1]["UpdateExpression"])
+        doc = self.s3.json("site", f"data/{self.pid}.json")
+        self.s3.seed("audio", "audio/canonical.speechmarks.json",
+                     [json.loads(line) for line in self.s3.objects["audio", self.event["pollyMarksKey"]].decode().splitlines()])
+        fake_item = {"status": "reader_publish_failed", "audioKey": self.event["audioKey"],
+                     "speechMarksKey": "audio/canonical.speechmarks.json"}
+        fake_table = types.SimpleNamespace(get_item=lambda **kwargs: {"Item": fake_item})
+        fake_boto3 = types.SimpleNamespace(client=lambda name: self.s3,
+                                           resource=lambda name: types.SimpleNamespace(Table=lambda name: fake_table))
+        with mock.patch.dict(sys.modules, {"boto3": fake_boto3}):
+            worker_spec = importlib.util.spec_from_file_location("worker_cached", ROOT / "lambdas/worker/handler.py")
+            worker = importlib.util.module_from_spec(worker_spec)
+            worker_spec.loader.exec_module(worker)
+        worker.JOB_TABLE = "jobs"
+        cached = worker.check_existing_manifest({**self.event, "charCount": 10}, None)
+        self.assertTrue(cached["cached"])
+        self.assertTrue(cached["readerNeedsPublish"])
+        self.assertEqual(cached["pollyMarksKey"], fake_item["speechMarksKey"])
+        fake_item["status"] = "approved"
+        self.assertTrue(worker.check_existing_manifest({**self.event, "charCount": 10}, None)["readerNeedsPublish"])
+        fake_item["readerPublishedAt"] = "2026-11-04T12:00:00Z"
+        self.assertFalse(worker.check_existing_manifest({**self.event, "charCount": 10}, None)["readerNeedsPublish"])
+        bridge.publish(cached, self.s3, self.table, "content", "audio", "site", settle=lambda: None)
+        self.assertEqual(self.s3.json("site", f"data/{self.pid}.json"), doc)
+
+    def test_frontend_publish_keeps_live_index(self):
+        if not shutil.which("node"):
+            self.skipTest("Node.js is unavailable")
+        result = subprocess.run(["node", str(ROOT / "tests/test_publish_frontend.cjs")],
+                                text=True, capture_output=True, check=False)
+        self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_unaligned_marks_publish_nothing(self):
         self.s3.seed("audio", self.event["pollyMarksKey"], marks_for(self.source["text"], {1: "wrong"}))

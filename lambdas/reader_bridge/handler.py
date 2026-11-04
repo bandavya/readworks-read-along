@@ -18,29 +18,6 @@ def _norm(value):
     return "".join(ch.lower() for ch in str(value) if ch.isalnum())
 
 
-def _number_words(value):
-    if not value.isdigit() or len(value) > 4:
-        return None
-    n = int(value)
-    ones = ("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
-            "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen",
-            "seventeen", "eighteen", "nineteen")
-    tens = ("", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety")
-    def under_100(x):
-        return ones[x] if x < 20 else tens[x // 10] + (ones[x % 10] if x % 10 else "")
-    if n < 100:
-        return under_100(n)
-    if n < 1000:
-        return ones[n // 100] + "hundred" + (under_100(n % 100) if n % 100 else "")
-    return ones[n // 1000] + "thousand" + (_number_words(str(n % 1000)) if n % 1000 else "")
-
-
-def _spoken_key(value):
-    # Accept only a deterministic expansion; unfamiliar numeric forms fail closed.
-    return "".join(_number_words(part) or _norm(part)
-                   for part in re.findall(r"\d+|[^\d]+", value))
-
-
 def _read(s3, bucket, key):
     with s3.get_object(Bucket=bucket, Key=key)["Body"] as body:
         return body.read()
@@ -67,12 +44,14 @@ def _timings(text, marks_body):
                         len(text[:word.end()].encode("utf-8")), word.group()))
     groups = [[] for _ in words]
     last_time = -1
-    for line in marks_body.decode("utf-8").splitlines():
-        if not line.strip():
+    decoded = marks_body.decode("utf-8")
+    marks = json.loads(decoded) if decoded.lstrip().startswith("[") else decoded.splitlines()
+    for line in marks:
+        if isinstance(line, str) and not line.strip():
             continue
         try:
-            mark = json.loads(line)
-        except json.JSONDecodeError as exc:
+            mark = line if isinstance(line, dict) else json.loads(line)
+        except (TypeError, json.JSONDecodeError) as exc:
             raise ReaderInputError("invalid Polly speech mark JSON") from exc
         if mark.get("type") != "word":
             continue
@@ -95,10 +74,10 @@ def _timings(text, marks_body):
             continue
         if not marks:
             raise ReaderInputError(f"missing Polly word mark for passage word {i}: {word!r}")
-        # Offsets establish the word boundary; spoken values independently check it.
-        source = _spoken_key(word)
+        # Polly may spell numeric tokens many ways; offsets establish their boundary.
+        source = _norm(word)
         spoken = "".join(_norm(m.get("value", "")) for m in marks)
-        if source != spoken:
+        if not any(ch.isdigit() for ch in word) and source != spoken:
             raise ReaderInputError(f"Polly word {i} differs from reader text: {word!r} / {[m.get('value') for m in marks]!r}")
         begin = marks[0]["time"] / 1000
         following = next((g[0]["time"] / 1000 for g in groups[i + 1:] if g), None)
@@ -116,12 +95,18 @@ class _Annotator(HTMLParser):
         self.words = words
         self.at = 0
         self.out = []
+        self.stack = []
 
     def handle_starttag(self, tag, attrs):
         self.out.append(self.get_starttag_text())
+        if tag not in ("br", "hr", "img", "input", "meta", "link", "source", "wbr"):
+            self.stack.append(tag)
 
     def handle_endtag(self, tag):
         self.out.append(f"</{tag}>")
+        if tag in self.stack:
+            while self.stack and self.stack.pop() != tag:
+                pass
 
     def handle_data(self, data):
         for piece in re.split(r"(\s+)", data):
@@ -129,6 +114,9 @@ class _Annotator(HTMLParser):
                 continue
             if piece.isspace() or not _norm(piece):
                 self.out.append(html.escape(piece, quote=False))
+                continue
+            if any(tag in ("figure", "figcaption", "h1", "h2", "h3", "h4", "h5", "h6") for tag in self.stack):
+                self.out.append(f'<span class="sa-w sa-unread">{html.escape(piece, quote=False)}</span>')
                 continue
             if self.at >= len(self.words) or _norm(piece) != _norm(self.words[self.at][1]):
                 raise ReaderInputError(f"HTML differs from passage word {self.at}: {piece!r}")
@@ -201,7 +189,10 @@ def _vocab(source):
     values = source.get("vocabulary") or source.get("vocab") or []
     if isinstance(values, dict):
         senses = values.get("support", {}).get("senses", {})
-        return {str(k): {"word": v.get("word"), "definition": html.unescape(v.get("definition") or ""),
+        occurrences = values.get("support", {}).get("occurrences", {})
+        return {str(k): {"word": v.get("word") or next((o.get("word") for oid, o in occurrences.items()
+                                                     if oid[:-2] == str(k) and o.get("word")), None),
+                         "definition": html.unescape(v.get("definition") or ""),
                          "example": html.unescape((v.get("example_list") or [""])[0]),
                          "pos": (v.get("part_of_speech") or [None])[0], "spanish": None, "say": None}
                 for k, v in senses.items()}
@@ -275,12 +266,12 @@ def publish(event, s3, table, content_bucket, audio_bucket, frontend_bucket, set
     existing = _optional_json(s3, frontend_bucket, f"data/{pid}.json")
     record = _record(source, pid, text, html_text)
     if existing:
-        if not _existing_fits(existing, text) or existing.get("title") != record["title"]:
-            raise ReaderInputError("existing reader passage differs; preserving its voices")
-        record = existing
-        record["grade"] = _record(source, pid, text, html_text)["grade"] or record.get("grade", "")
-        record["lexile"] = source.get("lexile", record.get("lexile"))
-        record["vocab"] = _vocab(source) or record.get("vocab", {})
+        same_words = _existing_fits(existing, text)
+        lead_count = len(record["title_words"]) + len(record["by_words"])
+        record["voices"] = [v for v in existing.get("voices", []) if same_words
+                            and len(v.get("t", [])) == record["words"]
+                            and len(v.get("lead", [])) in (0, lead_count)
+                            and (existing.get("title") == record["title"] or not any(v.get("lead", [])))]
     if len(rows) != record["words"]:
         raise ReaderInputError("reader word count differs from Polly timing")
     voice_id = "generated"
@@ -307,6 +298,10 @@ def publish(event, s3, table, content_bucket, audio_bucket, frontend_bucket, set
                    CacheControl="public, max-age=31536000, immutable")
     _write_json(s3, frontend_bucket, f"data/{pid}.json", record)
     _add_to_index(s3, frontend_bucket, _index_row(record), pid, settle)
+    table.update_item(Key={"passageId": pid, "textHash": event["textHash"]},
+                      UpdateExpression="SET #s = :s, readerPublishedAt = :u REMOVE readerFailureReason",
+                      ExpressionAttributeNames={"#s": "status"},
+                      ExpressionAttributeValues={":s": "approved", ":u": datetime.now(timezone.utc).isoformat()})
     return {**event, "readerReady": True, "readerKey": f"data/{pid}.json", "readerAudioKey": audio_path}
 
 
@@ -317,7 +312,7 @@ def handler(event, _context):
     try:
         return publish(event, s3, table, os.environ["CONTENT_BUCKET"],
                        os.environ["AUDIO_BUCKET"], os.environ["FRONTEND_BUCKET"])
-    except ReaderInputError as exc:
+    except Exception as exc:
         reason = str(exc)
         _mark_failed(table, event, reason)
         return {**event, "readerReady": False, "readerFailureReason": reason}

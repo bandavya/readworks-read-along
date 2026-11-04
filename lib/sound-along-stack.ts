@@ -287,8 +287,11 @@ export class SoundAlongStack extends cdk.Stack {
         cause: 'Reader bridge rejected passage; see readerFailureReason in the job table.',
         error: 'SoundAlongReaderPublishError',
       });
+      const readerSuccess = new sfn.Choice(this, 'WasAudioReused')
+        .when(sfn.Condition.booleanEquals('$.cached', true), succeedDone)
+        .otherwise(emitMetrics.next(succeedDone));
       const readerResult = new sfn.Choice(this, 'IsReaderReady')
-        .when(sfn.Condition.booleanEquals('$.readerReady', true), emitMetrics.next(succeedDone))
+        .when(sfn.Condition.booleanEquals('$.readerReady', true), readerSuccess)
         .otherwise(readerFailed);
       afterPublish = published.next(publishToReader).next(readerResult);
     } else {
@@ -316,13 +319,18 @@ export class SoundAlongStack extends cdk.Stack {
 
     waitForPolly.next(checkPolly).next(pollChoice);
 
+    const cachedPath = publishToReader
+      ? new sfn.Choice(this, 'ReaderNeedsPublish')
+        .when(sfn.Condition.booleanEquals('$.readerNeedsPublish', true), publishToReader)
+        .otherwise(succeedCached)
+      : succeedCached;
     const definition = loadPassage
       .next(normalizeText)
       .next(computeHash)
       .next(checkExisting)
       .next(
         new sfn.Choice(this, 'ManifestExists')
-          .when(sfn.Condition.booleanEquals('$.cached', true), succeedCached)
+          .when(sfn.Condition.booleanEquals('$.cached', true), cachedPath)
           .otherwise(submitPolly.next(waitForPolly)),
       );
 
