@@ -1,0 +1,43 @@
+# Heard versus written check
+
+*Can a suspected difference between the audio and passage stop publication?*
+
+Making the audio · Status: built, off by default
+
+A recording can be well formed and still say something different from the passage on screen. An optional check catches that before publication. It asks speech recognition (software that turns speech into text) what the audio says and compares the result with the written passage. If it finds an omission, replacement, or extra phrase, it holds the take and records the reasons for a reviewer. A held take does not reach the reader, so an older published voice can stay available.
+
+Recognition is evidence, not a judge of sound. It can confuse a name or an unusual word. A maintained list can accept known ways a name is heard, for one passage or all. The default list is empty.
+
+Passing means the recognition run found no blocking difference. It does not mean a person heard or approved the narration. People still settle pronunciation, unclear cases, and review policy.
+
+**The optional check can hold a suspicious take before publication, but its verdict is only as good as the recognition.**
+
+A clear result moves on; a difference or an error holds the take:
+
+```mermaid
+flowchart LR
+  A["Validated MP3"] -->|audio| B["Recognize heard words"]
+  B -->|transcript| C["Compare with text"]
+  C -->|clear| D["Publish steps"]
+  C -->|difference or error| E["Hold and reasons"]
+```
+
+## How it connects
+
+[Audio and pace checks](audio-and-pace-checks.md) run first. [Names and pronunciation](names-and-pronunciation.md) covers the accepted spellings, and [Publish to reader](publish-to-reader.md) explains where a held take stops.
+
+## Where it stands
+
+The check is built, off by default, and locally tested with stand-in AWS services. It has not been run or listened to on the event AWS account. A local run on the two long ReadWorks recordings would hold both, partly from recognition errors; that audio is outside this repo. No target-device trial with sound and a reader was confirmed.
+
+---
+
+## Technical details
+
+`-c qualityGate=true` activates `lib/quality-gate.ts` after `IsValid`. It starts a Transcribe batch job, polls in ten-second waits, and calls `lambdas/quality_gate/handler.py`. With `generativeVoice=true`, the gate reuses the transcript already made for timing. `comparison.py` normalizes punctuation, common spoken variants, numbers, and supported name spellings. Any blocking flag holds the take; failed or unparseable transcription also holds it. A hold writes `review/<passageId>.json` and job status `held`, then ends at `HeldForVoiceCheck` without `WriteManifest`, `PublishDemoJson`, or reader publication.
+
+On a clear comparison, the gate writes manifest and job status `generated` with `reviewStatus: needs human check`. Its cache accepts only `generated` results. The S3 `config/names.json` list replaces the packaged list; the packaged list is empty. A known recognition spelling can be entered and the passage rerun, but no in-workflow human release action is implemented. Check locally with `python tests/test_quality_gate.py` and `npx cdk synth -c qualityGate=true`. The design document's automatic re-synthesis, review console, sampled auditing, and volunteer workflow are ideas, not built here.
+
+---
+
+Previous: [Audio and pace checks](audio-and-pace-checks.md) · [Spec home](README.md) · Next: [Publish to reader](publish-to-reader.md)

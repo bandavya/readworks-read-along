@@ -1,0 +1,41 @@
+# Story library
+
+*How does a reader find and open a passage?*
+
+The reader · Status: built and tested locally
+
+A reader starts by finding a story. The library lists the available passages, and a reader can search by title or narrow the list by grade. A More section adds language, the kind of voice available, and a bookmarked-only filter. A count updates as filters change, and an empty result offers a way back to all stories.
+
+Each row shows a title, an illustration or placeholder, grade, Lexile score when supplied (ReadWorks' reading-difficulty measure), word count, and a bookmark button. English stories also get a younger-readers link. Choosing a title opens the article and its player.
+
+Bookmarks live in this browser only. They do not assign a story to a class or sync across devices. The list comes from the site's published index of passages, so what appears depends on the data deployed with the site.
+
+Focused mode shows plain rows. The All features view adds a bookshelf layout and a picture of where the narration pauses.
+
+**The library takes a reader from a story title to its timed article.**
+
+The screenshot shows the focused library at laptop size.
+
+![Focused story library at laptop size](shots/library.png)
+
+## How it connects
+
+[Library index](library-index.md) defines the list data. Each row opens [The passage reader](the-passage-reader.md) or the [Younger readers view](younger-readers-view.md).
+
+## Where it stands
+
+The build team's Nov. 4 focused run passed 41 of 41 checks on The Big Hike and both long passages at six sizes in muted Edge. That supports the local list and navigation, not the completeness or rights of a future ReadWorks catalog. The library has not run on the event AWS account or a real device. No child, teacher, or ReadWorks reviewer has tried focused mode, and ReadWorks reviewed only an earlier themed demo.
+
+---
+
+## Technical details
+
+`frontend-src/src/looks/mix/MixLibrary.vue` calls `loadIndex()` from `frontend-src/src/api.js`. In local mode that reads `data/index.json`; a configured published data base selects a managed index or API endpoint. The component filters client-side by case-insensitive title substring, numeric grade, `EN` or `ES`, voice ID, and bookmark membership. It sorts by grade then title. Grade options derive from the loaded items. The bookmark set persists as `mix-bookmarks`; the all-features layout persists as `mix-library-view` in the app store.
+
+Each row links to `#/look/mix/p/<uuid>` and English entries also to `#/look/mix/kid/<uuid>`. The component loads each passage in the background, two at a time, to find its first picture's alternative text and create voice-shape maps. Focused mode suppresses those maps and forces rows even if a bookshelf preference is stored. An image failure leaves a labeled fallback. An index failure shows **Could not load the story list.**
+
+Start Vite from `frontend-src` with `npm run dev -- --host 127.0.0.1 --port 8992` and run `node frontend-src/tests/focused_browser.mjs http://127.0.0.1:8992`. On a real device, check search, filters, bookmarks after reopening the browser, and whether the intended catalog and media are actually available.
+
+---
+
+Previous: [Younger readers view](younger-readers-view.md) · [Spec home](README.md) · Next: [Screen sizes and accessibility](screen-sizes-and-accessibility.md)
