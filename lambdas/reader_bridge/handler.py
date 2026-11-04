@@ -298,6 +298,21 @@ def publish(event, s3, table, content_bucket, audio_bucket, frontend_bucket, set
                    CacheControl="public, max-age=31536000, immutable")
     _write_json(s3, frontend_bucket, f"data/{pid}.json", record)
     _add_to_index(s3, frontend_bucket, _index_row(record), pid, settle)
+
+    # Pronunciation guide ("Words to know") audio, in the SAME voice as the passage, so the
+    # guide no longer uses the older shipped clips. Draft audio: entries say "needs human check".
+    # Best-effort: a failure here must not fail the passage publish.
+    if os.environ.get("SYLLABLE_AUDIO") == "true" and record.get("vocab"):
+        try:
+            import boto3
+            from syllable_audio.handler import publish_syllables
+            publish_syllables(boto3.client("polly"), s3, frontend_bucket, pid, record["vocab"],
+                              event["voiceId"], event["engine"], source.get("language") or "en-US")
+        except Exception as exc:  # noqa: BLE001
+            table.update_item(Key={"passageId": pid, "textHash": event["textHash"]},
+                              UpdateExpression="SET syllableAudioError = :e",
+                              ExpressionAttributeValues={":e": str(exc)[:300]})
+
     table.update_item(Key={"passageId": pid, "textHash": event["textHash"]},
                       UpdateExpression="SET #s = :s, readerPublishedAt = :u REMOVE readerFailureReason",
                       ExpressionAttributeNames={"#s": "status"},

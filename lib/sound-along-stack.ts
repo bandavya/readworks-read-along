@@ -167,7 +167,14 @@ export class SoundAlongStack extends cdk.Stack {
       code: generativeCode ?? lambda.Code.fromAsset(path.join(__dirname, '..', 'lambdas', 'reader_bridge'), { exclude: ['**/__pycache__/**', '**/*.pyc'] }),
       timeout: cdk.Duration.minutes(5),
       memorySize: 256,
-      environment: { ...commonLambdaEnv, FRONTEND_BUCKET: frontendBucket.bucketName },
+      environment: {
+        ...commonLambdaEnv,
+        FRONTEND_BUCKET: frontendBucket.bucketName,
+        // Pronunciation-guide audio in the passage voice. Needs the whole lambdas/ tree
+        // (syllable_audio + worker + pyphen), which only the generative bundle ships, so it is
+        // on only for the generative-voice deploy. Turn off with -c syllableAudio=false.
+        SYLLABLE_AUDIO: (generativeVoice && String(this.node.tryGetContext('syllableAudio')) !== 'false') ? 'true' : 'false',
+      },
       logRetention: logs.RetentionDays.ONE_WEEK,
     }) : undefined;
 
@@ -208,6 +215,12 @@ export class SoundAlongStack extends cdk.Stack {
       readerBridgeFn.addToRolePolicy(new iam.PolicyStatement({
         actions: ['dynamodb:UpdateItem'], resources: [jobTable.tableArn],
       }));
+      if (generativeVoice) {
+        // Pronunciation-guide audio is synthesized inline in the bridge, in the passage voice.
+        readerBridgeFn.addToRolePolicy(new iam.PolicyStatement({
+          actions: ['polly:SynthesizeSpeech'], resources: ['*'],
+        }));
+      }
     }
 
     // Polly: async synthesis writes to the audio bucket.
