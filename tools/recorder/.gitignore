@@ -1,0 +1,4 @@
+human_recordings/
+private/
+__pycache__/
+*.pyc

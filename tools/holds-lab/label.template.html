@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Holds lab | Label flags</title>
+<style>
+:root{font:16px/1.45 system-ui,sans-serif;color:#182431;background:#f5f7f5}
+body{max-width:900px;margin:auto;padding:1rem}header,section{background:white;border:1px solid #d6dfdb;border-radius:12px;padding:1rem;margin:.8rem 0}
+h1{margin:.1rem 0}button,input{font:inherit;padding:.4rem}button{cursor:pointer}fieldset{border:0;margin:1rem 0;padding:0}
+label{display:block;margin:.5rem 0}small,.muted{color:#52605c}.context{background:#eaf2ef;padding:1rem;border-radius:8px}
+.warn{background:#fff4df;padding:.7rem}a{color:#075e69}.audio{padding:.7rem;background:#e2edf7;border-radius:8px}.audio button{margin:.2rem}.audio small{display:block}
+</style>
+<header><a href="index.html">← Policy map</a><h1>Listen or read, then label</h1>
+<p>No labels ship with this page. Export before leaving or reloading; unexported answers will be lost. This page does not publish a take.</p></header>
+<section><p class="warn">These flags are invented examples. Add private/sample.json for a fuller local labeling view. The label you enter is your own decision.</p>
+<label>Reviewer name <input id="reviewer" maxlength="80" autocomplete="name"></label>
+<label>Import a prior labels JSON <input id="import" type="file" accept="application/json,.json"></label>
+<button id="export">Export labels JSON</button><p id="progress"></p></section>
+<section><button id="prev">← Previous</button> <span id="position"></span> <button id="next">Next →</button>
+<h2 id="title"></h2><p id="pair"></p><p class="context" id="context"></p><p id="time"></p><div id="audioBox" class="audio"></div><audio id="player" preload="none"></audio><p id="audioStatus" role="status"></p><p class="muted" id="source"></p>
+<fieldset><legend>What does this flag mean?</legend>
+<label><input type="radio" name="answer" value="voice_wrong"> Voice wrong: the recording says the wrong words</label>
+<label><input type="radio" name="answer" value="recognizer_wrong"> Recognizer wrong: recording sounds right</label>
+<label><input type="radio" name="answer" value="doesnt_matter"> Doesn't matter for the reader</label>
+<label><input type="radio" name="answer" value="unsure"> Not sure</label></fieldset>
+<label>Optional note <input id="note" maxlength="500" style="width:100%"></label></section>
+<script>
+const DATA=/*DATA*/;
+const flags=DATA.takes.flatMap(t=>t.flags.map(f=>({...f,take:t}))).sort((a,b)=>{
+  const priority=f=>f.take.source==='gatefix-1101'?(f.take.route==='human'?0:1):2;
+  return priority(a)-priority(b);
+});
+let at=0, labels={};
+let stopAt=null;
+const player=document.getElementById('player');
+player.ontimeupdate=()=>{if(stopAt!==null&&player.currentTime>=stopAt){player.pause();stopAt=null}};
+player.onerror=()=>{document.getElementById('audioStatus').textContent='Could not load this recording from the local server.'};
+function playClip(url,time){
+  player.pause();player.onloadedmetadata=null;stopAt=null;
+  document.getElementById('audioStatus').textContent='';
+  if(player.getAttribute('src')!==url){player.src=url;player.load()}
+  const start=Math.max(0,time-2),end=time+2;
+  const seekAndPlay=()=>{
+    player.currentTime=start;stopAt=end;
+    player.play().catch(()=>{document.getElementById('audioStatus').textContent='Could not play this clip.'});
+  };
+  if(player.readyState>=1)seekAndPlay();else player.onloadedmetadata=seekAndPlay;
+}
+function render(){
+  player.pause();player.onloadedmetadata=null;stopAt=null;
+  document.getElementById('audioStatus').textContent='';
+  const f=flags[at];
+  const group=f.take.source==='synthetic-demo'?'Made-up example':f.take.source;
+  document.getElementById('position').textContent=`${at+1} of ${flags.length} · ${group}`;
+  document.getElementById('title').textContent=f.take.title+' · '+f.take.route;
+  document.getElementById('pair').textContent=`Written: ${f.written||'(none)'} | Recognizer/report: ${f.heard||'(not heard)'}`;
+  document.getElementById('context').textContent=f.context||'Context unavailable in this report';
+  document.getElementById('time').textContent=`Time: ${f.at==null?'exact spot unknown':f.at+' seconds'}${f.time_basis?' · '+f.time_basis:''}`;
+  const audioBox=document.getElementById('audioBox');audioBox.replaceChildren();
+  if(!f.take.audio){audioBox.textContent='No matching local audio was found for this flag.'}
+  else{
+    const spots=f.at!=null?[f.at]:(f.candidate_times||[]);
+    if(spots.length>1){const note=document.createElement('small');note.textContent=`Exact spot not matched. ${spots.length} candidate places in the local recording:`;audioBox.append(note)}
+    if(!spots.length){const note=document.createElement('small');note.textContent='Exact spot not matched; no short clip is available. Open the full local recording.';audioBox.append(note)}
+    spots.forEach((time,i)=>{const row=document.createElement('div'),button=document.createElement('button');button.type='button';button.textContent=`▶ ${spots.length>1?'Candidate '+(i+1)+' · ':''}${time.toFixed(1)}s`;button.onclick=()=>playClip(f.take.audio,time);row.append(button);if(f.candidate_contexts?.[i]){const hint=document.createElement('small');hint.textContent=f.candidate_contexts[i];row.append(hint)}audioBox.append(row)});
+    const full=document.createElement('a');full.href=f.take.audio;full.target='_blank';full.textContent='Full recording';audioBox.append(full);
+  }
+  document.getElementById('source').textContent=f.evidence+' · '+f.category;
+  document.querySelectorAll('input[name=answer]').forEach(x=>x.checked=labels[f.id]?.answer===x.value);
+  document.getElementById('note').value=labels[f.id]?.note||'';
+  document.getElementById('progress').textContent=`${Object.values(labels).filter(x=>x.answer&&x.answer!=='unsure').length} decisions marked; no labels shipped.`;
+}
+function set(){
+  const f=flags[at], choice=document.querySelector('input[name=answer]:checked'), note=document.getElementById('note').value;
+  if(choice||note)labels[f.id]={answer:choice?.value||'unsure',note:note.slice(0,500)};
+  else delete labels[f.id];
+  render();
+}
+document.getElementById('prev').onclick=()=>{at=Math.max(0,at-1);render()};
+document.getElementById('next').onclick=()=>{at=Math.min(flags.length-1,at+1);render()};
+document.querySelectorAll('input[name=answer]').forEach(x=>x.onchange=set);
+document.getElementById('note').onchange=set;
+document.getElementById('export').onclick=()=>{
+  // A note can still have focus when Export is clicked, before onchange fires.
+  set();
+  const reviewer=document.getElementById('reviewer').value.trim();
+  if(!reviewer){alert('Enter your name before export.');return}
+  const data={schema:2,sample_id:DATA.sample_id,source:'sample.json',reviewer,exported_at:new Date().toISOString(),labels};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download='holds-labels.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+};
+document.getElementById('import').onchange=async e=>{
+  try{
+    const v=JSON.parse(await e.target.files[0].text());
+    if(v.schema!==2||v.sample_id!==DATA.sample_id||!v.labels||Array.isArray(v.labels)||typeof v.labels!=='object')
+      throw Error('This label file belongs to a different sample.');
+    if(typeof v.reviewer!=='string'||!v.reviewer.trim())throw Error('Reviewer name is missing.');
+    const valid=new Set(flags.map(f=>f.id));
+    if(Object.keys(v.labels).some(k=>!valid.has(k)))throw Error('Unknown flag ID.');
+    if(Object.values(v.labels).some(x=>!['voice_wrong','recognizer_wrong','doesnt_matter','unsure'].includes(x?.answer)))
+      throw Error('Unknown answer.');
+    document.getElementById('reviewer').value=String(v.reviewer||'').slice(0,80);
+    labels=Object.fromEntries(Object.entries(v.labels).map(([k,x])=>[k,{answer:x.answer,note:String(x.note||'').slice(0,500)}]));
+    render();
+  }catch(err){alert('Could not import labels: '+err.message)}
+};
+render();
+</script></html>

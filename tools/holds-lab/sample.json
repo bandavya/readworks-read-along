@@ -1,0 +1,104 @@
+{
+  "schema": 2,
+  "sample_id": "28120ead71b2c92e3dac336ab1755669125846bd57a4ed93c55cbf1a5ed26bae",
+  "takes": [
+    {
+      "unobserved_flags": 0,
+      "recorded": null,
+      "replayable": false,
+      "audio": null,
+      "structural_failure": false,
+      "evidence": "made-up example",
+      "homograph_words": {},
+      "id": "demo:1",
+      "passage_id": "demo-1",
+      "title": "The Paper Kite",
+      "route": "human",
+      "source": "synthetic-demo",
+      "flags": [
+        {
+          "id": "demo:1:0",
+          "kind": "swap",
+          "written": "kite",
+          "heard": "boat",
+          "at": null,
+          "context": "Mira carried her paper kite to the hill.",
+          "advisory": false,
+          "category": "real-looking substitution",
+          "evidence": "made-up example",
+          "second_agrees": null
+        }
+      ]
+    },
+    {
+      "unobserved_flags": 0,
+      "recorded": null,
+      "replayable": false,
+      "audio": null,
+      "structural_failure": false,
+      "evidence": "made-up example",
+      "homograph_words": {},
+      "id": "demo:2",
+      "passage_id": "demo-2",
+      "title": "The Garden Gate",
+      "route": "human",
+      "source": "synthetic-demo",
+      "flags": [
+        {
+          "id": "demo:2:0",
+          "kind": "swap",
+          "written": "seeds",
+          "heard": "seed",
+          "at": null,
+          "context": "Noah planted three seeds by the gate.",
+          "advisory": false,
+          "category": "word ending",
+          "evidence": "made-up example",
+          "second_agrees": null
+        }
+      ]
+    },
+    {
+      "unobserved_flags": 0,
+      "recorded": null,
+      "replayable": false,
+      "audio": null,
+      "structural_failure": false,
+      "evidence": "made-up example",
+      "homograph_words": {
+        "wind": 1
+      },
+      "id": "demo:3",
+      "passage_id": "demo-3",
+      "title": "A Rainy Walk",
+      "route": "generated",
+      "source": "synthetic-demo",
+      "flags": []
+    },
+    {
+      "unobserved_flags": 0,
+      "recorded": null,
+      "replayable": false,
+      "audio": null,
+      "structural_failure": true,
+      "evidence": "made-up example",
+      "homograph_words": {},
+      "id": "demo:4",
+      "passage_id": "demo-4",
+      "title": "The Lantern",
+      "route": "generated",
+      "source": "synthetic-demo",
+      "flags": []
+    }
+  ],
+  "homograph_hits": [
+    {
+      "passage_id": "demo-3",
+      "words": {
+        "wind": 1
+      }
+    }
+  ],
+  "passages_scanned": 4,
+  "replay_mismatches": []
+}
