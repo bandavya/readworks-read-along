@@ -135,6 +135,16 @@ export class SoundAlongStack extends cdk.Stack {
     const writeManifestFn = makeWorker('WriteManifestFn', 'write_manifest');
     const publishDemoFn = makeWorker('PublishDemoFn', 'publish_demo_json');
     const emitMetricsFn = makeWorker('EmitMetricsFn', 'emit_metrics');
+    const readerBridgeEnabled = this.node.tryGetContext('readerBridge') === 'true';
+    const readerBridgeFn = readerBridgeEnabled ? new lambda.Function(this, 'ReaderBridgeFn', {
+      runtime: lambda.Runtime.PYTHON_3_12,
+      handler: 'handler.handler',
+      code: lambda.Code.fromAsset(path.join(__dirname, '..', 'lambdas', 'reader_bridge')),
+      timeout: cdk.Duration.minutes(5),
+      memorySize: 256,
+      environment: { ...commonLambdaEnv, FRONTEND_BUCKET: frontendBucket.bucketName },
+      logRetention: logs.RetentionDays.ONE_WEEK,
+    }) : undefined;
 
     const allWorkers = [
       loadPassageFn, normalizeTextFn, computeHashFn, checkManifestFn,
@@ -154,6 +164,26 @@ export class SoundAlongStack extends cdk.Stack {
     audioBucket.grantReadWrite(publishDemoFn);
     contentBucket.grantReadWrite(writeManifestFn);
     contentBucket.grantReadWrite(publishDemoFn);
+    if (readerBridgeFn) {
+      // Without ListBucket, S3 reports a missing file as AccessDenied instead of NoSuchKey,
+      // and the bridge has to tell "not published yet" apart from a real failure.
+      readerBridgeFn.addToRolePolicy(new iam.PolicyStatement({
+        actions: ['s3:ListBucket'],
+        resources: [contentBucket.bucketArn, frontendBucket.bucketArn],
+      }));
+      readerBridgeFn.addToRolePolicy(new iam.PolicyStatement({
+        actions: ['s3:GetObject'],
+        resources: [contentBucket.arnForObjects('passages/*'), audioBucket.arnForObjects('audio/*'),
+                    audioBucket.arnForObjects('polly/*'), frontendBucket.arnForObjects('data/*')],
+      }));
+      readerBridgeFn.addToRolePolicy(new iam.PolicyStatement({
+        actions: ['s3:PutObject'],
+        resources: [frontendBucket.arnForObjects('data/*'), frontendBucket.arnForObjects('audio/*')],
+      }));
+      readerBridgeFn.addToRolePolicy(new iam.PolicyStatement({
+        actions: ['dynamodb:UpdateItem'], resources: [jobTable.tableArn],
+      }));
+    }
 
     // Polly: async synthesis writes to the audio bucket.
     const pollyPolicy = new iam.PolicyStatement({
@@ -224,6 +254,10 @@ export class SoundAlongStack extends cdk.Stack {
       lambdaFunction: publishDemoFn,
       outputPath: '$.Payload',
     });
+    const publishToReader = readerBridgeFn ? new tasks.LambdaInvoke(this, 'PublishToReader', {
+      lambdaFunction: readerBridgeFn,
+      outputPath: '$.Payload',
+    }) : undefined;
     const emitMetrics = new tasks.LambdaInvoke(this, 'EmitMetrics', {
       lambdaFunction: emitMetricsFn,
       outputPath: '$.Payload',
@@ -238,6 +272,21 @@ export class SoundAlongStack extends cdk.Stack {
       error: 'SoundAlongGenerationError',
     });
 
+    const published = writeManifest.next(publishDemo);
+    let afterPublish: sfn.IChainable;
+    if (publishToReader) {
+      const readerFailed = new sfn.Fail(this, 'ReaderPublishFailed', {
+        cause: 'Reader bridge rejected passage; see readerFailureReason in the job table.',
+        error: 'SoundAlongReaderPublishError',
+      });
+      const readerResult = new sfn.Choice(this, 'IsReaderReady')
+        .when(sfn.Condition.booleanEquals('$.readerReady', true), emitMetrics.next(succeedDone))
+        .otherwise(readerFailed);
+      afterPublish = published.next(publishToReader).next(readerResult);
+    } else {
+      afterPublish = published.next(emitMetrics).next(succeedDone);
+    }
+
     // Poll loop: WaitForCompletion -> CheckPollyStatus -> Choice
     const pollChoice = new sfn.Choice(this, 'IsPollyDone')
       .when(
@@ -246,7 +295,7 @@ export class SoundAlongStack extends cdk.Stack {
           new sfn.Choice(this, 'IsValid')
             .when(
               sfn.Condition.booleanEquals('$.valid', true),
-              writeManifest.next(publishDemo).next(emitMetrics).next(succeedDone),
+              afterPublish,
             )
             .otherwise(failState),
         ),

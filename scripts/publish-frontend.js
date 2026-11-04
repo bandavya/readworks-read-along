@@ -49,7 +49,7 @@ const CONTENT_TYPES = {
 // Long cache for hashed assets; short cache for html/data (content changes).
 function cacheControl(key) {
   if (key.startsWith('assets/')) return 'public, max-age=31536000, immutable';
-  if (key === 'index.html') return 'no-cache';
+  if (key === 'index.html' || key.startsWith('data/')) return 'no-cache';
   return 'public, max-age=300';
 }
 

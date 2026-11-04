@@ -45,10 +45,32 @@ lambdas/
   worker/       Step Functions task handlers (Python)
   trigger/      S3 → Step Functions starter
   api/          Browser API handler
-frontend/       Static Vue 3 app (no build step)
+frontend/       Compiled Vue 3 app shell and separately managed media
 demo-data/      3 public-domain-style passages + mock assignment record
 scripts/        seed / generate / publish-frontend helpers
 ```
+
+## Frontend source and builds
+
+`frontend-src/` is the Vue/Vite source and test harnesses. Run `npm run build:frontend`
+from the repo root to rebuild `frontend/index.html` and `frontend/assets/` with relative
+URLs; the command replaces stale assets and leaves `frontend/data/`, `audio/`, `img/`,
+and `look-art/` alone. Commit the rebuilt shell before running the existing
+`scripts/publish-frontend.js`. Run `npm run test:frontend` for local Node harnesses;
+checks needing uncommitted ReadWorks media print `SKIP` when it is absent. For a
+local preview, serve `frontend/` with your own licensed media linked in.
+
+All Vite settings are optional build-time `VITE_*` environment variables. With
+none set, external API features are off and media uses relative paths:
+
+- `VITE_API_BASE`: base URL for optional assignments, feedback, and review API.
+- `VITE_HOLDS_API`: base URL for the optional held-narration panel.
+- `VITE_PUBLISHED_DATA_BASE`: alternate published passage index/document base.
+- `VITE_CONTENT_ASSET_BASE`: alternate audio/timing asset base; otherwise uses the published data base.
+- `VITE_DATA_OPTIONS`: comma-separated local usage events to keep; empty keeps none.
+- `VITE_BUDDY`: default reading buddy; empty leaves selection to the reader.
+- `VITE_SHOWCASE=1`: starts the showcase theme view and hides working notes.
+- `VITE_PUBLIC_SAMPLE=1`: uses the silent public sample mode and disables the optional API calls.
 
 ## Frontend media (not in git)
 
@@ -101,6 +123,19 @@ node scripts/publish-frontend.js \
 # open https://<DistributionDomain>/
 ```
 
+## Reader bridge (optional)
+
+On a fresh deployment, deploy with `npx cdk deploy -c readerBridge=true --all`,
+publish the static frontend with
+`node scripts/publish-frontend.js --frontend-bucket <FrontendBucketName>`, then
+seed or generate passages. The `PublishToReader` task
+copies validated Polly audio and writes `data/<id>.json` and `data/index.json`
+after `PublishDemoJson`; the default stack omits this task. A failed word match
+stops at `ReaderPublishFailed`, with the reason in the job table. To disable it,
+deploy without `-c readerBridge=true`. A later frontend publish only uploads
+files, but an older local `frontend/data/<id>.json` or `index.json` will overwrite
+the bridge's newer copy, so publish local media before generating new passages.
+
 ## Destroy (after confirming cleanup is permitted)
 
 ```bash
@@ -109,17 +144,16 @@ npm run destroy          # cdk destroy --all
 
 ## Local preview (no backend)
 
-Serve the `frontend/` folder with any static server. With no `apiBaseUrl`
-configured, `mock-data.js` renders the UI, access gating, and controls so you
-can validate the experience before deploying. Audio playback requires a real
-generation run.
+Serve `frontend/` with a static server and local passage data linked in. With no
+`VITE_API_BASE` set, the Vue reader renders the UI and controls for a local
+preview. Audio playback requires a real generation run.
 
 ## How the design maps to the code
 
 - **Deterministic hashing + dedup (T10):** `compute_hash` + `check_existing_manifest`.
 - **Async Polly + speech marks (6.3):** `submit_polly` / `check_polly` with retry/backoff.
 - **Backward-compatible `au` field (5.3):** `publish_demo_json` writes `au`.
-- **Unified player (7):** `frontend/player.js` — one component for human + synthetic audio.
+- **Unified player (7):** `frontend-src/src/soundAlong.js` and `frontend-src/src/components/PlayerBar.vue` share the player for human and synthetic audio.
 - **Tap-to-replay (7.1 / T07):** `replayFromWord` seeks to the word's speech-mark time.
 - **Student access (7.2 / T08):** `/passages/{id}/access` reads the mock assignment record.
 - **Private delivery (9 / T13):** S3 Block Public Access + CloudFront OAC; origins stay private.

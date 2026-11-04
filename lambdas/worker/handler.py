@@ -50,10 +50,13 @@ def load_passage(event, _context):
     key = event.get("key") or f"passages/{passage_id}.json"
     obj = s3.get_object(Bucket=CONTENT_BUCKET, Key=key)
     passage = json.loads(obj["Body"].read())
+    raw_text = passage.get("text")
+    if not isinstance(raw_text, str) or not raw_text.strip():
+        raise ValueError("no reader-ready passage text")
     return {
         "passageId": passage["passageId"],
         "title": passage.get("title", passage["passageId"]),
-        "rawText": passage["text"],
+        "rawText": raw_text,
         "language": passage.get("language", LANGUAGE),
         "soundAlong": passage.get("soundAlong", {"enabled": True, "audioAccess": "assignment"}),
         "sourceKey": key,
