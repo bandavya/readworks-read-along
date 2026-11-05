@@ -22,7 +22,7 @@ Recording and the review screen are in [Volunteer recorder](volunteer-recorder.m
 
 ## Where it stands
 
-Local tests with invented data checked approval, replacement, undo, and reapply, and the recorder suite passed 156 guard rules. No person has listened to a real recording through this path, no child or ReadWorks person has tried it, and this volunteer approval path has not run on the event AWS account or a real student device. The team reports that the separate generated-audio pipeline has run there. The reviewer name is typed, with no sign-in.
+Local tests with invented data checked approval, replacement, undo, and reapply, and the recorder suite passed 156 guard rules. The records show no person listening to a real recording through this path, no child or ReadWorks person trying it, and no run of this volunteer approval path on the event AWS account or a student device. The team reports that the separate generated-audio pipeline has run there. The reviewer name is typed, with no sign-in.
 
 ---
 

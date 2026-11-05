@@ -20,7 +20,7 @@ The current code prepares audio and word times once, then gives the browser fini
 
 ## Where it stands
 
-The infrastructure builds locally and the reader has muted browser checks. The team reports that the CDK stack is deployed in the event AWS account in `us-west-2`, with generative Ruth, the quality gate and reader bridge on, and the passage API off. Audio and guide clips load through CloudFront; direct storage access returned 403 in an earlier check. No real device test or ReadWorks engineering acceptance is recorded.
+The infrastructure builds locally and the reader has muted browser checks. The team reports that the CDK stack is deployed in the event AWS account in `us-west-2`, with generative Ruth, the quality gate and reader bridge on, and the passage API off. Audio and guide clips load through CloudFront; direct storage access returned 403 in an earlier check. No classroom device test or ReadWorks engineering acceptance is recorded.
 
 ---
 

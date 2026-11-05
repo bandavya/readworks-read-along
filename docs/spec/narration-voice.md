@@ -22,7 +22,7 @@ Joanna produces sound and word starts in separate requests:
 
 ## Where it stands
 
-Joanna remains the code's default deployment voice, but the team reports that the event AWS deployment uses Ruth. The live library lists 13 passages with a voice labeled `Generated voice (Ruth)`; seven of those also have a human voice, and one Spanish passage has only a human voice. The team's headless browser checks ran muted, so nobody has judged the generated sound by ear. No target-device trial with sound was confirmed.
+Joanna remains the code's default deployment voice, but the team reports that the event AWS deployment uses Ruth. The live library lists 13 passages with a voice labeled `Generated voice (Ruth)`; seven of those also have a human voice, and one Spanish passage has only a human voice. The team's headless browser checks ran muted. A team member has clicked through the live site by hand many times and listened to a one-minute demo, which sounded good to them. A full listening review isn't recorded. No target-device trial with sound was confirmed.
 
 ---
 

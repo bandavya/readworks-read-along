@@ -20,7 +20,7 @@ At 2,900 normalized characters, the voice paths have these estimated costs:
 
 ## Where it stands
 
-The cost formula has local tests. The team reports that five passages were generated on the event AWS account, but no actual bill or per-passage cost was supplied. Polly rates used here match the pricing page as read on Nov. 4, 2026; the `us-west-2` recognition rate and billing minimums could not be confirmed. The Ruth deployment also synthesizes Words to know clips for vocabulary, which this chart does not price. Human listening and review time have not been measured, and no person has judged the live sound by ear.
+The cost formula has local tests. The team reports that five passages were generated on the event AWS account, but no actual bill or per-passage cost was supplied. Polly rates used here match the pricing page as read on Nov. 4, 2026; the `us-west-2` recognition rate and billing minimums could not be confirmed. The Ruth deployment also synthesizes Words to know clips for vocabulary, which this chart does not price. No figure for human listening and review time is recorded.
 
 ---
 

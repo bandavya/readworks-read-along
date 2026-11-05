@@ -24,7 +24,7 @@ The screenshot shows the focused library at laptop size.
 
 ## Where it stands
 
-On a phone, the filter panel stays pinned as the list scrolls and covers about a third of the screen. This was reproduced on the live site on Nov. 4 and isn't fixed; it needs a small style fix, then a rebuild and a redeploy. The build team's Nov. 4 focused run passed 41 of 41 checks on The Big Hike and both long passages at six sizes in muted Edge. That supports the local list and navigation, not the completeness or rights of a future ReadWorks catalog. On Nov. 4, 2026, the live library listed 14 passages: 13 labeled "Generated voice (Ruth)," seven of those also labeled "Human voice (ReadWorks recording)," and one Spanish passage with only a human voice. It listed a 1,435-word passage and a 2,046-word excerpt with Ruth as their only voice, and one passage with 46 words to know. The team reports this library is deployed on the event AWS account. It has not been tried on a real device; no child, teacher, or ReadWorks reviewer has tried focused mode, and ReadWorks reviewed only an earlier themed demo.
+On a phone, the filter panel stays pinned as the list scrolls and covers about a third of the screen. This was reproduced on the live site on Nov. 4 and isn't fixed; it needs a small style fix, then a rebuild and a redeploy. The build team's Nov. 4 focused run passed 41 of 41 checks on The Big Hike and both long passages at six sizes in muted Edge. That supports the local list and navigation, not the completeness or rights of a future ReadWorks catalog. On Nov. 4, 2026, the live library listed 14 passages: 13 labeled "Generated voice (Ruth)," seven of those also labeled "Human voice (ReadWorks recording)," and one Spanish passage with only a human voice. It listed a 1,435-word passage and a 2,046-word excerpt with Ruth as their only voice, and one passage with 46 words to know. The team reports this library is deployed on the event AWS account. Use on a classroom device, or of focused mode by a child, teacher, or ReadWorks reviewer, isn't recorded, and the ReadWorks review on record is of an earlier themed demo.
 
 ---
 
@@ -36,7 +36,7 @@ The live list is observed, while the team reports five passages were generated t
 
 Each row links to `#/look/mix/p/<uuid>` and English entries also to `#/look/mix/kid/<uuid>`. The component loads each passage in the background, two at a time, to find its first picture's alternative text and create voice-shape maps. Focused mode suppresses those maps and forces rows even if a bookshelf preference is stored. An image failure leaves a labeled fallback. An index failure shows **Could not load the story list.**
 
-Start Vite from `frontend-src` with `npm run dev -- --host 127.0.0.1 --port 8992` and run `node frontend-src/tests/focused_browser.mjs http://127.0.0.1:8992`. On a real device, check search, filters, bookmarks after reopening the browser, and whether the intended catalog and media are actually available.
+Start Vite from `frontend-src` with `npm run dev -- --host 127.0.0.1 --port 8992` and run `node frontend-src/tests/focused_browser.mjs http://127.0.0.1:8992`. On a classroom device, check search, filters, bookmarks after reopening the browser, and whether the intended catalog and media are actually available.
 
 ---
 

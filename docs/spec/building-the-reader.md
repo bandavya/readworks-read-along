@@ -22,7 +22,7 @@ To see where the source and output sit, use [Repo map](repo-map.md). The file la
 
 ## Where it stands
 
-The checked-in built site contains a main page, supporting files, and an experiment settings file; it includes the focused reader image-caption fix from `frontend-src/src/looks/mix/mix.css`. The build team's muted Edge checks reported 41 of 41 focused reader checks on each of The Big Hike and two long passages at six screen sizes, and 162 of 162 classic reader checks. Those checks were not rerun, and no fresh build was made because the base checkout is read-only. The team's final build doc reports that the CDK stack and rebuilt reader are deployed on the event AWS account, including the focused reader caption fix. The live library lists 14 passages, including two long passages of 1,435 and 2,046 words with Ruth as their only voice; another passage lists 46 words to know. No real-device listening test has been observed.
+The checked-in built site contains a main page, supporting files, and an experiment settings file; it includes the focused reader image-caption fix from `frontend-src/src/looks/mix/mix.css`. The build team's muted Edge checks reported 41 of 41 focused reader checks on each of The Big Hike and two long passages at six screen sizes, and 162 of 162 classic reader checks. Those checks were not rerun, and no fresh build was made because the base checkout is read-only. The team's final build doc reports that the CDK stack and rebuilt reader are deployed on the event AWS account, including the focused reader caption fix. The live library lists 14 passages, including two long passages of 1,435 and 2,046 words with Ruth as their only voice; another passage lists 46 words to know. No classroom-device listening test is recorded.
 
 ---
 

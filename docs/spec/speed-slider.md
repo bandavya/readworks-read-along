@@ -24,7 +24,7 @@ Focused and classic players use a slider; the non-focused Mix reader uses four b
 
 ## Where it stands
 
-The build team's Nov. 4 focused run passed 41 of 41 checks on The Big Hike and two long passages at six sizes in muted Edge. The classic reader separately passed 162 of 162. Muted checks cannot show whether slowed or sped-up speech stays clear. The team reports the focused reader is deployed on the event AWS account with Ruth. The live headless check loaded audio and ran its clock, but did not verify the slider or sound by ear. The slider has not been tried on a real device, and no child, teacher, or ReadWorks reviewer has tried it.
+The build team's Nov. 4 focused run passed 41 of 41 checks on The Big Hike and two long passages at six sizes in muted Edge. The classic reader separately passed 162 of 162. Muted checks cannot show whether slowed or sped-up speech stays clear. The team reports the focused reader is deployed on the event AWS account with Ruth. The live headless check loaded audio and ran its clock. A muted scripted run moved the slider on the live site, and a team member heard that pace change in a one-minute demo. Use of the slider on a classroom device, or by a child, teacher, or ReadWorks reviewer, isn't recorded.
 
 ---
 

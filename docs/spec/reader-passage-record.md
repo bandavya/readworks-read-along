@@ -22,7 +22,7 @@ The record is built from the writing in [The passage file](the-passage-file.md).
 
 ## Where it stands
 
-The conversion code writes this shape and local tests exercise it. The team reports five Ruth passages generated on the event AWS account, with reader records and audio loading through the site delivery network. In muted headless browser checks, audio loaded and the clock ran, but highlight tolerance was not measured. A separate muted scripted run tapped a word on the live site; nobody listened. The live library listed 14 passages on Nov. 4, 2026: 13 labeled “Generated voice (Ruth),” seven of those also with a human voice, and one Spanish passage with only a human voice. No human listening review, real-device check, or use by a child, teacher, or ReadWorks person was confirmed.
+The conversion code writes this shape and local tests exercise it. The team reports five Ruth passages generated on the event AWS account, with reader records and audio loading through the site delivery network. In muted headless browser checks, audio loaded and the clock ran, but highlight tolerance was not measured. A separate muted scripted run tapped a word on the live site. The live library listed 14 passages on Nov. 4, 2026: 13 labeled “Generated voice (Ruth),” seven of those also with a human voice, and one Spanish passage with only a human voice. No full listening review, classroom-device check, or use by a child, teacher, or ReadWorks person was confirmed.
 
 ---
 

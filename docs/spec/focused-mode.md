@@ -29,7 +29,7 @@ Start with [Story library](story-library.md) to see the first screen, then [The 
 
 ## Where it stands
 
-The build team's Nov. 4, 2026 run passed 41 of 41 focused browser checks on The Big Hike and both long passages at six screen sizes, in muted Edge. The team reports focused mode is deployed on the event AWS account with generated voice (Ruth). It has not been tried on a real device, and no child, teacher, or ReadWorks reviewer has tried it. ReadWorks reviewed only an earlier themed demo. The browser run was muted and did not test listening quality. The team reports the live site is public to anyone with its address and has no sign-in.
+The build team's Nov. 4, 2026 run passed 41 of 41 focused browser checks on The Big Hike and both long passages at six screen sizes, in muted Edge. The team reports focused mode is deployed on the event AWS account with generated voice (Ruth). Use on a classroom device, or by a child, teacher, or ReadWorks reviewer, isn't recorded. The ReadWorks review on record is of an earlier themed demo. The browser run was muted and did not test listening quality. The team reports the live site is public to anyone with its address and has no sign-in.
 
 ---
 
@@ -39,7 +39,7 @@ The build team's Nov. 4, 2026 run passed 41 of 41 focused browser checks on The 
 
 `frontend-src/src/App.vue` shows the theme bar and return button only outside focused mode. The Mix library and reader each show **All features** while focused. The focused reader hides highlight colors, voice visualization, line masking, and the sound toggle, while retaining its core reading tools. `PUBLIC_SAMPLE` has separate routing and should not be taken as this entry flow. The default stack uses Joanna; the team reports the live stack uses Ruth with the word check on and the passage API off.
 
-To check locally, start the frontend with `npm run dev -- --host 127.0.0.1 --port 8992` from `frontend-src`, then, from the repo root, run `node frontend-src/tests/focused_browser.mjs http://127.0.0.1:8992`. That script needs Microsoft Edge in its default Windows install folder (the path is fixed in the script) and local passage data; it mutes audio. Confirm the storage choice in a normal browser as well, since the automated check does not establish behavior across a real device's browser settings.
+To check locally, start the frontend with `npm run dev -- --host 127.0.0.1 --port 8992` from `frontend-src`, then, from the repo root, run `node frontend-src/tests/focused_browser.mjs http://127.0.0.1:8992`. That script needs Microsoft Edge in its default Windows install folder (the path is fixed in the script) and local passage data; it mutes audio. Confirm the storage choice in a normal browser as well, since the automated check does not establish behavior across a classroom device's browser settings.
 
 ---
 

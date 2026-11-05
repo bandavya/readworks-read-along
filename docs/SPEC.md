@@ -7,8 +7,8 @@ Status as of 2026-11-04. Describes the build in **this repo** (`readworks-read-a
 Source designs: the team's technical and validation design documents, not in this repository.
 
 Statements marked **Verified** were checked against the running system or a test. Statements
-marked **Not verified** were not. No child, teacher or ReadWorks reviewer has used it, and
-browser checks ran muted, so nobody has judged the sound by ear.
+marked **Not verified** were not. Use by a child, teacher or ReadWorks reviewer isn't recorded, and
+browser checks ran muted. A team member has clicked through the live site by hand many times and listened to a one-minute demo, which sounded good to them. A full listening review isn't recorded.
 
 A separate earlier build exists (`sound-along`, CodeCommit, stack `SoundAlong-sandbox`,
 compiled-only frontend). It is not this build. Where the two differ, this document describes the
@@ -145,7 +145,7 @@ hear generated audio.**
 - Neural (Joanna): word timing from Polly speech marks.
 - Generative (Ruth): timing from Amazon Transcribe. Per `README.md`, the generative path has
   been exercised against fake AWS in `tests/test_generative_voice.py` and now on the live `alex`
-  stack (5 passages generated). **Not verified:** audio quality by ear.
+  stack (5 passages generated). **Not verified:** a full listening review. A team member heard a one-minute demo.
 
 ---
 
@@ -230,9 +230,9 @@ passage voice; sense IDs match across the passage HTML, vocab and syllable data.
 | T02 Upload a passage | Verified |
 | T03 Generate audio + manifest | Verified |
 | T04 Timing references the text | Verified (Transcribe-aligned word times published) |
-| T05 Play through the reader | Partly: audio loads and the clock runs in a headless browser. Sound not heard |
+| T05 Play through the reader | Partly: audio loads and the clock runs in a headless browser, which ran muted. |
 | T06 Highlight within tolerance | Partly: highlight follows the timing data word by word. Tolerance not agreed/measured |
-| T07 Tap a word to seek | Partly: a muted scripted run with real mouse clicks tapped a word on two passages on the live site, and the highlight moved to it. Not judged by ear |
+| T07 Tap a word to seek | Partly: a muted scripted run with real mouse clicks tapped a word on two passages on the live site, and the highlight moved to it. |
 | T08 Student access | Legacy API only; not wired into the reader |
 | T09 Human audio plays | Shipped passages include it; not re-tested here |
 | T10 Same passage twice avoids regeneration | Verified (a matching finished job row skips regeneration) |
@@ -244,7 +244,7 @@ passage voice; sense IDs match across the passage HTML, vocab and syllable data.
 Other checks on this build: generated passages render and play with word highlighting; the
 pronunciation guide plays in the passage voice; the image-caption overlap in the focused reader
 hero is fixed; the library index is consistent. All **Verified** in a headless browser against
-the live site; none judged by ear.
+the live site; a team member also clicked through by hand and heard a one-minute demo.
 
 ---
 
@@ -260,7 +260,7 @@ the live site; none judged by ear.
 | Underline-plus-highlight distracting | Open: reader uses highlight; the underline concern needs a reader-style decision |
 | "Help with a word" confusing | Open |
 | Words-to-know layout redundant; Kid view; focus tools unclear | Open (reader UX) |
-| Longer ~1,500-word sample | Present: Grandma's Music (1,435 words) and the Jesse Jackson excerpt (2,046 words) are in the live library, with Ruth as their only voice. Not judged by ear. |
+| Longer ~1,500-word sample | Present: Grandma's Music (1,435 words) and the Jesse Jackson excerpt (2,046 words) are in the live library, with Ruth as their only voice. A team member heard part of Grandma's Music in a one-minute demo. |
 | Match ReadWorks product-page styling for integration | Partly: focused mode already uses ReadWorks colours/fonts |
 
 ---
@@ -298,7 +298,7 @@ rows, then re-run, so the new voice is the only (default) voice rather than stac
 1. **No human review gate** before generated audio or pronunciation entries reach the reader.
 2. **Public URL** with default-certificate TLS 1.0, no WAF, no auth (section 7).
 3. **Syllable splits are hyphenation-based**, not exact phonetic syllables; flagged for review.
-4. **Generative path quality not judged by ear**; Transcribe timing may differ from a forced aligner.
+4. **No full listening review of the generative path is recorded**; Transcribe timing may differ from a forced aligner.
 5. **Legacy API is unauthenticated**; `/generate` can start billable runs without credentials.
 6. **Index rows are not pruned on delete** (replaced per uuid on regeneration); a failed regen could
    leave a stale row. Not observed; the live index is consistent.

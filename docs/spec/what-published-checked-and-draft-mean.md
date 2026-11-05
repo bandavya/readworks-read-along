@@ -22,7 +22,7 @@ To see when a passage becomes available, go to [publish to reader](publish-to-re
 
 ## Where it stands
 
-The code and local tests cover status changes and review fingerprints. The team reports five passages generated and published on the event AWS account, with the quality gate on and no human approval gate. The live library lists 14 passages. No person is recorded as having listened to and approved the generated passages or word-help clips. Browser tests ran muted, and no real device or student review is recorded.
+The code and local tests cover status changes and review fingerprints. The team reports five passages generated and published on the event AWS account, with the quality gate on and no human approval gate. The live library lists 14 passages. No person is recorded as having reviewed and approved the generated passages or word-help clips. A team member has listened to a one-minute demo, which isn't that kind of review. Browser tests ran muted, and no classroom device or student review is recorded.
 
 ---
 

@@ -8,9 +8,9 @@ A name can be spelled right in a passage and still be spoken in a way its owner 
 
 One list of alternate spellings tells the word check which recognizer spellings count as the same name, so they aren't flagged. A separate entry can hold a pronunciation a person has confirmed, for a synthesized voice to use. Accepting a recognizer spelling says nothing about how the name sounded to a listener.
 
-For a person's name, someone could add an entry limited to one passage, record the confirmed pronunciation, and check the narration by ear. That hasn't been done. The committed name lists are empty, and no such entry or listening evidence exists. The code can't know which pronunciation ReadWorks or the named person wants. That choice belongs to ReadWorks' content team or someone they trust to confirm it.
+For a person's name, someone could add an entry limited to one passage, record the confirmed pronunciation, and check the narration by ear. No entry like that is configured. The committed name lists are empty, and no listening record for a name is in this repo. The code can't know which pronunciation ReadWorks or the named person wants. That choice belongs to ReadWorks' content team or someone they trust to confirm it.
 
-**A name's pronunciation is untested, and an alternate recognizer spelling is not a pronunciation approval.**
+**No test of a name's pronunciation is recorded, and an alternate recognizer spelling is not a pronunciation approval.**
 
 A name's recognizer spelling and its intended sound serve different purposes:
 
@@ -22,7 +22,7 @@ For synthesized audio, see [Narration voice](narration-voice.md). Recognition fl
 
 ## Where it stands
 
-The word-check tests include a made-up passage-scoped `heard_as` spelling and passed 12 tests, but they check only comparison behavior. No name pronunciation is configured or tested, and no person has listened to a take to judge a name. The team's final build doc reports that the Ruth narration path and quality gate have run on the event AWS account; no real-device listening trial has been recorded. The name-list code exists; the pronunciation decision and its listening check do not.
+The word-check tests include a made-up passage-scoped `heard_as` spelling and passed 12 tests, but they check only comparison behavior. No name pronunciation is configured, and no test or listening check of a take for a name is recorded. The team's final build doc reports that the Ruth narration path and quality gate have run on the event AWS account; no classroom-device listening trial has been recorded. The name-list code exists; the pronunciation decision and its listening check do not.
 
 ---
 

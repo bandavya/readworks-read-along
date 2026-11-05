@@ -22,7 +22,7 @@ Follow the blue line for the default path. Each dashed box is added by a switch:
 
 ## Where it stands
 
-The team reports that `SoundAlong-alex` was deployed from CDK to the event AWS account in `us-west-2`, with Ruth (`generativeVoice=true`), `qualityGate` and the reader bridge on, and `passageApi` off. The team reports five passages generated through the pipeline, CloudFront delivery, and a repeated passage that avoided regeneration. Direct S3 access returned 403 in an earlier check. The site is public to anyone with its address, the legacy `/generate` route can start paid runs without credentials, and there is no human approval before generated audio can reach students. No person has judged the sound by ear or tried it on a target device with sound.
+The team reports that `SoundAlong-alex` was deployed from CDK to the event AWS account in `us-west-2`, with Ruth (`generativeVoice=true`), `qualityGate` and the reader bridge on, and `passageApi` off. The team reports five passages generated through the pipeline, CloudFront delivery, and a repeated passage that avoided regeneration. Direct S3 access returned 403 in an earlier check. The site is public to anyone with its address, the legacy `/generate` route can start paid runs without credentials, and there is no human approval before generated audio can reach students. A team member has clicked through the live site by hand many times and listened to a one-minute demo, which sounded good to them. A full listening review isn't recorded. A trial on a target device with sound isn't recorded.
 
 ---
 

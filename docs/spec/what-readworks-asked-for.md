@@ -22,7 +22,7 @@ The request is to tie each spoken word to the page:
 
 ## Where it stands
 
-ReadWorks reacted to an earlier themed demo and praised the Ruth voice tested in a separate account. It has not reviewed the focused reader. The current reader has local muted browser checks, with no real device or student use recorded. The team reports a deployed event-account stack with Ruth generation and the focused reader; nobody has judged that build's sound by ear. The live library lists 14 passages, including 13 with Ruth and one Spanish passage with only a human voice. The original vision document and its usage figures could not be confirmed here.
+ReadWorks reacted to an earlier themed demo and praised the Ruth voice tested in a separate account. A ReadWorks review of the focused reader isn't recorded. The current reader has local muted browser checks, with no classroom device or student use recorded. The team reports a deployed event-account stack with Ruth generation and the focused reader; a team member has listened to a one-minute demo of it, and a full listening review isn't recorded. The live library lists 14 passages, including 13 with Ruth and one Spanish passage with only a human voice. The original vision document and its usage figures could not be confirmed here.
 
 ---
 

@@ -26,7 +26,7 @@ To see what happens after approval, including undo, go to [Human recordings](hum
 
 ## Where it stands
 
-The recorder's local tests passed 156 guard rules, using invented text and synthetic sound. The on-device speech recognizer, a real microphone, and a joined take still need a listening trial. The optional Amazon cloud listener has only a local stand-in test and is off by default. This local recorder has not run on the event AWS account or a real student device, or with a ReadWorks volunteer. The team reports that the separate generated-audio pipeline has run on the event account.
+The recorder's local tests passed 156 guard rules, using invented text and synthetic sound. The on-device speech recognizer, a real microphone, and a joined take still need a listening trial. The optional Amazon cloud listener has only a local stand-in test and is off by default. A run of this local recorder on the event AWS account or a student device, or with a ReadWorks volunteer, isn't recorded. The team reports that the separate generated-audio pipeline has run on the event account.
 
 ---
 

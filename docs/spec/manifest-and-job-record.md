@@ -20,7 +20,7 @@ The fingerprint is taken from the text in [The passage file](the-passage-file.md
 
 ## Where it stands
 
-Both record writers and status lookup have local tests with stand-in services. The team reports that the Ruth pipeline ran on the event AWS account with the voice check on and generated five passages; a repeated passage avoided regeneration. Its checked results have `status=generated` and `reviewStatus=needs human check`, which does not mean a person approved them. The default Joanna deployment has the check off and writes `approved` and `unreviewed`. The team reports no real-device check, human listening review, or use by a child, teacher, or ReadWorks person.
+Both record writers and status lookup have local tests with stand-in services. The team reports that the Ruth pipeline ran on the event AWS account with the voice check on and generated five passages; a repeated passage avoided regeneration. Its checked results have `status=generated` and `reviewStatus=needs human check`, which does not mean a person approved them. The default Joanna deployment has the check off and writes `approved` and `unreviewed`. No classroom-device check, full listening review, or use by a child, teacher, or ReadWorks person is recorded.
 
 ---
 

@@ -18,7 +18,7 @@ A cloud workflow takes a passage's text and makes the audio and a time for each 
 
 ## Where it stands
 
-This spec describes one version of the code: commit `ab6e826` of the team repository. The team reports it is deployed on the event's AWS account with the Ruth voice. The live site lists 14 passages, and its reader passed 42 of 42 browser checks with the sound off. Nobody has judged the audio by ear, and no child, teacher or ReadWorks staff member has tried this version. [What is proven and what is not](what-is-proven-and-what-is-not.md) goes through it part by part.
+This spec describes one version of the code: commit `ab6e826` of the team repository. The team reports it is deployed on the event's AWS account with the Ruth voice. The live site lists 14 passages, and its reader passed 42 of 42 browser checks with the sound off. A team member has clicked through it by hand many times and listened to a one-minute demo, which sounded good to them. A full listening review, or use by a child, teacher or ReadWorks staff member, isn't recorded for this version. [What is proven and what is not](what-is-proven-and-what-is-not.md) goes through it part by part.
 
 ## Where to start
 

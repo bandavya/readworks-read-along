@@ -6,7 +6,7 @@ The product at a glance · Status: built and tested locally
 
 ReadWorks reviewed an earlier themed prototype and named places where a child might lose focus: moving underlines, overlapping word help, too many reading effects, and a younger view that felt like a separate e-book. The current branch answers with a simpler, article-like focused mode. Its reading tools offer three ways to follow the voice, and the younger readers link keeps the article shape with larger text. Slow playback now handles one-syllable words differently, and the Spanish translation is labeled.
 
-Other feedback needs more than a screen change. A long passage has to survive timing and layout checks, a name must be spoken the same way each time, and word-help clips should sound like the story voice. On the live Ruth setup, the team reports new word-help clips in the passage voice and a deployed caption fix. Nobody has judged the sound by ear.
+Other feedback needs more than a screen change. A long passage has to survive timing and layout checks, a name must be spoken the same way each time, and word-help clips should sound like the story voice. On the live Ruth setup, the team reports new word-help clips in the passage voice and a deployed caption fix. A team member has clicked through the live site by hand many times and listened to a one-minute demo, which sounded good to them. A full listening review isn't recorded.
 
 In the table below, "Done" means built, with the local evidence stated. "Partly" means the response is incomplete or unverified.
 
@@ -18,7 +18,7 @@ In the table below, "Done" means built, with the local evidence stated. "Partly"
 
 ## Where it stands
 
-ReadWorks' review came before focused mode. The focused reader passed 41 of 41 muted Edge browser checks on a short passage and two long passages at six screen sizes; the classic reader passed 162 of 162. The team reports an event-account deployment with Ruth, a word-help clip check in a muted headless browser, and the caption fix deployed. These do not show that the voice sounds right or that highlights match audible words. No real device or child test is recorded.
+ReadWorks' review came before focused mode. The focused reader passed 41 of 41 muted Edge browser checks on a short passage and two long passages at six screen sizes; the classic reader passed 162 of 162. The team reports an event-account deployment with Ruth, a word-help clip check in a muted headless browser, and the caption fix deployed. These do not show that the voice sounds right or that highlights match audible words. No classroom device or child test is recorded.
 
 ---
 
@@ -33,8 +33,8 @@ Source: ReadWorks' written feedback. Each row follows its numbered item.
 | 3. Paragraph and line indicator | Done | Focused mode sets the extra voice line and focus effects aside; they remain under All features in `MixReader.vue`. |
 | 4. Unclear help button | Partly | Focused `MixReader.vue` shows a word's meaning for marked vocabulary; tap still replays a word. `views/Focus.vue` has a selected-word Meaning button. The two reader routes should be user tested for clarity. |
 | 5. Inconsistent name pronunciation | Partly | `lambdas/quality_gate/names.py` and its names list can recognize spelling variants for a held take; they do not guarantee that Polly says a name consistently. The pronunciation field is used only by a local recorder tool; the AWS narration path doesn't load it, so a confirmed pronunciation won't change the AWS voice yet. The quality gate is off by default, but the team reports it on in the live Ruth setup. Names need a listening check. |
-| 6. Different word-help voice | Partly | With `SYLLABLE_AUDIO=true` on the Ruth deployment, `lambdas/syllable_audio/handler.py` synthesizes whole-word, per-syllable and slow clips in the passage voice; the team reports they play in a muted headless browser. A default Joanna deployment uses older clips. The syllable splits need human review, and nobody has judged the sound by ear. |
-| 7. One-syllable slow repeats | Done | `components/SyllableGuide.vue` now plays the whole word at a slower playback rate when it has one syllable; multi-syllable words use the prepared slow clip. Audible quality remains untested here. |
+| 6. Different word-help voice | Partly | With `SYLLABLE_AUDIO=true` on the Ruth deployment, `lambdas/syllable_audio/handler.py` synthesizes whole-word, per-syllable and slow clips in the passage voice; the team reports they play in a muted headless browser. A default Joanna deployment uses older clips. The syllable splits need human review, and a full listening review of them isn't recorded. |
+| 7. One-syllable slow repeats | Done | `components/SyllableGuide.vue` now plays the whole word at a slower playback rate when it has one syllable; multi-syllable words use the prepared slow clip. A test of audible quality isn't recorded here. |
 | 8. Redundant Words to Know | Partly | `MixReader.vue` has a Words to Know section and a side meaning card. Translation is labeled “In Spanish.” The repeated meaning can still appear in both places. |
 | 9. E-book Kid View | Done | In focused mode, `looks/index.js` routes younger readers to `MixReader.vue` with `kid: true`, an article with larger text. The paged `MixKid.vue` remains in All features. |
 | 10. Distracting focus tools | Done | `MixReader.vue` starts focus `off` in focused mode and hides spotlight and line choices until All features. The older two-line effect remains available there. |

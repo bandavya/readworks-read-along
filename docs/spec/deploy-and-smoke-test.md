@@ -20,7 +20,7 @@ The smoke script checks one passage through the deployed reader path:
 
 ## Where it stands
 
-The team reports that CDK deployment, passage upload, generation, and timing were verified on the event AWS account in `us-west-2`; five passages were generated with Ruth. Audio loads and the clock runs in a muted headless browser, and the focused reader's caption fix is deployed, but highlight tolerance was not measured. The team reports that its own checks didn't cover tap-a-word, keyboard operation, or comparing two voices. A separate muted scripted run tapped a word on the live site; nobody listened. Direct S3 access returned 403 in an earlier check. The team does not say that the exact `scripts/smoke.js` command below passed end to end. No child, teacher, or ReadWorks person has tried the deployed reader, and nobody has judged its sound by ear.
+The team reports that CDK deployment, passage upload, generation, and timing were verified on the event AWS account in `us-west-2`; five passages were generated with Ruth. Audio loads and the clock runs in a muted headless browser, and the focused reader's caption fix is deployed, but highlight tolerance was not measured. The team reports that its own checks didn't cover tap-a-word, keyboard operation, or comparing two voices. A separate muted scripted run tapped a word on the live site. Direct S3 access returned 403 in an earlier check. The team does not say that the exact `scripts/smoke.js` command below passed end to end. Use of the deployed reader by a child, teacher, or ReadWorks person isn't recorded. A team member has clicked through the live site by hand many times and listened to a one-minute demo, which sounded good to them. A full listening review isn't recorded.
 
 ---
 

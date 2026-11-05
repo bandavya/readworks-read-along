@@ -22,7 +22,7 @@ A signed submission writes an intake file, then a later call checks its state:
 
 ## Where it stands
 
-The signed passage service is built and off by default. The team reports that `passageApi` was not enabled on the event AWS stack, so its submit and status routes were not verified there. The deployed legacy browser API is separate; the team reports that `/generate` accepts requests without credentials and can start paid runs. No ReadWorks content system has tried the signed route, and no target-device trial with sound was confirmed.
+The signed passage service is built and off by default. The team reports that `passageApi` was not enabled on the event AWS stack, so its submit and status routes were not verified there. The deployed legacy browser API is separate; the team reports that `/generate` accepts requests without credentials and can start paid runs. Use of the signed route by a ReadWorks content system isn't recorded, and no target-device trial with sound was confirmed.
 
 ---
 

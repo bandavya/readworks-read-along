@@ -20,7 +20,7 @@ Ruth changes the path that makes word starts:
 
 ## Where it stands
 
-This path is off in the default Joanna deployment. The team reports that the event AWS stack uses `generativeVoice=true` and has generated five passages with Ruth. The live library lists 13 passages with a voice labeled `Generated voice (Ruth)`. The team reports that audio loads and the clock runs in a muted headless browser; no highlight tolerance was measured. Nobody has judged the sound by ear or tried it on a target device with sound.
+This path is off in the default Joanna deployment. The team reports that the event AWS stack uses `generativeVoice=true` and has generated five passages with Ruth. The live library lists 13 passages with a voice labeled `Generated voice (Ruth)`. The team reports that audio loads and the clock runs in a muted headless browser; no highlight tolerance was measured. A team member has clicked through the live site by hand many times and listened to a one-minute demo, which sounded good to them. A full listening review isn't recorded. A trial on a target device with sound isn't recorded.
 
 ---
 

@@ -20,7 +20,7 @@ To see the copy the child's reader loads, go to [Reader passage record](reader-p
 
 ## Where it stands
 
-Intake and conversion have local tests. The team reports that the Ruth pipeline ran on the event AWS account and generated five passages from uploaded sources. The live library listed A Very Small Garden with 46 words on Nov. 4, 2026. The signed intake service is off on that deployment; the default deployment uses Joanna. No human listening review or real-device check was confirmed, and browser checks ran muted. No child, teacher, or ReadWorks person was reported using it.
+Intake and conversion have local tests. The team reports that the Ruth pipeline ran on the event AWS account and generated five passages from uploaded sources. The live library listed A Very Small Garden with 46 words on Nov. 4, 2026. The signed intake service is off on that deployment; the default deployment uses Joanna. No full listening review or classroom-device check was confirmed, and browser checks ran muted. No child, teacher, or ReadWorks person was reported using it.
 
 ---
 

@@ -24,7 +24,7 @@ The built dashboard turns coarse progress into class totals and alphabetical row
 
 ## Where it stands
 
-The dashboard and a made-up class route are built. The repo's data sheet records an end-to-end local test with made-up students and a local server. The teacher demo passed 173 of 173 browser checks on one machine and 172 of 173 on another; the missed check was the standard-reader word card, and its cause is unknown. No real teacher, child, or ReadWorks person has tried this version, no classroom-device trial or human listening check could be confirmed. The team reports the reader deployed on the event AWS account, but the class dashboard was not verified there; `passageApi` is off and student access uses the legacy API only.
+The dashboard and a made-up class route are built. The repo's data sheet records an end-to-end local test with made-up students and a local server. The teacher demo passed 173 of 173 browser checks on one machine and 172 of 173 on another; the missed check was the standard-reader word card, and its cause is unknown. Use of this version by a teacher, child, or ReadWorks person isn't recorded, and no classroom-device trial or human listening check could be confirmed. The team reports the reader deployed on the event AWS account, but the class dashboard was not verified there; `passageApi` is off and student access uses the legacy API only.
 
 ---
 
@@ -34,7 +34,7 @@ The dashboard and a made-up class route are built. The repo's data sheet records
 
 `frontend-src/src/dataKit/options.js` marks `opened`, `word_tap`, `replay`, `word_card_opened`, and `audio_trouble` as yes fields; `playback` is a level. The screen headings are Opened, Audio played, Tapped a word, Replayed, Used word help, and Audio wouldn't play; audio levels include Significant part. The server path is designed to return only those allowed fields. `frontend-src/src/dataKit/data_sheet.html` shows the local flow and says the server is set to expire records after 14 days. That setting needs confirmation in the actual deployment before anyone relies on it.
 
-The broader proposal in the team's teacher design document includes assignment, student, and class-word views with question scores, richer attention rules, and support controls. The class dashboard component does not implement those views. The separate [Teacher demo](teacher-demo.md) illustrates some of them with fixed values. Run `cd frontend-src; node src/dataKit/usage.test.mjs` to check the kit, and open `#/teacher/class/demo` to inspect the display. A real device, identity check, and teacher interpretation study remain unconfirmed.
+The broader proposal in the team's teacher design document includes assignment, student, and class-word views with question scores, richer attention rules, and support controls. The class dashboard component does not implement those views. The separate [Teacher demo](teacher-demo.md) illustrates some of them with fixed values. Run `cd frontend-src; node src/dataKit/usage.test.mjs` to check the kit, and open `#/teacher/class/demo` to inspect the display. A classroom device, identity check, and teacher interpretation study remain unconfirmed.
 
 ---
 

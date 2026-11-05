@@ -22,7 +22,7 @@ Start with [what ReadWorks asked for](what-readworks-asked-for.md) for the need.
 
 ## Where it stands
 
-The focused reader passed 41 of 41 browser checks on a short passage and two long passages at six screen sizes, in Edge with sound muted. The classic reader passed 162 of 162 muted checks. The team reports that the stack ran on the event AWS account in `us-west-2`, generated five passages with the Ruth voice, and served audio and word-help clips through CloudFront. A live-site check on November 4 found 14 library passages; 13 list Ruth, and seven of those also list a human recording. These checks do not establish audible synchronization. No real device or child has tried it, and nobody has judged the generated sound by ear. ReadWorks reviewed an earlier themed demo, before focused mode existed.
+The focused reader passed 41 of 41 browser checks on a short passage and two long passages at six screen sizes, in Edge with sound muted. The classic reader passed 162 of 162 muted checks. The team reports that the stack ran on the event AWS account in `us-west-2`, generated five passages with the Ruth voice, and served audio and word-help clips through CloudFront. A live-site check on November 4 found 14 library passages; 13 list Ruth, and seven of those also list a human recording. These checks do not establish audible synchronization. Use on a classroom device or by a child isn't recorded. A team member has clicked through the live site by hand many times and listened to a one-minute demo, which sounded good to them. A full listening review isn't recorded. ReadWorks reviewed an earlier themed demo, before focused mode existed.
 
 ---
 

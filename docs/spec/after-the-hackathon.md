@@ -20,7 +20,7 @@ The design documents propose a pilot, catalog operations, and ReadWorks integrat
 
 ## Where it stands
 
-The team reports the event-account stack deployed with generative Ruth, the quality gate on, and five pipeline-generated passages. That is not the proposed pilot or catalog operation. The teacher demo is a local prototype, not a production assignment service. No real device, content-team pilot, volunteer consent flow, or student outcome study is recorded. Nobody has judged the live build's sound by ear.
+The team reports the event-account stack deployed with generative Ruth, the quality gate on, and five pipeline-generated passages. That is not the proposed pilot or catalog operation. The teacher demo is a local prototype, not a production assignment service. No classroom device, content-team pilot, volunteer consent flow, or student outcome study is recorded. A team member has clicked through the live site by hand many times and listened to a one-minute demo, which sounded good to them. A full listening review isn't recorded.
 
 ---
 

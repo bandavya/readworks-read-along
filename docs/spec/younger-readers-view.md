@@ -28,7 +28,7 @@ The link lives in [Story library](story-library.md). [The passage reader](the-pa
 
 ## Where it stands
 
-The build team's Nov. 4 focused run passed 41 of 41 checks on The Big Hike and two long passages across six sizes in muted Edge. The classic reader and kid-view suite passed 162 of 162. These runs did not show that younger children can navigate or understand this view. The team reports the focused reader is deployed on the event AWS account with Ruth, but did not separately verify the younger-readers link on the live build. This view has not been tried on a real device, and no child, teacher, or ReadWorks reviewer has tried it.
+The build team's Nov. 4 focused run passed 41 of 41 checks on The Big Hike and two long passages across six sizes in muted Edge. The classic reader and kid-view suite passed 162 of 162. These runs did not show that younger children can navigate or understand this view. The team reports the focused reader is deployed on the event AWS account with Ruth, but did not separately verify the younger-readers link on the live build. Use of this view on a classroom device, or by a child, teacher, or ReadWorks reviewer, isn't recorded.
 
 ---
 

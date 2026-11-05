@@ -22,7 +22,7 @@ For the product view, start with [Sound Along in one picture](sound-along-in-one
 
 ## Where it stands
 
-Local tests cover parts of these directories, as detailed in [Tests and how to run them](tests-and-how-to-run-them.md). The team's final build doc reports that the CDK stack was deployed on the event AWS account with Ruth, the quality gate, reader bridge, and syllable audio on; the passage API was off. The default deployment still uses Joanna and older guide clips. The live library lists 14 passages; 13 have a generated Ruth voice, seven of those also have a human recording, and one Spanish passage has only a human voice. The website's muted browser checks say nothing about how audio sounds or how it works on a real device.
+Local tests cover parts of these directories, as detailed in [Tests and how to run them](tests-and-how-to-run-them.md). The team's final build doc reports that the CDK stack was deployed on the event AWS account with Ruth, the quality gate, reader bridge, and syllable audio on; the passage API was off. The default deployment still uses Joanna and older guide clips. The live library lists 14 passages; 13 have a generated Ruth voice, seven of those also have a human recording, and one Spanish passage has only a human voice. The website's muted browser checks say nothing about how audio sounds or how it works on a classroom device.
 
 ---
 

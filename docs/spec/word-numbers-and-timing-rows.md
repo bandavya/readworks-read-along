@@ -8,7 +8,7 @@ To follow a story aloud, each word on screen must point to its moment in the rec
 
 Some items are only punctuation, such as a row of asterisks or a lone dash. They keep their number but have no spoken time. A child still sees them, and the reader skips past them when jumping to a spoken word. Title words use their own separate list, since they sit outside the numbered article.
 
-The default Joanna setup uses the speech engine's word markers. The live Ruth setup uses speech recognition to align audio with text. Both give the browser times for highlighting and navigation, but no person has listened to judge their match on the live build.
+The default Joanna setup uses the speech engine's word markers. The live Ruth setup uses speech recognition to align audio with text. Both give the browser times for highlighting and navigation, but no measurement of their match on the live build is recorded.
 
 **One article word number points to one slot in each voice's timing list.**
 
@@ -22,7 +22,7 @@ The numbered words and timing lists sit inside the [Reader passage record](reade
 
 ## Where it stands
 
-The mapping and reader engine have local tests. Two long passages were aligned locally against ReadWorks' current audio with WhisperX, an open speech-alignment tool: 1,423 of 1,435 words for Grandma's Music and 2,019 of 2,046 for the 2,046-word excerpt received timings. The remaining tokens were largely punctuation. That audio is not stored in the repo. Both passages were live with Ruth as their only voice on Nov. 4, 2026. The team reports that the Ruth pipeline ran on the event AWS account and published timing data. Muted headless browser checks showed audio loading, the clock running, and word highlighting, but no highlight tolerance was measured. A separate muted scripted run tapped a word on the live site; nobody listened. The team reports no real-device check, human listening review, or use by a child, teacher, or ReadWorks person.
+The mapping and reader engine have local tests. Two long passages were aligned locally against ReadWorks' current audio with WhisperX, an open speech-alignment tool: 1,423 of 1,435 words for Grandma's Music and 2,019 of 2,046 for the 2,046-word excerpt received timings. The remaining tokens were largely punctuation. That audio is not stored in the repo. Both passages were live with Ruth as their only voice on Nov. 4, 2026. The team reports that the Ruth pipeline ran on the event AWS account and published timing data. Muted headless browser checks showed audio loading, the clock running, and word highlighting, but no highlight tolerance was measured. A separate muted scripted run tapped a word on the live site. No classroom-device check, full listening review, or use by a child, teacher, or ReadWorks person is recorded.
 
 ---
 

@@ -20,7 +20,7 @@ A class link can attach coarse reports to a chosen name, but it cannot establish
 
 ## Where it stands
 
-The student link opens the classic reader, not the focused reader, which records no events. The flow is implemented against a configured server. The server side is not in this repo; only its written contract is, so what answers those requests couldn't be confirmed. The repo's data sheet describes a local end-to-end check with made-up students and a local server, which does not establish that class reporting runs on the event AWS account. The team reports the reader deployed there with `passageApi` off and student access through the legacy API only; class-link reporting was not verified. No real student, teacher, or ReadWorks person has used it, and no real device trial or human listening check could be confirmed. The build team's browser checks used muted sound.
+The student link opens the classic reader, not the focused reader, which records no events. The flow is implemented against a configured server. The server side is not in this repo; only its written contract is, so what answers those requests couldn't be confirmed. The repo's data sheet describes a local end-to-end check with made-up students and a local server, which does not establish that class reporting runs on the event AWS account. The team reports the reader deployed there with `passageApi` off and student access through the legacy API only; class-link reporting was not verified. Use by a student, teacher, or ReadWorks person isn't recorded, and no classroom-device trial or human listening check could be confirmed. The build team's browser checks used muted sound.
 
 ---
 

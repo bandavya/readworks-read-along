@@ -24,7 +24,7 @@ The demo resolves settings in order before opening a real local reader view:
 
 ## Where it stands
 
-The demo is built locally with made-up data. On Nov. 4 the build team reported 173 of 173 browser checks passing on one machine and 172 of 173 on another. The missed check was a standard-reader word card while reading. Its cause is unknown, and older local media is one possibility. No child, teacher, or ReadWorks person has tried this version, and no classroom-device trial or human listening check could be confirmed. ReadWorks saw an earlier themed demo before focused mode existed. The team reports the reader deployed on the event AWS account, but the teacher demo was not verified there. Its fixed student results remain demonstration data.
+The demo is built locally with made-up data. On Nov. 4 the build team reported 173 of 173 browser checks passing on one machine and 172 of 173 on another. The missed check was a standard-reader word card while reading. Its cause is unknown, and older local media is one possibility. Use of this version by a child, teacher, or ReadWorks person isn't recorded, and no classroom-device trial or human listening check could be confirmed. ReadWorks saw an earlier themed demo before focused mode existed. The team reports the reader deployed on the event AWS account, but the teacher demo was not verified there. Its fixed student results remain demonstration data.
 
 ---
 

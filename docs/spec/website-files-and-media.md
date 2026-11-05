@@ -22,7 +22,7 @@ The story files stored here are described in [Reader passage record](reader-pass
 
 ## Where it stands
 
-The shell build, upload script, and library-list merge have local tests. The team reports that the Ruth setup was deployed on the event AWS account, that passage and guide audio load through the site delivery network, and that the focused reader's image-caption fix is deployed. Direct access to the private storage returned 403 in an earlier check. The live library listed 14 passages on Nov. 4, 2026. Browser checks ran muted; no real-device check, human listening review, or use by a child, teacher, or ReadWorks person was confirmed.
+The shell build, upload script, and library-list merge have local tests. The team reports that the Ruth setup was deployed on the event AWS account, that passage and guide audio load through the site delivery network, and that the focused reader's image-caption fix is deployed. Direct access to the private storage returned 403 in an earlier check. The live library listed 14 passages on Nov. 4, 2026. Browser checks ran muted; no classroom-device check, full listening review, or use by a child, teacher, or ReadWorks person was confirmed.
 
 ---
 

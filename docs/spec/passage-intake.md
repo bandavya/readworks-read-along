@@ -24,7 +24,7 @@ Both intake routes write the same passage file:
 
 ## Where it stands
 
-The team reports that the stack ran on the event AWS account in `us-west-2`: passage upload, generation, and a repeated passage that avoided regeneration were verified. The live library lists 14 passages, including two long passages with Ruth as their only voice. Direct S3 access returned 403 in an earlier check. No child, teacher, or ReadWorks person has tried this intake, and no target-device trial with sound was confirmed.
+The team reports that the stack ran on the event AWS account in `us-west-2`: passage upload, generation, and a repeated passage that avoided regeneration were verified. The live library lists 14 passages, including two long passages with Ruth as their only voice. Direct S3 access returned 403 in an earlier check. Use of this intake by a child, teacher, or ReadWorks person isn't recorded, and no target-device trial with sound was confirmed.
 
 ---
 

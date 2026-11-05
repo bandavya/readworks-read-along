@@ -22,7 +22,7 @@ The MP3 and word starts lead to different kinds of findings:
 
 ## Where it stands
 
-The checks have local tests. The team reports that generation and timing ran on the event AWS account, but it does not report individual pace warnings or a deliberate bad-file test there. A local comparison of the two long ReadWorks recordings would hold both, partly because recognition errs; that audio is outside this repo. No person has listened to this stack's output, and no target-device trial with sound was confirmed.
+The checks have local tests. The team reports that generation and timing ran on the event AWS account, but it does not report individual pace warnings or a deliberate bad-file test there. A local comparison of the two long ReadWorks recordings would hold both, partly because recognition errs; that audio is outside this repo. A team member has clicked through the live site by hand many times and listened to a one-minute demo, which sounded good to them. A full listening review isn't recorded. No target-device trial with sound was confirmed.
 
 ---
 

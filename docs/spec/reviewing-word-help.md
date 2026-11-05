@@ -22,7 +22,7 @@ A review choice stays tied to the exact help that was checked:
 
 ## Where it stands
 
-The local review screen and its browser storage are built, as a prototype with no sign-in. The Nov. 4 browser runs checked reader layouts with sound muted, so they do not show that anyone listened to the review recordings. No ReadWorks content reviewer has tried this version, no classroom-device trial or human listening check could be confirmed. The team reports guide audio deployed with Ruth on the event AWS account, but no human review or approval gate before students could hear generated audio. The review screen itself was not verified on that deployment.
+The local review screen and its browser storage are built, as a prototype with no sign-in. The Nov. 4 browser runs checked reader layouts with sound muted, so they do not show that anyone listened to the review recordings. Use of this version by a ReadWorks content reviewer isn't recorded, and no classroom-device trial or human listening check could be confirmed. The team reports guide audio deployed with Ruth on the event AWS account, but no human review or approval gate before students could hear generated audio. The review screen itself was not verified on that deployment.
 
 ---
 

@@ -24,7 +24,7 @@ The device keeps eight tool-use measures, while the optional class report sends 
 
 ## Where it stands
 
-The device counts, the local CSV export, and the class reporter are built. The repo's data sheet describes a local end-to-end run with made-up students and a local server, not the event AWS account. No real student, teacher, or ReadWorks person has used this reporting flow, no classroom-device trial or human listening check could be confirmed. The team reports the reader deployed on the event AWS account, with `passageApi` off and student access through the legacy API only; the named class reporter was not verified there. Browser tests used muted sound, so audio coverage does not show anyone listened.
+The device counts, the local CSV export, and the class reporter are built. The repo's data sheet describes a local end-to-end run with made-up students and a local server, not the event AWS account. Use of this reporting flow by a student, teacher, or ReadWorks person isn't recorded, and no classroom-device trial or human listening check could be confirmed. The team reports the reader deployed on the event AWS account, with `passageApi` off and student access through the legacy API only; the named class reporter was not verified there. Browser tests used muted sound, so audio coverage does not show anyone listened.
 
 ---
 

@@ -22,7 +22,7 @@ The same spoken word can appear in three ways:
 
 ## Where it stands
 
-The build team's Nov. 4 focused run passed 41 of 41 checks on The Big Hike and two long passages across six sizes, in muted Edge. That supports the visual behavior. It does not show that a child finds any cue easier to follow, or that the cues track the heard words. The team reports the reader with these choices is deployed on the event AWS account with Ruth. Its live headless check saw highlighting follow timing data, but measured no tolerance and ran muted. The choices have not been tried on a real device, and no child, teacher, or ReadWorks reviewer has tried them.
+The build team's Nov. 4 focused run passed 41 of 41 checks on The Big Hike and two long passages across six sizes, in muted Edge. That supports the visual behavior. It does not show that a child finds any cue easier to follow, or that the cues track the heard words. The team reports the reader with these choices is deployed on the event AWS account with Ruth. Its live headless check saw highlighting follow timing data, but measured no tolerance and ran muted. Use of these choices on a classroom device, or by a child, teacher, or ReadWorks reviewer, isn't recorded.
 
 ---
 
@@ -32,7 +32,7 @@ The build team's Nov. 4 focused run passed 41 of 41 checks on The Big Hike and t
 
 `frontend-src/src/looks/mix/mix.css` gives `.sa-now` the normal highlight. In underline mode it removes that background and box shadow and adds a three-pixel underline. In sentence mode it underlines `.sa-now` while `.mix-sentence` applies the background to each word in the current range. The title and byline can receive the current-word cue; sentence painting is restricted to words in the article text.
 
-Check the local behavior with `node frontend-src/tests/focused_browser.mjs http://127.0.0.1:8992` after starting Vite at that address. The test runs with audio muted. A real device check should include high zoom, screen reading, and a listener deciding whether sentence boundaries and visual cues match the passage as heard.
+Check the local behavior with `node frontend-src/tests/focused_browser.mjs http://127.0.0.1:8992` after starting Vite at that address. The test runs with audio muted. A classroom device check should include high zoom, screen reading, and a listener deciding whether sentence boundaries and visual cues match the passage as heard.
 
 ---
 

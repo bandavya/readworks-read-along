@@ -26,7 +26,7 @@ Opening Demo controls reveals the comparison choices behind All features:
 
 ## Where it stands
 
-The build team's Nov. 4 focused run passed 41 of 41 checks, including switching to All features and back. The classic reader run passed 162 of 162. Both ran muted. The team reports the site with the switch and themes is deployed on the event AWS account with Ruth, but did not verify every theme there. Neither has been tried on a real device, and no child or teacher has tried them. ReadWorks reviewed only the earlier themed demo.
+The build team's Nov. 4 focused run passed 41 of 41 checks, including switching to All features and back. The classic reader run passed 162 of 162. Both ran muted. The team reports the site with the switch and themes is deployed on the event AWS account with Ruth, but did not verify every theme there. Use on a classroom device, or by a child or teacher, isn't recorded for either. The ReadWorks review on record is of the earlier themed demo.
 
 ---
 

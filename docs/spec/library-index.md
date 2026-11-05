@@ -22,7 +22,7 @@ Choosing a row opens the story described in [Reader passage record](reader-passa
 
 ## Where it stands
 
-The index writer and website merge have local tests. The live library listed 14 passages on Nov. 4, 2026: 13 labeled “Generated voice (Ruth),” seven of those also with “Human voice (ReadWorks recording),” and one Spanish passage with only a human voice. A Very Small Garden listed 46 words. The team reports that the reader bridge and library index ran on the event AWS account and that live index entries resolved to reader data and audio. Browser checks ran muted; no real-device check, human listening review, or use by a child, teacher, or ReadWorks person was confirmed. This checkout has no seed index file.
+The index writer and website merge have local tests. The live library listed 14 passages on Nov. 4, 2026: 13 labeled “Generated voice (Ruth),” seven of those also with “Human voice (ReadWorks recording),” and one Spanish passage with only a human voice. A Very Small Garden listed 46 words. The team reports that the reader bridge and library index ran on the event AWS account and that live index entries resolved to reader data and audio. Browser checks ran muted; no classroom-device check, full listening review, or use by a child, teacher, or ReadWorks person was confirmed. This checkout has no seed index file.
 
 ---
 

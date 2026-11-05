@@ -6,7 +6,7 @@ Making the audio · Status: built and tested locally
 
 For a child to follow along, the reader must know when each word begins. In the default Joanna deployment, the speech service supplies start marks. Sound Along checks and stores them, then turns each into a start and end time for every word on screen. A slot holding only punctuation has no sound and gets no highlight.
 
-End times are inferred. Most words end when the next word starts, and the last word gets a short estimate added. The highlight is usable, but no one has listened to confirm each end. With the optional Ruth voice, speech recognition supplies the starts instead, and written words it missed get estimated positions.
+End times are inferred. Most words end when the next word starts, and the last word gets a short estimate added. The highlight is usable, but a check of each end by ear isn't recorded. With the optional Ruth voice, speech recognition supplies the starts instead, and written words it missed get estimated positions.
 
 A count of timed words is not enough to judge a passage. An interjection can fill a long guessed span while a short numeral gets an implausibly brief one.
 
@@ -22,7 +22,7 @@ Each end comes from the next word's start, and the last word gets an estimate:
 
 ## Where it stands
 
-The conversion has local tests. The team reports that timing references were verified on the event AWS deployment and that highlighting followed timing data in a muted headless browser; no tolerance against sound was measured. The live library has Ruth as the only voice for *Grandma's Music* (1,435 words) and a 2,046-word excerpt. In a separate local WhisperX test on existing ReadWorks audio, 1,423 and 2,019 words received times respectively; that test does not validate this AWS path. Nobody has listened to check synchronization or tried it on a target device with sound.
+The conversion has local tests. The team reports that timing references were verified on the event AWS deployment and that highlighting followed timing data in a muted headless browser; no tolerance against sound was measured. The live library has Ruth as the only voice for *Grandma's Music* (1,435 words) and a 2,046-word excerpt. In a separate local WhisperX test on existing ReadWorks audio, 1,423 and 2,019 words received times respectively; that test does not validate this AWS path. A team member has clicked through the live site by hand many times and listened to a one-minute demo, which sounded good to them. A full listening review isn't recorded. A synchronization measurement and a trial on a target device with sound aren't recorded.
 
 ---
 

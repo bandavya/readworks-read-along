@@ -24,7 +24,7 @@ The lab combines a person's flag labels with trial rules to show modeled outcome
 
 ## Where it stands
 
-The lab's policy tests ran with its public made-up sample. Its checks against historical data skip when private data is absent, so the model's effect on real ReadWorks takes could not be confirmed. The lab has not run on the event AWS account or a real device, and no person has listened to audio through it. The team reports that the separate generated-audio pipeline has run on the event account.
+The lab's policy tests ran with its public made-up sample. Its checks against historical data skip when private data is absent, so the model's effect on real ReadWorks takes could not be confirmed. A run of the lab on the event AWS account or a classroom device, or a person listening to audio through it, isn't recorded. The team reports that the separate generated-audio pipeline has run on the event account.
 
 ---
 

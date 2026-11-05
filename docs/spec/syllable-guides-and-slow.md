@@ -22,7 +22,7 @@ The guide lights the word parts from recorded audio:
 
 ## Where it stands
 
-The controls are built into the local reader. The Nov. 4 focused reader run passed 41 of 41 browser checks across three passages and six screen sizes, with sound muted. A muted run cannot confirm that the recordings match the story voice or pronounce words well. No child, teacher, or ReadWorks person has listened to this version, no classroom-device trial or human listening check could be confirmed. The team reports new guide clips loading through CloudFront and playing in a muted headless browser on the Ruth deployment in the event AWS account. Nobody has judged them by ear.
+The controls are built into the local reader. The Nov. 4 focused reader run passed 41 of 41 browser checks across three passages and six screen sizes, with sound muted. A muted run cannot confirm that the recordings match the story voice or pronounce words well. Listening by a child, teacher, or ReadWorks person isn't recorded for this version, and no classroom-device trial or full listening review could be confirmed. The team reports new guide clips loading through CloudFront and playing in a muted headless browser on the Ruth deployment in the event AWS account. A team member heard one slow clip in a one-minute demo.
 
 ---
 

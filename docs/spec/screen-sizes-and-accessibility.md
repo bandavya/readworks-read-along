@@ -10,7 +10,7 @@ The site also has visible keyboard focus, labeled controls, a reduced-motion sty
 
 Automated layout checks can find sideways scrolling, clipped tools, and small buttons. They cannot show whether a child understands the controls, whether a screen reader reads a long article well, or whether the highlight matches the speech a person hears. A real phone and tablet still need to be tried with touch, zoom, assistive technology, and sound.
 
-**The local browser checks cover layout and some controls, and real-device accessibility is still untested.**
+**The local browser checks cover layout and some controls, and a classroom-device accessibility test isn't recorded.**
 
 The screenshot shows the reader at phone width with the compact player.
 
@@ -22,7 +22,7 @@ The screenshot shows the reader at phone width with the compact player.
 
 ## Where it stands
 
-One known layout bug: on a phone, the library's filter panel stays pinned and covers about a third of the screen as the list scrolls. See [Story library](story-library.md). The build team's Nov. 4 focused run passed 41 of 41 browser checks on The Big Hike and both long passages at 320×568, 390×844, 844×390, 768×1024, 1366×768, and 1920×1080 in muted Edge. It checked horizontal overflow, player space, visible 44 px player targets, tool panel fit, word highlighting, and selected reader interactions. The classic reader passed 162 of 162 browser checks across its own size set. No accessibility standard has been certified or claimed. The team reports the reader is deployed on event AWS and the focused reader's image-caption overlap is fixed there. These viewport checks were local; the live headless check loaded audio and ran its clock, but did not verify keyboard operation, tap-a-word, or highlight tolerance. No real device has been checked, and no child, teacher, or ReadWorks reviewer has tried focused mode.
+One known layout bug: on a phone, the library's filter panel stays pinned and covers about a third of the screen as the list scrolls. See [Story library](story-library.md). The build team's Nov. 4 focused run passed 41 of 41 browser checks on The Big Hike and both long passages at 320×568, 390×844, 844×390, 768×1024, 1366×768, and 1920×1080 in muted Edge. It checked horizontal overflow, player space, visible 44 px player targets, tool panel fit, word highlighting, and selected reader interactions. The classic reader passed 162 of 162 browser checks across its own size set. No accessibility standard has been certified or claimed. The team reports the reader is deployed on event AWS and the focused reader's image-caption overlap is fixed there. These viewport checks were local; the live headless check loaded audio and ran its clock, but did not verify keyboard operation, tap-a-word, or highlight tolerance. A classroom-device check, or use of focused mode by a child, teacher, or ReadWorks reviewer, isn't recorded.
 
 ---
 
